@@ -314,13 +314,17 @@ export default function TradeDetail() {
 
               {/* Top User Profile block */}
               <div className="flex items-center gap-3 relative z-10">
-                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase">
-                  {user?.username?.slice(0, 2) || 'TR'}
+                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase overflow-hidden relative shrink-0">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    user?.username?.slice(0, 2) || 'TR'
+                  )}
                 </div>
                 <div>
                   <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
                   <div className="text-gray-500 text-[9px] font-mono mt-0.5">
-                    {new Date(trade.entryTime).toISOString().slice(0, 10)} &bull; {trade.entryTime.slice(11, 16)}
+                    {user?.tradingBio || 'Systematic Trader'} &bull; {new Date(trade.entryTime).toISOString().slice(0, 10)}
                   </div>
                 </div>
               </div>
@@ -404,19 +408,34 @@ export default function TradeDetail() {
                   </div>
                 </div>
 
-                {/* Mock QR Code vector */}
-                <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
-                    <rect x="1" y="1" width="7" height="7" />
-                    <rect x="16" y="1" width="7" height="7" />
-                    <rect x="16" y="16" width="7" height="7" />
-                    <rect x="1" y="16" width="7" height="7" />
-                    <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
-                    <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
-                    <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
-                    <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
-                  </svg>
-                </div>
+                {/* Dynamic Social Watermarks or QR Code */}
+                {user?.twitterHandle || user?.telegramHandle ? (
+                  <div className="text-right font-mono flex flex-col items-end justify-center">
+                    {user.twitterHandle && (
+                      <span className="text-[8px] font-bold text-gray-400" style={{ color: '#a3a3a3' }}>
+                        𝕏 {user.twitterHandle}
+                      </span>
+                    )}
+                    {user.telegramHandle && (
+                      <span className="text-[7px] text-gray-500 mt-0.5" style={{ color: '#737373' }}>
+                        ✈️ {user.telegramHandle}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
+                      <rect x="1" y="1" width="7" height="7" />
+                      <rect x="16" y="1" width="7" height="7" />
+                      <rect x="16" y="16" width="7" height="7" />
+                      <rect x="1" y="16" width="7" height="7" />
+                      <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
+                      <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
+                      <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
+                      <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
+                    </svg>
+                  </div>
+                )}
               </div>
             </div>
 

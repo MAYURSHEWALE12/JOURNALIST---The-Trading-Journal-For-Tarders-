@@ -418,19 +418,23 @@ export default function Dashboard() {
               {/* User Profile Header */}
               <div className="flex items-center gap-3 relative z-10">
                 <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300"
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300 overflow-hidden relative shrink-0"
                   style={{
                     backgroundColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.1)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)',
                     borderColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.3)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.2)',
                     color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
                   }}
                 >
-                  {user?.username?.slice(0, 2) || 'TR'}
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    user?.username?.slice(0, 2) || 'TR'
+                  )}
                 </div>
                 <div>
                   <div className="text-xs font-bold font-mono text-white" style={{ color: '#ffffff' }}>{user?.username || 'JournalistTrader'}</div>
                   <div className="text-[9px] font-mono mt-0.5" style={{ color: '#a3a3a3' }}>
-                    Portfolio &bull; {activeAccountName}
+                    {user?.tradingBio || 'Systematic Pro'} &bull; {activeAccountName}
                   </div>
                 </div>
               </div>
@@ -504,19 +508,34 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Vector QR Code mock */}
-                <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
-                    <rect x="1" y="1" width="7" height="7" />
-                    <rect x="16" y="1" width="7" height="7" />
-                    <rect x="16" y="16" width="7" height="7" />
-                    <rect x="1" y="16" width="7" height="7" />
-                    <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
-                    <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
-                    <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
-                    <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
-                  </svg>
-                </div>
+                {/* Dynamic Social Watermarks or QR Code */}
+                {user?.twitterHandle || user?.telegramHandle ? (
+                  <div className="text-right font-mono flex flex-col items-end justify-center">
+                    {user.twitterHandle && (
+                      <span className="text-[8px] font-bold text-gray-400" style={{ color: '#a3a3a3' }}>
+                        𝕏 {user.twitterHandle}
+                      </span>
+                    )}
+                    {user.telegramHandle && (
+                      <span className="text-[7px] text-gray-500 mt-0.5" style={{ color: '#737373' }}>
+                        ✈️ {user.telegramHandle}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
+                      <rect x="1" y="1" width="7" height="7" />
+                      <rect x="16" y="1" width="7" height="7" />
+                      <rect x="16" y="16" width="7" height="7" />
+                      <rect x="1" y="16" width="7" height="7" />
+                      <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
+                      <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
+                      <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
+                      <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
+                    </svg>
+                  </div>
+                )}
               </div>
             </div>
 

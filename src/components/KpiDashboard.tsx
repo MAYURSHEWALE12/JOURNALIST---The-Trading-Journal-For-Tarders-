@@ -536,7 +536,9 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
                 <div key={i} className="text-center text-[10px] text-gray-500 font-semibold mb-1">{d}</div>
               ))}
               {calendarDays.map((d: CalendarDay) => {
-                let bgColor = themeClasses.bgCard;
+                let bgColor = isDarkMode
+                  ? 'bg-[#181818] border border-white/5 text-gray-400'
+                  : 'bg-gray-100 border border-gray-200 text-gray-700';
                 if (d.pnl > 0) {
                   bgColor = isDarkMode
                     ? 'bg-brand-emerald/15 border border-brand-emerald/40 text-brand-emerald font-bold'

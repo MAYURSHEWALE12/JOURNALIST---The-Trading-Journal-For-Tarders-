@@ -174,8 +174,9 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* ASSET PERFORMANCE SUMMARY */}
+      {/* ASSET PERFORMANCE SUMMARY */}
         {assetSummary.rows.length > 0 && (
           <div className={`border rounded p-5 flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border}`}>
             <div className="flex flex-col h-full">
@@ -240,8 +241,6 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-      </div>
 
       {/* TABLE DB */}
       <div className={`border rounded p-5 space-y-4 ${themeClasses.bgPanel} ${themeClasses.border}`}>

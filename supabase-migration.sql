@@ -5,6 +5,10 @@ CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT,
   email TEXT,
+  avatar_url TEXT DEFAULT '',
+  trading_bio TEXT DEFAULT '',
+  twitter_handle TEXT DEFAULT '',
+  telegram_handle TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

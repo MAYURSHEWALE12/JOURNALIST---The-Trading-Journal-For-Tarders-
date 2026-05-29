@@ -155,7 +155,6 @@ export async function authRegister(body: { username: string; email: string; pass
     }
 
     const user: User = { id: data.user.id, username: body.username, email: body.email };
-    localStorage.setItem('supabase_session', 'true');
     return { token: data.session?.access_token || '', user };
   }
   const res = await fetch('/api/auth/register', {
@@ -188,7 +187,6 @@ export async function authLogin(body: { email: string; password: string }): Prom
       username: profile?.username || body.email.split('@')[0],
       email: profile?.email || body.email,
     };
-    localStorage.setItem('supabase_session', 'true');
     return { token: data.session?.access_token || '', user };
   }
   const res = await fetch('/api/auth/login', {
@@ -204,7 +202,6 @@ export async function authLogin(body: { email: string; password: string }): Prom
 export async function authLogout(): Promise<void> {
   if (isSupabaseSession()) {
     await getSupabase().auth.signOut();
-    localStorage.removeItem('supabase_session');
     return;
   }
 }

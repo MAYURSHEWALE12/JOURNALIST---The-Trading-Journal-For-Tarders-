@@ -240,9 +240,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(() => {
-    const hasJWT = !!localStorage.getItem('journalist_jwt') && !!localStorage.getItem('journalist_user');
-    const hasSupabase = !!localStorage.getItem('supabase_session');
-    return hasJWT || hasSupabase;
+    return !!localStorage.getItem('journalist_jwt') && !!localStorage.getItem('journalist_user');
   });
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -331,7 +329,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     api.authLogout();
     localStorage.removeItem('journalist_user');
     localStorage.removeItem('journalist_jwt');
-    localStorage.removeItem('supabase_session');
     localStorage.removeItem('journalist_active_screen');
     localStorage.removeItem('journalist_sandbox_accounts');
     localStorage.removeItem('journalist_sandbox_trades');
@@ -374,8 +371,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const loadAccountsFromServer = useCallback(async () => {
     const token = localStorage.getItem('journalist_jwt');
-    const supabaseSession = localStorage.getItem('supabase_session');
-    if (!token && !supabaseSession) return;
+    if (!token && !isSupabaseConfigured()) return;
     try {
       const data = await api.fetchAccounts();
       if (data.length > 0) {
@@ -408,8 +404,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const loadTradesFromServer = useCallback(async () => {
     const token = localStorage.getItem('journalist_jwt');
-    const supabaseSession = localStorage.getItem('supabase_session');
-    if (!token && !supabaseSession) return;
+    if (!token && !isSupabaseConfigured()) return;
     try {
       const data = await api.fetchTrades();
       if (data.length > 0) {
@@ -423,22 +418,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [handleLogOut, setTrades]);
 
-  // On mount: validate JWT / Supabase session and load data
+  // On mount: validate JWT or restore Supabase session
   useEffect(() => {
     const token = localStorage.getItem('journalist_jwt');
 
-    const restoreSupabaseSession = async () => {
-      if (!isSupabaseConfigured()) return;
+    const checkSession = async () => {
+      if (!isSupabaseConfigured()) { setDataLoading(false); return; }
       try {
         const { data } = await (await import('../lib/supabase')).getSupabase().auth.getSession();
         if (data.session) {
-          localStorage.setItem('supabase_session', 'true');
           const su = await api.authMe();
           setUser(su);
           localStorage.setItem('journalist_user', JSON.stringify(su));
           await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
         }
       } catch { /* no session */ }
+      setDataLoading(false);
     };
 
     if (token && user) {
@@ -449,7 +444,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .catch(() => { handleLogOut(); })
         .finally(() => { setDataLoading(false); });
     } else {
-      restoreSupabaseSession().finally(() => { setDataLoading(false); });
+      checkSession();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

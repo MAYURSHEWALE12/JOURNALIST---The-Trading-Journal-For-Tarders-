@@ -1,13 +1,8 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useApp } from './context/AppContext';
 import LandingPage from './screens/LandingPage';
-import AuthPage from './screens/AuthPage';
-import ForgotPassword from './screens/ForgotPassword';
-import ResetPassword from './screens/ResetPassword';
-import Dashboard from './screens/Dashboard';
-import Analytics from './screens/Analytics';
-import Timeline from './screens/Timeline';
-import TradeDetail from './screens/TradeDetail';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import CursorFollower from './components/CursorFollower';
@@ -17,6 +12,14 @@ import NewAccountModal from './components/NewAccountModal';
 import EditTradeModal from './components/EditTradeModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import ScreenshotModal from './components/ScreenshotModal';
+
+const AuthPage = lazy(() => import('./screens/AuthPage'));
+const ForgotPassword = lazy(() => import('./screens/ForgotPassword'));
+const ResetPassword = lazy(() => import('./screens/ResetPassword'));
+const Dashboard = lazy(() => import('./screens/Dashboard'));
+const Analytics = lazy(() => import('./screens/Analytics'));
+const Timeline = lazy(() => import('./screens/Timeline'));
+const TradeDetail = lazy(() => import('./screens/TradeDetail'));
 
 function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const { themeClasses } = useApp();
@@ -99,23 +102,39 @@ function ExportingOverlay() {
   );
 }
 
+function AppSuspense({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950">
+        <span className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      {children}
+    </Suspense>
+  );
+}
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppProvider>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/dashboard" element={<WorkspaceLayout><DashboardPage /></WorkspaceLayout>} />
-          <Route path="/analytics" element={<WorkspaceLayout><AnalyticsPage /></WorkspaceLayout>} />
-          <Route path="/timeline" element={<WorkspaceLayout><TimelinePage /></WorkspaceLayout>} />
-          <Route path="/trade/:tradeId" element={<WorkspaceLayout><TradeDetailPage /></WorkspaceLayout>} />
-        </Routes>
-        <CursorFollower />
-        <ExportingOverlay />
-      </AppProvider>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <AppProvider>
+          <AppSuspense>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/dashboard" element={<WorkspaceLayout><DashboardPage /></WorkspaceLayout>} />
+              <Route path="/analytics" element={<WorkspaceLayout><AnalyticsPage /></WorkspaceLayout>} />
+              <Route path="/timeline" element={<WorkspaceLayout><TimelinePage /></WorkspaceLayout>} />
+              <Route path="/trade/:tradeId" element={<WorkspaceLayout><TradeDetailPage /></WorkspaceLayout>} />
+            </Routes>
+            <CursorFollower />
+            <ExportingOverlay />
+          </AppSuspense>
+        </AppProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }

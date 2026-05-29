@@ -198,12 +198,18 @@ export async function authRegister(body: { username: string; email: string; pass
   return result;
 }
 
-export async function updateProfileUsername(id: string, username: string): Promise<void> {
+export async function updateProfile(id: string, updates: {
+  username?: string;
+  avatar_url?: string;
+  trading_bio?: string;
+  twitter_handle?: string;
+  telegram_handle?: string;
+}): Promise<void> {
   if (isSupabaseSession()) {
     const res = await supabaseFetch(`/profiles?id=eq.${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: { 'Prefer': 'return=representation' },
-      body: JSON.stringify({ username }),
+      body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error('Failed to update public profile.');
     return;
@@ -211,9 +217,13 @@ export async function updateProfileUsername(id: string, username: string): Promi
   const res = await fetch(`/api/profiles/${id}`, {
     method: 'PATCH',
     headers: authHeaders(),
-    body: JSON.stringify({ username }),
+    body: JSON.stringify(updates),
   });
   if (!res.ok) throw new Error('Failed to update public profile.');
+}
+
+export async function updateProfileUsername(id: string, username: string): Promise<void> {
+  return updateProfile(id, { username });
 }
 
 

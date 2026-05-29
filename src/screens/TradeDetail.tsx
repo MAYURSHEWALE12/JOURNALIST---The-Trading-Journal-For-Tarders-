@@ -117,7 +117,7 @@ export default function TradeDetail() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setIsShareModalOpen(true)}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer whitespace-nowrap ${
               isDarkMode 
                 ? 'border-indigo-800/40 bg-indigo-900/10 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20' 
                 : 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-100'
@@ -127,7 +127,7 @@ export default function TradeDetail() {
           </button>
           <button
             onClick={() => handleOpenEditTrade(trade)}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer whitespace-nowrap ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} ${
               isDarkMode ? 'hover:border-white hover:text-white' : 'hover:border-gray-500 hover:text-gray-900'
             }`}
           >
@@ -135,7 +135,7 @@ export default function TradeDetail() {
           </button>
           <button
             onClick={() => setDeleteConfirmId(trade.id)}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer whitespace-nowrap ${
               isDarkMode 
                 ? 'border-rose-800/40 bg-rose-900/10 text-rose-400 hover:border-rose-500 hover:bg-rose-900/20' 
                 : 'border-rose-200 bg-rose-50 text-rose-600 hover:border-rose-400 hover:bg-rose-100'

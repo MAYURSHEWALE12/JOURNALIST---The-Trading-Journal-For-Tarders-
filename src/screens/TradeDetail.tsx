@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, BookOpen, Compass, Camera, Share2, Download, X } from 'lucide-react';
+import { ChevronLeft, BookOpen, Compass, Camera, Share2, Download, X, Pencil, Trash2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { TradeDetailSkeleton } from '../components/Skeleton';
@@ -131,7 +131,7 @@ export default function TradeDetail() {
               isDarkMode ? 'hover:border-white hover:text-white' : 'hover:border-gray-500 hover:text-gray-900'
             }`}
           >
-            ✏️ Edit Trade
+            <Pencil className="w-3.5 h-3.5" /> Edit Trade
           </button>
           <button
             onClick={() => setDeleteConfirmId(trade.id)}
@@ -141,7 +141,7 @@ export default function TradeDetail() {
                 : 'border-rose-200 bg-rose-50 text-rose-600 hover:border-rose-400 hover:bg-rose-100'
             }`}
           >
-            🗑️ Delete
+            <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
         </div>
       </div>

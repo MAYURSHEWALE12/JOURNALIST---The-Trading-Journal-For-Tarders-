@@ -233,14 +233,24 @@ export async function authSetPassword(password: string): Promise<void> {
 
 export async function authMe(): Promise<User> {
   if (isSupabaseSession()) {
+    const { data: sessionData } = await getSupabase().auth.getSession();
+    console.log('authMe session:', sessionData.session ? 'exists' : 'null');
+
     const { data, error } = await getSupabase().auth.getUser();
+    console.log('authMe getUser error:', error);
     if (error || !data.user) throw new Error('UNAUTHORIZED');
 
-    const { data: profile } = await getSupabase()
+    const { data: profile, error: profileError } = await getSupabase()
       .from('profiles')
       .select('username, email')
       .eq('id', data.user.id)
       .maybeSingle() as unknown as { data: { username: string; email: string } | null; error: unknown };
+
+    console.log('authMe profile query error:', profileError);
+
+    if (profileError) {
+      console.log('Profile error details:', JSON.stringify(profileError));
+    }
 
     // Auto-create profile for OAuth sign-ins (Google)
     if (!profile) {

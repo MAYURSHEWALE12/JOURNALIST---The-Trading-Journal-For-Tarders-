@@ -94,7 +94,7 @@ export default function NewTradeModal() {
                     className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`} />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Quantity *</label>
+                  <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Lot Size *</label>
                   <input type="number" step="any" placeholder="0.00" required value={newTradeData.quantity}
                     onChange={(e) => update('quantity', e.target.value)}
                     className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`} />

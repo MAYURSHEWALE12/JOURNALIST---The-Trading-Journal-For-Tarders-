@@ -107,7 +107,7 @@ export default function TradeDetail() {
             <div className={`font-mono text-lg ${themeClasses.textMain}`}>${trade.exitPrice}</div>
           </div>
           <div>
-            <div className={`text-[10px] font-mono uppercase tracking-widest mb-1 ${themeClasses.textSub}`}>Quantity / Size</div>
+            <div className={`text-[10px] font-mono uppercase tracking-widest mb-1 ${themeClasses.textSub}`}>Lot Size</div>
             <div className={`font-mono text-lg ${themeClasses.textMain}`}>{trade.quantity}</div>
           </div>
           <div>

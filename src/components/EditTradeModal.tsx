@@ -78,7 +78,7 @@ export default function EditTradeModal() {
               </select>
             </div>
             <div>
-              <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Quantity</label>
+              <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Lot Size</label>
               <input type="number" value={editTradeData.quantity} onChange={e => update('quantity', e.target.value)}
                 className={`w-full border rounded py-2 px-3 text-sm font-mono focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} focus:border-gray-400`} />
             </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, memo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, ReferenceLine,
+  AreaChart, Area, ReferenceLine, Cell,
 } from 'recharts';
 import { Calendar, BarChart3, LineChart } from 'lucide-react';
 
@@ -25,26 +25,16 @@ interface PremiumPnLChartProps {
     status: string;
   }>;
   themeClasses: {
-    bgBase: string;
-    bgPanel: string;
-    bgCard: string;
-    bgHover: string;
-    border: string;
-    borderActive: string;
-    textMain: string;
-    textSub: string;
-    navActive: string;
+    bgBase: string; bgPanel: string; bgCard: string; bgHover: string;
+    border: string; borderActive: string;
+    textMain: string; textSub: string; navActive: string;
   };
   isDarkMode: boolean;
 }
 
 function groupBy<T>(items: T[], keyFn: (item: T) => string): Map<string, T[]> {
   const map = new Map<string, T[]>();
-  for (const item of items) {
-    const key = keyFn(item);
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(item);
-  }
+  for (const item of items) { const key = keyFn(item); if (!map.has(key)) map.set(key, []); map.get(key)!.push(item); }
   return map;
 }
 
@@ -60,11 +50,7 @@ function computeDayData(trades: PremiumPnLChartProps['trades']): DayData[] {
     const d = new Date(date);
     days.push({
       label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      date,
-      pnl,
-      trades: ts.length,
-      wins,
-      losses,
+      date, pnl, trades: ts.length, wins, losses,
       best: best === -Infinity ? 0 : best,
       worst: worst === Infinity ? 0 : worst,
     });
@@ -76,8 +62,7 @@ function computeDayData(trades: PremiumPnLChartProps['trades']): DayData[] {
 function computeWeeklyData(trades: PremiumPnLChartProps['trades']): DayData[] {
   const groups = groupBy(trades, t => {
     const d = new Date(t.entryTime.slice(0, 10));
-    const start = new Date(d);
-    start.setDate(d.getDate() - d.getDay());
+    const start = new Date(d); start.setDate(d.getDate() - d.getDay());
     return start.toISOString().slice(0, 10);
   });
   const weeks: DayData[] = [];
@@ -88,15 +73,10 @@ function computeWeeklyData(trades: PremiumPnLChartProps['trades']): DayData[] {
     const best = ts.reduce((m, t) => Math.max(m, t.netPnl), -Infinity);
     const worst = ts.reduce((m, t) => Math.min(m, t.netPnl), Infinity);
     const d = new Date(date);
-    const end = new Date(d);
-    end.setDate(d.getDate() + 6);
+    const end = new Date(d); end.setDate(d.getDate() + 6);
     weeks.push({
       label: `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${end.toLocaleDateString('en-US', { day: 'numeric' })}`,
-      date,
-      pnl,
-      trades: ts.length,
-      wins,
-      losses,
+      date, pnl, trades: ts.length, wins, losses,
       best: best === -Infinity ? 0 : best,
       worst: worst === Infinity ? 0 : worst,
     });
@@ -117,11 +97,7 @@ function computeMonthlyData(trades: PremiumPnLChartProps['trades']): DayData[] {
     const d = new Date(`${date}-01`);
     months.push({
       label: d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-      date,
-      pnl,
-      trades: ts.length,
-      wins,
-      losses,
+      date, pnl, trades: ts.length, wins, losses,
       best: best === -Infinity ? 0 : best,
       worst: worst === Infinity ? 0 : worst,
     });
@@ -144,6 +120,27 @@ function computeEquityData(trades: PremiumPnLChartProps['trades']) {
   return points;
 }
 
+function niceScale(maxRaw: number, minRaw: number): { min: number; max: number; step: number; ticks: number[] } {
+  if (maxRaw === minRaw) return { min: 0, max: 100, step: 25, ticks: [0, 25, 50, 75, 100] };
+  const padding = (maxRaw - minRaw) * 0.15;
+  const paddedMax = maxRaw + padding;
+  const paddedMin = Math.min(0, minRaw - padding);
+  const range = paddedMax - paddedMin;
+  const roughStep = range / 5;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+  const residual = roughStep / magnitude;
+  let niceStep: number;
+  if (residual <= 1.5) niceStep = 1 * magnitude;
+  else if (residual <= 3.5) niceStep = 2 * magnitude;
+  else if (residual <= 7.5) niceStep = 5 * magnitude;
+  else niceStep = 10 * magnitude;
+  const niceMin = Math.floor(paddedMin / niceStep) * niceStep;
+  const niceMax = Math.ceil(paddedMax / niceStep) * niceStep;
+  const ticks: number[] = [];
+  for (let t = niceMin; t <= niceMax + niceStep / 2; t += niceStep) ticks.push(t);
+  return { min: niceMin, max: niceMax, step: niceStep, ticks };
+}
+
 const toShortDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -155,9 +152,7 @@ const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDa
     return (
       <div className={`px-3 py-2 rounded-lg text-xs font-mono shadow-lg border ${isDarkMode ? 'bg-[#181818] border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
         <div className="font-semibold mb-0.5">{label}</div>
-        <span className={val >= 0 ? 'text-emerald-500' : 'text-rose-500'}>
-          {val >= 0 ? '+' : ''}${val.toFixed(2)}
-        </span>
+        <span className={val >= 0 ? 'text-emerald-500' : 'text-rose-500'}>{val >= 0 ? '+' : ''}${val.toFixed(2)}</span>
       </div>
     );
   }
@@ -167,9 +162,7 @@ const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDa
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>P&L</span>
-          <span className={`font-semibold ${d.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            {d.pnl >= 0 ? '+' : ''}${d.pnl.toFixed(2)}
-          </span>
+          <span className={`font-semibold ${d.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{d.pnl >= 0 ? '+' : ''}${d.pnl.toFixed(2)}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Trades</span>
@@ -177,9 +170,7 @@ const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDa
         </div>
         <div className="flex justify-between gap-4">
           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Win Rate</span>
-          <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            {d.trades > 0 ? Math.round((d.wins / d.trades) * 100) : 0}%
-          </span>
+          <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{d.trades > 0 ? Math.round((d.wins / d.trades) * 100) : 0}%</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Best Trade</span>
@@ -201,29 +192,7 @@ const modes: { key: ChartMode; label: string; icon: typeof BarChart3 }[] = [
   { key: 'equity', label: 'Equity', icon: LineChart },
 ];
 
-const tickFormatter = (v: number) => `$${v.toFixed(0)}`;
-
-const BarShape = memo(function BarShape({ x, y, width, height, payload, isDarkMode }: any) {
-  const isPositive = payload.pnl >= 0;
-  const barColor = isPositive
-    ? (isDarkMode ? '#22c55e' : '#16a34a')
-    : (isDarkMode ? '#ef4444' : '#dc2626');
-  const radius = isPositive ? 3 : 0;
-  const baseY = isPositive ? y + height : y;
-  const barH = Math.max(Math.abs(height), 2);
-  return (
-    <rect
-      x={x + width * 0.1}
-      y={baseY}
-      width={width * 0.8}
-      height={barH}
-      fill={barColor}
-      rx={radius}
-      ry={radius}
-      className="transition-opacity duration-200 hover:opacity-80"
-    />
-  );
-});
+const barFormatted = (v: number) => `$${v.toFixed(0)}`;
 
 function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartProps) {
   const [mode, setMode] = useState<ChartMode>('daily');
@@ -244,7 +213,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
   );
 
   const chartLen = useMemo(
-    () => (mode === 'equity' ? equityData.length - 1 : chartData.length),
+    () => (mode === 'equity' ? Math.max(0, equityData.length - 1) : chartData.length),
     [mode, equityData, chartData]
   );
 
@@ -256,14 +225,17 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
     return { winningDays: winning, losingDays: losing, tradingDays: dayData.length };
   }, [dayData]);
 
-  const simpleStats = useMemo(() => {
-    return {
-      bestDay: dayData.length > 0 ? Math.max(...dayData.map(d => d.pnl)) : 0,
-      worstDay: dayData.length > 0 ? Math.min(...dayData.map(d => d.pnl)) : 0,
-    };
-  }, [dayData]);
+  const winRate = useMemo(() => {
+    const { winningDays, tradingDays } = dayStats;
+    return tradingDays > 0 ? Math.round((winningDays / tradingDays) * 100) : 0;
+  }, [dayStats]);
 
-  const advancedStats = useMemo(() => {
+  const bestDay = useMemo(
+    () => dayData.length > 0 ? Math.max(...dayData.map(d => d.pnl)) : 0,
+    [dayData]
+  );
+
+  const stats = useMemo(() => {
     const { tradingDays } = dayStats;
     const adp = tradingDays > 0 ? totalPnl / tradingDays : 0;
     const grossWins = trades.filter(t => t.netPnl > 0).reduce((s, t) => s + t.netPnl, 0);
@@ -278,26 +250,22 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
     return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
   }, [mode, chartData]);
 
-  const yDomain = useMemo(() => {
+  const scale = useMemo(() => {
     if (mode === 'equity') {
       const balances = equityData.map(d => d.balance);
-      const min = Math.min(...balances);
-      const max = Math.max(...balances);
-      const pad = (max - min) * 0.15 || 50;
-      return [Math.min(0, min - pad), max + pad];
+      const rawMin = Math.min(...balances);
+      const rawMax = Math.max(...balances);
+      return niceScale(rawMax, rawMin);
     }
     const vals = chartData.map(d => d.pnl);
-    if (vals.length === 0) return [0, 100];
-    const max = Math.max(...vals, 0);
-    const min = Math.min(...vals, 0);
-    const range = max - min;
-    const pad = range * 0.15 || 50;
-    return [Math.min(0, min - pad), max + pad];
+    const rawMax = Math.max(...vals, 0);
+    const rawMin = Math.min(...vals, 0);
+    return niceScale(rawMax, rawMin);
   }, [mode, chartData, equityData]);
 
   const chartHeight = useMemo(() => {
-    if (chartLen <= 5) return 'h-40 md:h-48';
-    if (chartLen <= 30) return 'h-56 md:h-64';
+    if (chartLen <= 5) return 'h-36 md:h-44';
+    if (chartLen <= 20) return 'h-52 md:h-60';
     return 'h-64 md:h-72';
   }, [chartLen]);
 
@@ -341,20 +309,16 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
 
   return (
     <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
-      {/* Header */}
-      <div className="px-6 pt-5 pb-3">
+      {/* Header — inspired by Stripe/Vercel Analytics */}
+      <div className="px-6 pt-5 pb-2">
         <div className="flex items-start justify-between">
-          <div className="min-w-0">
+          <div>
             <h3 className={`text-[10px] font-semibold uppercase tracking-[0.15em] font-mono ${themeClasses.textSub}`}>Net Daily P&L</h3>
-            <div className={`text-xl font-display font-bold tracking-tight mt-0.5 ${totalPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            <div className={`text-2xl font-display font-bold tracking-tight mt-0.5 ${totalPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
               {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
-              <span className={`text-xs font-mono font-medium ml-2 ${themeClasses.textSub}`}>this period</span>
             </div>
-            <div className={`text-[10px] font-mono mt-0.5 ${themeClasses.textSub}`}>
-              {dayStats.winningDays} Winning &bull; {dayStats.losingDays} Losing &bull; {dayStats.tradingDays} Days
-            </div>
+            <div className={`text-[10px] font-mono mt-0.5 ${themeClasses.textSub}`}>This Period</div>
           </div>
-          {/* Segmented control — secondary emphasis */}
           <div className={`hidden sm:inline-flex rounded-lg p-0.5 border self-start shrink-0 ${isDarkMode ? 'bg-black/20 border-white/5' : 'bg-gray-50 border-gray-200'}`}>
             {modes.map(m => (
               <button
@@ -362,7 +326,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                 onClick={() => handleModeChange(m.key)}
                 className={`flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-mono font-medium transition-all duration-200 ${
                   mode === m.key
-                    ? isDarkMode ? 'bg-white/8 text-white' : 'bg-white text-gray-900 shadow-xs'
+                    ? `${isDarkMode ? 'bg-white/10 text-white' : 'bg-white text-gray-900'} shadow-xs`
                     : isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
@@ -374,48 +338,37 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
         </div>
       </div>
 
-      {/* KPI row — simplified when few data points */}
-      <div className="px-6 pb-3">
+      {/* KPI row */}
+      <div className="px-6 pb-2">
         <div className="flex flex-wrap gap-1.5">
-          {dayStats.tradingDays >= 5 ? (
-            <>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Avg Day <span className={advancedStats.adp >= 0 ? 'text-emerald-500 font-medium' : 'text-rose-500 font-medium'}>{advancedStats.adp >= 0 ? '+' : ''}${advancedStats.adp.toFixed(2)}</span>
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Best Day <span className="text-emerald-500 font-medium">+${simpleStats.bestDay.toFixed(2)}</span>
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Worst Day <span className="text-rose-500 font-medium">${simpleStats.worstDay.toFixed(2)}</span>
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Profit Factor <span className={`font-medium ${advancedStats.profitFactor >= 1.5 ? 'text-emerald-500' : advancedStats.profitFactor >= 1 ? 'text-yellow-500' : 'text-rose-500'}`}>{advancedStats.profitFactor.toFixed(2)}x</span>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Trading Days <span className="font-medium">{dayStats.tradingDays}</span>
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Wins <span className="text-emerald-500 font-medium">{dayStats.winningDays}</span>
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                Losses <span className="text-rose-500 font-medium">{dayStats.losingDays}</span>
-              </span>
-            </>
+          <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
+            Trading Days <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{dayStats.tradingDays}</span>
+          </span>
+          <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
+            Win Rate <span className={winRate >= 50 ? 'text-emerald-500 font-medium' : 'text-rose-500 font-medium'}>{winRate}%</span>
+          </span>
+          <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
+            Avg Day <span className={stats.adp >= 0 ? 'text-emerald-500 font-medium' : 'text-rose-500 font-medium'}>{stats.adp >= 0 ? '+' : ''}${stats.adp.toFixed(2)}</span>
+          </span>
+          <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
+            Best Day <span className="text-emerald-500 font-medium">+${bestDay.toFixed(2)}</span>
+          </span>
+          {dayStats.tradingDays >= 5 && (
+            <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
+              Profit Factor <span className={`font-medium ${stats.profitFactor >= 1.5 ? 'text-emerald-500' : stats.profitFactor >= 1 ? 'text-yellow-500' : 'text-rose-500'}`}>{stats.profitFactor.toFixed(2)}x</span>
+            </span>
           )}
         </div>
       </div>
 
       {/* Chart */}
-      <div className="px-2 pb-4">
+      <div className="px-3 pb-4">
         <div className={chartHeight}>
           <ResponsiveContainer width="100%" height="100%">
             {mode === 'equity' ? (
-              <AreaChart data={visibleData as any} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
+              <AreaChart data={visibleData as any} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
                 <defs>
-                  <linearGradient id="eqGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="eqGrad3" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={isDarkMode ? '#6366f1' : '#4f46e5'} stopOpacity={0.12} />
                     <stop offset="100%" stopColor={isDarkMode ? '#6366f1' : '#4f46e5'} stopOpacity={0} />
                   </linearGradient>
@@ -433,29 +386,30 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  domain={yDomain as [number, number]}
+                  domain={[scale.min, scale.max]}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)', fontSize: 9, fontFamily: 'ui-monospace, monospace' }}
-                  tickFormatter={tickFormatter}
-                  width={48}
+                  tickFormatter={barFormatted}
+                  width={44}
+                  ticks={scale.ticks}
                 />
                 <Tooltip
                   content={<CustomTooltip isDarkMode={isDarkMode} />}
-                  cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)', strokeDasharray: '4 4' }}
+                  cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', strokeDasharray: '4 4' }}
                 />
                 <Area
                   type="monotone"
                   dataKey="balance"
                   stroke={isDarkMode ? '#6366f1' : '#4f46e5'}
                   strokeWidth={2}
-                  fill="url(#eqGrad2)"
-                  animationDuration={400}
+                  fill="url(#eqGrad3)"
+                  animationDuration={500}
                   animationEasing="ease-out"
                 />
               </AreaChart>
             ) : (
-              <BarChart data={visibleData as DayData[]} margin={{ top: 8, right: 12, bottom: 4, left: -8 }}>
+              <BarChart data={visibleData as DayData[]} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke={isDarkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'}
@@ -467,35 +421,51 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                   tickLine={false}
                   tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)', fontSize: 9, fontFamily: 'ui-monospace, monospace' }}
                   interval="preserveStartEnd"
-                  minTickGap={20}
+                  minTickGap={24}
                 />
                 <YAxis
-                  domain={yDomain as [number, number]}
+                  domain={[scale.min, scale.max]}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)', fontSize: 9, fontFamily: 'ui-monospace, monospace' }}
-                  tickFormatter={tickFormatter}
-                  width={48}
+                  tickFormatter={barFormatted}
+                  width={44}
+                  ticks={scale.ticks}
                 />
                 <Tooltip
                   content={<CustomTooltip isDarkMode={isDarkMode} />}
-                  cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)', strokeDasharray: '4 4' }}
+                  cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', strokeDasharray: '4 4' }}
                 />
-                {avgPnl !== 0 && (
+                {avgPnl !== 0 && chartLen >= 3 && (
                   <ReferenceLine
                     y={avgPnl}
-                    stroke={isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}
+                    stroke={isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}
                     strokeDasharray="6 4"
                     strokeWidth={1}
+                    label={{
+                      value: `Avg $${avgPnl.toFixed(0)}`,
+                      position: 'insideTopRight',
+                      fill: isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+                      fontSize: 9,
+                      fontFamily: 'ui-monospace, monospace',
+                    }}
                   />
                 )}
                 <Bar
                   dataKey="pnl"
                   radius={[3, 3, 0, 0]}
-                  animationDuration={400}
+                  animationDuration={500}
                   animationEasing="ease-out"
-                  shape={<BarShape isDarkMode={isDarkMode} />}
-                />
+                  maxBarSize={48}
+                >
+                  {(visibleData as DayData[]).map((entry, idx) => (
+                    <Cell
+                      key={idx}
+                      fill={entry.pnl >= 0 ? (isDarkMode ? '#22c55e' : '#16a34a') : (isDarkMode ? '#ef4444' : '#dc2626')}
+                      className="transition-opacity duration-200 hover:opacity-80"
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             )}
           </ResponsiveContainer>
@@ -503,7 +473,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
       </div>
 
       {/* Mobile segmented control */}
-      <div className={`sm:hidden px-6 pb-4`}>
+      <div className="sm:hidden px-6 pb-4">
         <div className={`inline-flex rounded-lg p-0.5 border ${isDarkMode ? 'bg-black/20 border-white/5' : 'bg-gray-50 border-gray-200'}`}>
           {modes.map(m => (
             <button
@@ -511,7 +481,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
               onClick={() => handleModeChange(m.key)}
               className={`flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-mono font-medium transition-all duration-200 ${
                 mode === m.key
-                  ? isDarkMode ? 'bg-white/8 text-white' : 'bg-white text-gray-900 shadow-xs'
+                  ? `${isDarkMode ? 'bg-white/10 text-white' : 'bg-white text-gray-900'} shadow-xs`
                   : isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'
               }`}
             >

@@ -30,6 +30,7 @@ export default function Calendar() {
   const [startY, setStartY] = useState(0);
 
   const handleDragStart = (clientY: number) => {
+    if (window.innerWidth >= 640) return; // Disable dragging on desktop
     setIsDragging(true);
     setStartY(clientY);
   };
@@ -336,9 +337,9 @@ export default function Calendar() {
             className={`w-full max-w-xl rounded-t-[2.5rem] border-t shadow-2xl flex flex-col justify-between overflow-hidden relative max-h-[82vh] ${isDragging ? '' : 'animate-slide-up'} ${themeClasses.bgPanel} ${themeClasses.border}`}
           >
             
-            {/* iOS Grab Handle & Pull Area */}
+            {/* iOS Grab Handle & Pull Area (Hidden on desktop) */}
             <div 
-              className="w-full pt-3.5 pb-2 cursor-grab active:cursor-grabbing select-none shrink-0"
+              className="w-full pt-3.5 pb-2 cursor-grab active:cursor-grabbing select-none shrink-0 sm:hidden"
               onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
               onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
               onTouchEnd={handleDragEnd}
@@ -352,9 +353,9 @@ export default function Calendar() {
               <div className="w-12 h-1.5 bg-neutral-300 dark:bg-neutral-800 rounded-full mx-auto" />
             </div>
             
-            {/* Drawer Header (acts as drag handle too) */}
+            {/* Drawer Header (acts as drag handle on mobile, standard header on desktop) */}
             <div 
-              className={`px-5 pb-4 pt-1.5 border-b flex items-center justify-between bg-neutral-950/10 cursor-grab active:cursor-grabbing select-none shrink-0 ${themeClasses.border}`}
+              className={`px-5 pb-4 pt-3.5 sm:pt-5 border-b flex items-center justify-between bg-neutral-950/10 cursor-grab active:cursor-grabbing sm:cursor-default sm:active:cursor-default select-none shrink-0 ${themeClasses.border}`}
               onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
               onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
               onTouchEnd={handleDragEnd}

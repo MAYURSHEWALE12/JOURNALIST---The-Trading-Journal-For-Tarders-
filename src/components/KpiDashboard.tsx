@@ -158,59 +158,65 @@ function KpiCard({
   const isUp = kpi.change > 0;
   const isDown = kpi.change < 0;
   return (
-    <div className={`group relative border rounded-xl p-4 md:p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800`}>
+    <div className={`group relative border rounded-xl p-3 sm:p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800`}>
       {/* Tooltip on hover */}
-      <div className="absolute top-4 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-help z-10">
+      <div className="absolute top-4 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-help z-10 hidden sm:block">
         <div className="relative">
           <HelpCircle className="w-3.5 h-3.5 hover:text-neutral-300 transition-colors" />
           <MetricTooltip label={kpi.label} tooltip={kpi.tooltip} isDarkMode={isDarkMode} />
         </div>
       </div>
 
-      <div className="flex items-start justify-between mb-3">
-        <div className={`text-[10px] font-mono font-semibold uppercase tracking-wider ${themeClasses.textSub}`}>{kpi.label}</div>
-        <div className="shrink-0 bg-black/5 dark:bg-white/5 p-1.5 rounded-lg border border-neutral-500/10">{icon}</div>
+      <div className="flex items-start justify-between mb-2 sm:mb-3">
+        <div className={`text-[9px] sm:text-[10px] font-mono font-semibold uppercase tracking-wider ${themeClasses.textSub}`}>{kpi.label}</div>
+        <div className="shrink-0 bg-black/5 dark:bg-white/5 p-1 sm:p-1.5 rounded-lg border border-neutral-500/10 hidden xs:flex">{icon}</div>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-2 sm:gap-4">
         <div>
-          <div className={`text-xl md:text-2xl font-display font-bold tracking-tight ${themeClasses.textMain}`}>{kpi.value}</div>
+          <div className={`text-base sm:text-xl md:text-2xl font-display font-bold tracking-tight ${themeClasses.textMain}`}>{kpi.value}</div>
         </div>
-        {type === 'winrate' && (
-          <ProgressRing value={parseFloat(kpi.value)} />
-        )}
-        {type === 'profitfactor' && (
-          <ProgressArc value={parseFloat(kpi.value)} />
-        )}
-        {type === 'default' && kpi.sparklineData && kpi.sparklineData.length >= 2 && (
-          <MiniSparkline data={kpi.sparklineData} color={kpi.health === 'needsImprovement' ? '#f43f5e' : '#10b981'} />
-        )}
+        <div className="shrink-0 scale-90 sm:scale-100 origin-right">
+          {type === 'winrate' && (
+            <ProgressRing value={parseFloat(kpi.value)} />
+          )}
+          {type === 'profitfactor' && (
+            <ProgressArc value={parseFloat(kpi.value)} />
+          )}
+          {type === 'default' && kpi.sparklineData && kpi.sparklineData.length >= 2 && (
+            <MiniSparkline data={kpi.sparklineData} color={kpi.health === 'needsImprovement' ? '#f43f5e' : '#10b981'} />
+          )}
+        </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between border-t border-neutral-500/5 pt-2 text-[10px] font-mono">
-        <div className="flex items-center gap-1.5">
-          {isUp && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-          {isDown && <TrendingDown className="w-3 h-3 text-rose-500" />}
-          {!isUp && !isDown && <Minus className="w-3 h-3 text-gray-400" />}
-          <span className={isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-gray-400'}>
-            {kpi.change > 0 ? '+' : ''}{kpi.change.toFixed(1)}%
-          </span>
-          <span className="text-gray-400">vs prev period</span>
+      <div className="mt-3 flex items-center justify-between border-t border-neutral-500/5 pt-2 text-[8px] sm:text-[10px] font-mono">
+        <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-0.5 sm:gap-1">
+            {isUp && <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500" />}
+            {isDown && <TrendingDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-500" />}
+            {!isUp && !isDown && <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400" />}
+            <span className={`font-semibold ${isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-gray-400'}`}>
+              {kpi.change > 0 ? '+' : ''}{kpi.change.toFixed(0)}%
+            </span>
+          </div>
+          <span className="text-gray-450 hidden xs:inline">vs prev</span>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="text-[9px] text-gray-400">Benchmark:</span>
+        
+        <div className="items-center gap-1 hidden md:flex">
+          <span className="text-[9px] text-gray-450">Benchmark:</span>
           <span className={`text-[9px] font-semibold ${themeClasses.textMain}`}>{kpi.benchmark}</span>
         </div>
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between">
-        <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${health.cls}`}>
+      <div className="mt-2 flex items-center justify-between">
+        <span className={`inline-flex items-center gap-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${health.cls}`}>
           <span className={`w-1 h-1 rounded-full ${health.dot}`} />
           {health.label}
         </span>
       </div>
 
-      <div className={`mt-2.5 text-[9px] font-mono leading-relaxed border-l-2 border-neutral-500/10 pl-2 py-0.5 ${themeClasses.textSub}`}>
+      {/* Hide detailed insight block on mobile to keep heights beautifully balanced in 2x2 grid */}
+      <div className={`mt-2 text-[9px] font-mono leading-relaxed border-l-2 border-neutral-500/10 pl-2 py-0.5 hidden sm:block ${themeClasses.textSub}`}>
         {kpi.insight}
       </div>
     </div>
@@ -433,8 +439,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
 
   return (
     <div className="space-y-6">
-      {/* Primary KPIs Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Primary KPIs Grid (2x2 on mobile for balanced visual symmetry) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
         {primaryKpis.map((kpi, i) => (
           <KpiCard
             key={kpi.label}

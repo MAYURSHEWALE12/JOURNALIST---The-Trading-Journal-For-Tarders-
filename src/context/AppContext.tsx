@@ -426,10 +426,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // On mount: validate JWT / Supabase session and load data
   useEffect(() => {
     const token = localStorage.getItem('journalist_jwt');
-    const supabaseSession = localStorage.getItem('supabase_session');
 
-    // Check for Supabase session from email confirmation redirect
-    const checkSupabaseSession = async () => {
+    const restoreSupabaseSession = async () => {
       if (!isSupabaseConfigured()) return;
       try {
         const { data } = await (await import('../lib/supabase')).getSupabase().auth.getSession();
@@ -450,20 +448,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(() => { handleLogOut(); })
         .finally(() => { setDataLoading(false); });
-    } else if (supabaseSession) {
-      api.authMe()
-        .then(async (su) => {
-          setUser(su);
-          localStorage.setItem('journalist_user', JSON.stringify(su));
-          await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
-        })
-        .catch(() => {
-          localStorage.removeItem('supabase_session');
-          handleLogOut();
-        })
-        .finally(() => { setDataLoading(false); });
     } else {
-      checkSupabaseSession().finally(() => { setDataLoading(false); });
+      restoreSupabaseSession().finally(() => { setDataLoading(false); });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

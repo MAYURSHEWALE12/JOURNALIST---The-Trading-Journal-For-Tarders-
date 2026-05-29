@@ -67,6 +67,21 @@ export default function NewTradeModal() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
+                  <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Entry Time</label>
+                  <input type="time" value={newTradeData.entryTime}
+                    onChange={(e) => update('entryTime', e.target.value)}
+                    className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`} />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Exit Time</label>
+                  <input type="time" value={newTradeData.exitTime}
+                    onChange={(e) => update('exitTime', e.target.value)}
+                    className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`} />
+                </div>
+                <div></div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
                   <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Entry Price *</label>
                   <input type="number" step="any" placeholder="0.00" required value={newTradeData.entryPrice}
                     onChange={(e) => update('entryPrice', e.target.value)}

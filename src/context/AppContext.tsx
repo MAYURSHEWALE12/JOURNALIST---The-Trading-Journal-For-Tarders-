@@ -641,6 +641,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet',
     tagsString: '', notes: '', emotions: [] as string[], screenshotUrl: '', screenshotUrls: [] as string[],
     tradeDate: new Date().toISOString().slice(0, 10),
+    entryTime: '12:00',
+    exitTime: '12:00',
   });
   const [isEditTradeOpen, setIsEditTradeOpen] = useState(false);
   const [editTradeData, setEditTradeData] = useState<EditTradeData | null>(null);
@@ -671,7 +673,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     const dateStr = newTradeData.tradeDate || new Date().toISOString().slice(0, 10);
-    const tradeTime = new Date(dateStr + 'T12:00:00.000Z').toISOString();
+    const entryTimeStr = newTradeData.entryTime || '12:00';
+    const exitTimeStr = newTradeData.exitTime || '12:00';
+    const entryDateTime = new Date(`${dateStr}T${entryTimeStr}:00.000Z`).toISOString();
+    const exitDateTime = new Date(`${dateStr}T${exitTimeStr}:00.000Z`).toISOString();
     const newTrade: Trade = {
       id: generateId('TRD'),
       asset: newTradeData.asset.toUpperCase(),
@@ -680,8 +685,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       entryPrice: priceE,
       exitPrice: priceX,
       quantity: qty,
-      entryTime: tradeTime,
-      exitTime: tradeTime,
+      entryTime: entryDateTime,
+      exitTime: exitDateTime,
       netPnl: calcPnl,
       plannedR: parseFloat(newTradeData.plannedR),
       realizedR: parseFloat(newTradeData.realizedR),
@@ -707,7 +712,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsCreatingTrade(false);
     setIsNewTradeOpen(false);
     setNewTradeStep(1);
-    setNewTradeData({ asset: '', direction: 'LONG', status: 'WIN', entryPrice: '', exitPrice: '', quantity: '', netPnl: '', plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet', tagsString: '', notes: '', emotions: [], screenshotUrl: '', screenshotUrls: [], tradeDate: new Date().toISOString().slice(0, 10) });
+    setNewTradeData({ asset: '', direction: 'LONG', status: 'WIN', entryPrice: '', exitPrice: '', quantity: '', netPnl: '', plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet', tagsString: '', notes: '', emotions: [], screenshotUrl: '', screenshotUrls: [], tradeDate: new Date().toISOString().slice(0, 10), entryTime: '12:00', exitTime: '12:00' });
   };
 
   const handleOpenNewTradeModal = () => {
@@ -730,6 +735,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       screenshotUrl: trade.screenshotUrl || '',
       screenshotUrls: trade.screenshotUrls || [],
       tradeDate: trade.entryTime ? trade.entryTime.slice(0, 10) : new Date().toISOString().slice(0, 10),
+      entryTime: trade.entryTime ? trade.entryTime.slice(11, 16) : '12:00',
+      exitTime: trade.exitTime ? trade.exitTime.slice(11, 16) : '12:00',
     });
     setIsEditTradeOpen(true);
   };
@@ -752,7 +759,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     const dateStr = editTradeData.tradeDate || new Date().toISOString().slice(0, 10);
-    const tradeTime = new Date(dateStr + 'T12:00:00.000Z').toISOString();
+    const entryTimeStr = editTradeData.entryTime || '12:00';
+    const exitTimeStr = editTradeData.exitTime || '12:00';
+    const entryDateTime = new Date(`${dateStr}T${entryTimeStr}:00.000Z`).toISOString();
+    const exitDateTime = new Date(`${dateStr}T${exitTimeStr}:00.000Z`).toISOString();
     const updated: Trade = {
       id: editTradeData.id, asset: editTradeData.asset.toUpperCase(),
       direction: editTradeData.direction, status: autoStatus,
@@ -763,8 +773,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       tags: editTradeData.tagsString.split(',').map((s: string) => s.trim()).filter(Boolean),
       notes: editTradeData.notes || 'No description provided.',
       emotionalState: editTradeData.emotions.length > 0 ? editTradeData.emotions : ['Neutral'],
-      entryTime: tradeTime,
-      exitTime: tradeTime,
+      entryTime: entryDateTime,
+      exitTime: exitDateTime,
       accountId: activeAccountId,
       screenshotUrl: editTradeData.screenshotUrls[0] || undefined,
       screenshotUrls: editTradeData.screenshotUrls || [],

@@ -47,6 +47,18 @@ export default function EditTradeModal() {
                 className={`w-full border rounded py-2 px-3 text-sm font-mono focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} focus:border-gray-400`} />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Entry Time</label>
+              <input type="time" value={editTradeData.entryTime} onChange={e => update('entryTime', e.target.value)}
+                className={`w-full border rounded py-2 px-3 text-sm font-mono focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} focus:border-gray-400`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Exit Time</label>
+              <input type="time" value={editTradeData.exitTime} onChange={e => update('exitTime', e.target.value)}
+                className={`w-full border rounded py-2 px-3 text-sm font-mono focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} focus:border-gray-400`} />
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Direction</label>

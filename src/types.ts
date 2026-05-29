@@ -90,6 +90,8 @@ export interface NewTradeData {
   screenshotUrl: string;
   screenshotUrls: string[];
   tradeDate: string;
+  entryTime: string;
+  exitTime: string;
 }
 
 export interface EditTradeData {
@@ -110,6 +112,8 @@ export interface EditTradeData {
   screenshotUrl: string;
   screenshotUrls: string[];
   tradeDate: string;
+  entryTime: string;
+  exitTime: string;
 }
 
 export interface CalendarDay {

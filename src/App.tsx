@@ -26,7 +26,7 @@ function WorkspaceLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <main className="flex-1 flex flex-col overflow-y-auto w-full">
         <Header />
-        <div className="p-6 max-w-7xl w-full mx-auto space-y-6 flex-1">
+        <div className="p-4 md:p-6 max-w-7xl w-full mx-auto space-y-6 flex-1">
           {children}
         </div>
       </main>

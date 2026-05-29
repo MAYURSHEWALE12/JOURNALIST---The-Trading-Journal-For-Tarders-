@@ -303,7 +303,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
   if (insufficient) {
     return (
       <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
-        <div className="px-6 pt-5 pb-4">
+        <div className="px-4 md:px-6 pt-5 pb-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-[10px] font-semibold uppercase tracking-[0.15em] font-mono ${themeClasses.textSub}`}>Net Daily P&L</h3>
@@ -325,11 +325,11 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
   return (
     <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
       {/* Header — inspired by Stripe/Vercel Analytics */}
-      <div className="px-6 pt-5 pb-2">
+      <div className="px-4 md:px-6 pt-5 pb-2">
         <div className="flex items-start justify-between">
           <div>
             <h3 className={`text-[10px] font-semibold uppercase tracking-[0.15em] font-mono ${themeClasses.textSub}`}>Net Daily P&L</h3>
-            <div className={`text-2xl font-display font-bold tracking-tight mt-0.5 ${totalPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            <div className={`text-xl md:text-2xl font-display font-bold tracking-tight mt-0.5 ${totalPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
               {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
             </div>
             <div className={`text-[10px] font-mono mt-0.5 ${themeClasses.textSub}`}>This Period</div>
@@ -354,7 +354,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
       </div>
 
       {/* KPI row */}
-      <div className="px-6 pb-2">
+      <div className="px-4 md:px-6 pb-2">
         <div className="flex flex-wrap gap-1.5">
           <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${isDarkMode ? 'border-white/5 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
             Trading Days <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{dayStats.tradingDays}</span>
@@ -377,7 +377,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
       </div>
 
       {/* Chart */}
-      <div className="px-3 pb-4">
+      <div className="px-2 md:px-3 pb-4">
         <div className={chartHeight}>
           <ResponsiveContainer width="100%" height="100%">
             {mode === 'equity' ? (
@@ -498,7 +498,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
       </div>
 
       {/* Mobile segmented control */}
-      <div className="sm:hidden px-6 pb-4">
+      <div className="sm:hidden px-4 pb-4">
         <div className={`inline-flex rounded-lg p-0.5 border ${isDarkMode ? 'bg-black/20 border-white/5' : 'bg-gray-50 border-gray-200'}`}>
           {modes.map(m => (
             <button

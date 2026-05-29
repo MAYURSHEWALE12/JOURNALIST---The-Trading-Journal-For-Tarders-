@@ -55,7 +55,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
   if (trades.length < 2) {
     return (
       <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
-        <div className="px-6 pt-5 pb-4">
+        <div className="px-4 md:px-6 pt-5 pb-4">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-medium bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
               BETA
@@ -73,7 +73,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
 
   return (
     <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
-      <div className="px-6 pt-5 pb-4">
+      <div className="px-4 md:px-6 pt-5 pb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-medium bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
             BETA
@@ -83,9 +83,9 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
       </div>
 
       {/* Score + Level */}
-      <div className="px-6 pb-4 flex items-end gap-4">
+      <div className="px-4 md:px-6 pb-4 flex items-end gap-4">
         <div>
-          <div className={`text-5xl font-display font-bold tracking-tight ${levelColors[score.level] || 'text-gray-500'}`}>
+          <div className={`text-4xl md:text-5xl font-display font-bold tracking-tight ${levelColors[score.level] || 'text-gray-500'}`}>
             {score.score}
           </div>
           <div className={`mt-1 inline-block px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold border ${levelBadgeColors[score.level] || ''}`}>
@@ -98,7 +98,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
       </div>
 
       {/* Radar Chart */}
-      <div className="px-2 h-52 md:h-56">
+      <div className="px-2 h-44 md:h-52 lg:h-56">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={radarData} margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
             <PolarGrid
@@ -145,7 +145,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
       </div>
 
       {/* Score breakdown */}
-      <div className="px-6 pb-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+      <div className="px-4 md:px-6 pb-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
         {radarMetrics.map(m => {
           const val = score[m.key];
           return (
@@ -161,7 +161,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
 
       {/* Insights */}
       {score.insights.length > 0 && (
-        <div className={`px-6 py-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+        <div className={`px-4 md:px-6 py-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
           <div className={`text-[9px] font-mono font-semibold uppercase tracking-wider mb-2 ${themeClasses.textSub}`}>Insights</div>
           <div className="space-y-1">
             {score.insights.map((insight, i) => (

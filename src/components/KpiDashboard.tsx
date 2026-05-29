@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, HelpCircle, Activity, Award, ShieldAlert, Zap } from 'lucide-react';
-import type { Trade } from '../types';
+import { TrendingUp, TrendingDown, Minus, HelpCircle, Activity, Award, ShieldAlert, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { Trade, CalendarDay } from '../types';
 import { computeJournalistScore, type JournalistScoreResult } from '../lib/journalistScore';
 
 interface KpiDashboardProps {
@@ -20,6 +20,13 @@ interface KpiDashboardProps {
     textMain: string; textSub: string; navActive: string;
   };
   isDarkMode: boolean;
+  calendarDays: CalendarDay[];
+  currentYear: number;
+  currentMonth: number;
+  handlePrevMonth: () => void;
+  handleNextMonth: () => void;
+  selectedDate: string | null;
+  setSelectedDate: (d: string | null) => void;
 }
 
 type HealthStatus = 'excellent' | 'good' | 'average' | 'needsImprovement';
@@ -151,7 +158,7 @@ function KpiCard({
   const isUp = kpi.change > 0;
   const isDown = kpi.change < 0;
   return (
-    <div className={`group relative border rounded-xl p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800`}>
+    <div className={`group relative border rounded-xl p-4 md:p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800`}>
       {/* Tooltip on hover */}
       <div className="absolute top-4 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-help z-10">
         <div className="relative">
@@ -167,7 +174,7 @@ function KpiCard({
 
       <div className="flex items-center justify-between gap-4">
         <div>
-          <div className={`text-2xl font-display font-bold tracking-tight ${themeClasses.textMain}`}>{kpi.value}</div>
+          <div className={`text-xl md:text-2xl font-display font-bold tracking-tight ${themeClasses.textMain}`}>{kpi.value}</div>
         </div>
         {type === 'winrate' && (
           <ProgressRing value={parseFloat(kpi.value)} />
@@ -210,15 +217,14 @@ function KpiCard({
   );
 }
 
-export default function KpiDashboard({ trades, computedStats, themeClasses, isDarkMode }: KpiDashboardProps) {
+export default function KpiDashboard({ trades, computedStats, themeClasses, isDarkMode, calendarDays, currentYear, currentMonth, handlePrevMonth, handleNextMonth, selectedDate, setSelectedDate }: KpiDashboardProps) {
   const score: JournalistScoreResult = useMemo(() => computeJournalistScore(trades), [trades]);
 
-  const { kpis, summary, scoreContrib } = useMemo(() => {
+  const { kpis, scoreContrib } = useMemo(() => {
     const total = trades.length;
     if (total === 0) {
       return {
         kpis: [] as KpiMeta[],
-        summary: [] as string[],
         scoreContrib: [] as { label: string; pct: number; score: number }[],
       };
     }
@@ -409,22 +415,7 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
       { label: 'Discipline', score: score.disciplineScore, pct: (score.disciplineScore * 0.15) / (score.score || 1) * 100 },
     ];
 
-    // Summary insights
-    const summary: string[] = [];
-    const bestMetric = [...scoreContrib].sort((a, b) => b.pct - a.pct)[0];
-    const worstMetric = [...scoreContrib].sort((a, b) => a.pct - b.pct)[0];
-
-    if (totalPnl > 0) {
-      summary.push(`Profitability increased ${pnl2 > pnl1 ? 'significantly' : 'moderately'} compared to the previous period.`);
-    } else {
-      summary.push('Overall profitability is negative. Focus strictly on executing premium A+ setups.');
-    }
-    if (bestMetric) summary.push(`Your strongest scoring area is ${bestMetric.label} (${Math.round(bestMetric.pct)}% contribution).`);
-    if (worstMetric && worstMetric.score < 70) summary.push(`${worstMetric.label} requires adjustment (${Math.round(worstMetric.pct)}% contribution).`);
-    if (pf >= 2) summary.push('Profit Factor exceeds standard professional benchmarks.');
-    if (avgRMultiple >= 1.5) summary.push('Your average R multiple indicates disciplined execution.');
-
-    return { kpis: [...kpis, ...additionalKpis], summary, scoreContrib };
+    return { kpis: [...kpis, ...additionalKpis], scoreContrib };
   }, [trades, computedStats, score]);
 
   if (trades.length === 0) {
@@ -464,7 +455,7 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
       {/* Journalist Score & Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Score Contribution Card */}
-        <div className={`border rounded-xl p-6 relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border}`}>
+        <div className={`border rounded-xl p-4 md:p-6 relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border}`}>
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/5 to-transparent rounded-bl-full pointer-events-none" />
           
           <div className="flex items-center justify-between mb-4 border-b border-neutral-500/5 pb-3">
@@ -477,7 +468,7 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
           </div>
 
           <div className="flex items-baseline gap-2 mb-5">
-            <span className={`text-4xl font-display font-extrabold tracking-tight ${themeClasses.textMain}`}>
+            <span className={`text-3xl md:text-4xl font-display font-extrabold tracking-tight ${themeClasses.textMain}`}>
               {score.score}
             </span>
             <span className="text-gray-500 text-xs font-mono">/100</span>
@@ -505,31 +496,93 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
           </div>
         </div>
 
-        {/* Performance Insights Summary */}
-        <div className={`lg:col-span-2 border rounded-xl p-6 backdrop-blur-md transition-all duration-300 hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className="flex items-center justify-between mb-4 border-b border-neutral-500/5 pb-3">
-            <div className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>
-              Executive Performance Summary
-            </div>
-            <span className="text-[9px] font-mono text-gray-500">
-              Updated Real-Time
-            </span>
-          </div>
-          <div className="space-y-2.5">
-            {summary.map((s, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <span className="text-emerald-500 font-bold shrink-0 mt-0.5">&bull;</span>
-                <span className={`text-[11px] font-sans leading-relaxed tracking-normal ${themeClasses.textMain}`}>
-                  {s}
-                </span>
+        {/* Daily Performance Calendar */}
+        <div className={`lg:col-span-2 border rounded-xl p-4 md:p-6 backdrop-blur-md transition-all duration-300 hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border}`}>
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <div className="space-y-0.5">
+                <span className={`text-[9px] font-semibold uppercase tracking-wider font-mono block ${themeClasses.textSub}`}>Daily Performance Calendar</span>
+                <div className={`text-xs font-display font-bold leading-tight ${themeClasses.textMain}`}>
+                  {new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                </div>
               </div>
-            ))}
+              <div className="flex items-center space-x-1">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  className={`p-1 border rounded transition cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover}`}
+                  title="Previous Month"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  disabled={currentYear > new Date().getFullYear() || (currentYear === new Date().getFullYear() && currentMonth >= new Date().getMonth())}
+                  className={`p-1 border rounded transition ${
+                    (currentYear > new Date().getFullYear() || (currentYear === new Date().getFullYear() && currentMonth >= new Date().getMonth()))
+                      ? 'opacity-30 cursor-not-allowed border-white/[0.04]'
+                      : `cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover}`
+                  }`}
+                  title="Next Month"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 md:gap-1.5">
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                <div key={i} className="text-center text-[10px] text-gray-500 font-semibold mb-1">{d}</div>
+              ))}
+              {calendarDays.map((d: CalendarDay) => {
+                let bgColor = themeClasses.bgCard;
+                if (d.pnl > 0) {
+                  bgColor = isDarkMode
+                    ? 'bg-brand-emerald/15 border border-brand-emerald/40 text-brand-emerald font-bold'
+                    : 'bg-emerald-100 border border-emerald-300 text-emerald-950 font-bold';
+                }
+                if (d.pnl < 0) {
+                  bgColor = isDarkMode
+                    ? 'bg-brand-rose/15 border border-brand-rose/30 text-brand-rose font-bold'
+                    : 'bg-rose-100 border border-rose-300 text-rose-950 font-bold';
+                }
+                return (
+                  <div
+                    key={d.day}
+                    title={`Date: ${d.date}\nP/L: $${d.pnl}`}
+                    onClick={() => setSelectedDate(selectedDate === d.date && d.pnl !== 0 ? null : d.date)}
+                    className={`h-7 md:h-9 rounded font-mono flex flex-col items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer relative group p-1 ${bgColor} ${
+                      selectedDate === d.date ? 'ring-2 ring-white/50 scale-110 z-10' : ''
+                    }`}
+                  >
+                    <span className="text-[8px] md:text-[9px] font-bold leading-none">{d.day}</span>
+                    {d.pnl !== 0 && (
+                      <span className="text-[6.5px] md:text-[7.5px] font-semibold leading-none mt-0.5 opacity-90 font-mono">
+                        {d.pnl > 0 ? `+$${Math.round(d.pnl)}` : `-$${Math.round(Math.abs(d.pnl))}`}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={`text-[9px] md:text-[10px] mt-4 flex items-center gap-2 font-mono ${themeClasses.textSub}`}>
+            <span className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded inline-block ${isDarkMode ? 'bg-brand-emerald/20 border border-brand-emerald/40' : 'bg-emerald-100 border border-emerald-300'}`}></span> Win
+            <span className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded inline-block ${isDarkMode ? 'bg-brand-rose/20 border border-brand-rose/30' : 'bg-rose-100 border border-rose-300'}`}></span> Loss
+            <span className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded inline-block ${isDarkMode ? 'bg-[#1e1e1e]' : 'bg-gray-200'}`}></span> Flat
+            {selectedDate && (
+              <button onClick={() => setSelectedDate(null)} className={`ml-auto text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 rounded border cursor-pointer transition font-semibold ${themeClasses.border} ${themeClasses.bgCard} hover:border-gray-400 ${themeClasses.textMain}`}>
+                Clear
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Secondary KPIs Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {secondaryKpis.map((kpi) => (
           <KpiCard
             key={kpi.label}

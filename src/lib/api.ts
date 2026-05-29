@@ -28,7 +28,8 @@ async function supabaseFetch(path: string, options: RequestInit = {}): Promise<R
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token || '';
   const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1${path}`;
-  return fetch(url, {
+  console.log(`supabaseFetch ${path}: token=${token ? token.slice(0, 20) + '...' : 'NONE'}, session=${session ? 'exists' : 'null'}`);
+  const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -37,6 +38,11 @@ async function supabaseFetch(path: string, options: RequestInit = {}): Promise<R
       ...(options.headers || {}),
     },
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    console.log(`supabaseFetch ${path} ERROR ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return res;
 }
 
 // ─── Accounts ──────────────────────────────────────────────────

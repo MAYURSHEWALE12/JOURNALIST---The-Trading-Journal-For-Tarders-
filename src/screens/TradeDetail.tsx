@@ -1,5 +1,6 @@
 import React from 'react';
-import { ChevronLeft, BookOpen, Compass, Camera, Share2, Download, X, Pencil, Trash2, Brain } from 'lucide-react';
+import { ChevronLeft, BookOpen, Compass, Camera, Share2, Download, X, Pencil, Trash2 } from 'lucide-react';
+import { getEmotionIcon } from '../components/NewTradeModal';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { TradeDetailSkeleton } from '../components/Skeleton';
@@ -213,7 +214,7 @@ export default function TradeDetail() {
               <div className="flex flex-wrap gap-2">
                 {trade.emotionalState.map((em, i) => (
                   <span key={i} className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono font-semibold rounded border ${isDarkMode ? 'border-brand-amber/30 text-brand-amber bg-brand-amber/5' : 'border-amber-300 text-amber-700 bg-amber-50'}`}>
-                    <Brain className="w-3 h-3" /> {em}
+                    {getEmotionIcon(em)} {em}
                   </span>
                 ))}
               </div>

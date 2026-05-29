@@ -1,9 +1,28 @@
 import { useState } from 'react';
-import { Check, X, Brain } from 'lucide-react';
+import { Check, X, Brain, Smile, Flame, Zap, Coins, Frown, Crown } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
 import { EMOTIONAL_STATES } from '../types';
 import type { NewTradeData } from '../types';
+
+export const getEmotionIcon = (emotion: string, className = "w-3 h-3") => {
+  switch (emotion) {
+    case 'Calm':
+      return <Smile className={className} />;
+    case 'FOMO':
+      return <Flame className={className} />;
+    case 'Impulsive':
+      return <Zap className={className} />;
+    case 'Greedy':
+      return <Coins className={className} />;
+    case 'Anxious':
+      return <Frown className={className} />;
+    case 'Confident':
+      return <Crown className={className} />;
+    default:
+      return <Brain className={className} />;
+  }
+};
 
 export default function NewTradeModal() {
   const [screenshotInput, setScreenshotInput] = useState('');
@@ -199,7 +218,7 @@ export default function NewTradeModal() {
                     return (
                       <button type="button" key={em} onClick={() => toggleEmotion(em)}
                         className={`flex items-center justify-center gap-1.5 py-1.5 border rounded text-[10px] font-mono tracking-tight font-semibold cursor-pointer transition ${isSelected ? 'bg-white text-black border-white' : `bg-bg-hover text-gray-400 hover:text-white ${themeClasses.border}`}`}>
-                        <Brain className="w-3 h-3" /> {em}
+                        {getEmotionIcon(em)} {em}
                       </button>
                     );
                   })}

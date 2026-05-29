@@ -24,6 +24,36 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[] } | null>(null);
 
+  // iOS Drag-to-Dismiss Gesture States
+  const [translateY, setTranslateY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+
+  const handleDragStart = (clientY: number) => {
+    setIsDragging(true);
+    setStartY(clientY);
+  };
+
+  const handleDragMove = (clientY: number) => {
+    if (!isDragging) return;
+    const delta = clientY - startY;
+    // Only allow dragging downwards
+    if (delta > 0) {
+      setTranslateY(delta);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    // If pulled down by more than 100px, dismiss the modal
+    if (translateY > 100) {
+      setSelectedDayTrades(null);
+    }
+    setTranslateY(0);
+  };
+
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth(); // 0-indexed
 
@@ -298,13 +328,43 @@ export default function Calendar() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity" onClick={() => setSelectedDayTrades(null)} />
           
           {/* iOS Bottom Sheet Container */}
-          <div className={`w-full max-w-xl rounded-t-[2.5rem] border-t shadow-2xl flex flex-col justify-between overflow-hidden relative max-h-[82vh] animate-slide-up ${themeClasses.bgPanel} ${themeClasses.border}`}>
+          <div 
+            style={{
+              transform: translateY > 0 ? `translateY(${translateY}px)` : undefined,
+              transition: isDragging ? 'none' : 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+            className={`w-full max-w-xl rounded-t-[2.5rem] border-t shadow-2xl flex flex-col justify-between overflow-hidden relative max-h-[82vh] ${isDragging ? '' : 'animate-slide-up'} ${themeClasses.bgPanel} ${themeClasses.border}`}
+          >
             
-            {/* iOS Grab Handle */}
-            <div className="w-12 h-1.5 bg-neutral-300 dark:bg-neutral-800 rounded-full mx-auto my-3.5 shrink-0 cursor-pointer" onClick={() => setSelectedDayTrades(null)} />
+            {/* iOS Grab Handle & Pull Area */}
+            <div 
+              className="w-full pt-3.5 pb-2 cursor-grab active:cursor-grabbing select-none shrink-0"
+              onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+              onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
+              onTouchEnd={handleDragEnd}
+              onMouseDown={(e) => handleDragStart(e.clientY)}
+              onMouseMove={(e) => {
+                if (e.buttons === 1) handleDragMove(e.clientY);
+              }}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+            >
+              <div className="w-12 h-1.5 bg-neutral-300 dark:bg-neutral-800 rounded-full mx-auto" />
+            </div>
             
-            {/* Drawer Header */}
-            <div className={`px-5 pb-4 pt-2 border-b flex items-center justify-between bg-neutral-950/10 ${themeClasses.border}`}>
+            {/* Drawer Header (acts as drag handle too) */}
+            <div 
+              className={`px-5 pb-4 pt-1.5 border-b flex items-center justify-between bg-neutral-950/10 cursor-grab active:cursor-grabbing select-none shrink-0 ${themeClasses.border}`}
+              onTouchStart={(e) => handleDragStart(e.touches[0].clientY)}
+              onTouchMove={(e) => handleDragMove(e.touches[0].clientY)}
+              onTouchEnd={handleDragEnd}
+              onMouseDown={(e) => handleDragStart(e.clientY)}
+              onMouseMove={(e) => {
+                if (e.buttons === 1) handleDragMove(e.clientY);
+              }}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+            >
               <div>
                 <h3 className={`font-display text-base font-black ${themeClasses.textMain}`}>
                   Trades Log &bull; Day {selectedDayTrades.day}

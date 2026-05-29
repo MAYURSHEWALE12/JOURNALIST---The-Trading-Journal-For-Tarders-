@@ -23,13 +23,29 @@ function isSupabaseSession(): boolean {
   return isSupabaseConfigured();
 }
 
+async function supabaseFetch(path: string, options: RequestInit = {}): Promise<Response> {
+  const supabase = getSupabase();
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token || '';
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1${path}`;
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+}
+
 // ─── Accounts ──────────────────────────────────────────────────
 
 export async function fetchAccounts(): Promise<Account[]> {
   if (isSupabaseSession()) {
-    const { data, error } = await getSupabase().from('accounts').select('*');
-    if (error) throw new Error(error.message);
-    return (data || []) as unknown as Account[];
+    const res = await supabaseFetch('/accounts?select=*');
+    if (!res.ok) throw new Error('UNAUTHORIZED');
+    return (await res.json()) as unknown as Account[];
   }
   const res = await fetch('/api/accounts', { headers: authHeaders() });
   if (res.status === 401 || res.status === 403) throw new Error('UNAUTHORIZED');
@@ -39,8 +55,11 @@ export async function fetchAccounts(): Promise<Account[]> {
 
 export async function createAccount(account: Account): Promise<void> {
   if (isSupabaseSession()) {
-    const { error } = await getSupabase().from('accounts').insert(account as never);
-    if (error) throw new Error(error.message);
+    const res = await supabaseFetch('/accounts', {
+      method: 'POST',
+      body: JSON.stringify(account),
+    });
+    if (!res.ok) throw new Error('Failed to save account.');
     return;
   }
   const res = await fetch('/api/accounts', {
@@ -53,8 +72,8 @@ export async function createAccount(account: Account): Promise<void> {
 
 export async function deleteAccount(id: string): Promise<void> {
   if (isSupabaseSession()) {
-    const { error } = await getSupabase().from('accounts').delete().eq('id', id);
-    if (error) throw new Error(error.message);
+    const res = await supabaseFetch(`/accounts?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete account.');
     return;
   }
   const res = await fetch(`/api/accounts/${id}`, {
@@ -68,12 +87,10 @@ export async function deleteAccount(id: string): Promise<void> {
 
 export async function fetchTrades(): Promise<Trade[]> {
   if (isSupabaseSession()) {
-    const { data, error } = await getSupabase()
-      .from('trades')
-      .select('*')
-      .order('entryTime', { ascending: false });
-    if (error) throw new Error(error.message);
-    return (data || []).map((row: Record<string, unknown>) => ({
+    const res = await supabaseFetch('/trades?select=*&order=entryTime.desc');
+    if (!res.ok) throw new Error('UNAUTHORIZED');
+    const data = await res.json() as Array<Record<string, unknown>>;
+    return data.map((row) => ({
       ...row,
       tags: safeParseArray(row.tags),
       emotionalState: safeParseArray(row.emotionalState),
@@ -92,8 +109,11 @@ export async function fetchTrades(): Promise<Trade[]> {
 
 export async function createTrade(trade: Trade): Promise<void> {
   if (isSupabaseSession()) {
-    const { error } = await getSupabase().from('trades').insert(trade as never);
-    if (error) throw new Error(error.message);
+    const res = await supabaseFetch('/trades', {
+      method: 'POST',
+      body: JSON.stringify(trade),
+    });
+    if (!res.ok) throw new Error('Failed to save trade.');
     return;
   }
   const res = await fetch('/api/trades', {
@@ -106,8 +126,11 @@ export async function createTrade(trade: Trade): Promise<void> {
 
 export async function updateTrade(id: string, trade: Partial<Trade>): Promise<void> {
   if (isSupabaseSession()) {
-    const { error } = await getSupabase().from('trades').update(trade as never).eq('id', id);
-    if (error) throw new Error(error.message);
+    const res = await supabaseFetch(`/trades?id=eq.${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(trade),
+    });
+    if (!res.ok) throw new Error('Failed to update trade.');
     return;
   }
   const res = await fetch(`/api/trades/${id}`, {
@@ -120,8 +143,8 @@ export async function updateTrade(id: string, trade: Partial<Trade>): Promise<vo
 
 export async function deleteTrade(id: string): Promise<void> {
   if (isSupabaseSession()) {
-    const { error } = await getSupabase().from('trades').delete().eq('id', id);
-    if (error) throw new Error(error.message);
+    const res = await supabaseFetch(`/trades?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete trade.');
     return;
   }
   const res = await fetch(`/api/trades/${id}`, {
@@ -143,11 +166,10 @@ export async function authRegister(body: { username: string; email: string; pass
     if (!data.user) throw new Error('Registration failed.');
 
     // Create profile entry
-    await getSupabase().from('profiles').insert({
-      id: data.user.id,
-      username: body.username,
-      email: body.email,
-    } as never);
+    await supabaseFetch('/profiles', {
+      method: 'POST',
+      body: JSON.stringify({ id: data.user.id, username: body.username, email: body.email }),
+    });
 
     // If email confirmation is required, session will be null
     if (!data.session) {
@@ -176,11 +198,9 @@ export async function authLogin(body: { email: string; password: string }): Prom
     if (error) throw new Error(error.message);
     if (!data.user) throw new Error('Login failed.');
 
-    const { data: profile } = await getSupabase()
-      .from('profiles')
-      .select('username, email')
-      .eq('id', data.user.id)
-      .maybeSingle() as unknown as { data: { username: string; email: string } | null; error: unknown };
+    const profileRes = await supabaseFetch(`/profiles?select=username,email&id=eq.${data.user.id}`);
+    const profiles = await profileRes.json() as Array<{ username: string; email: string }>;
+    const profile = profiles?.[0] || null;
 
     const user: User = {
       id: data.user.id,
@@ -233,42 +253,36 @@ export async function authSetPassword(password: string): Promise<void> {
 
 export async function authMe(): Promise<User> {
   if (isSupabaseSession()) {
-    const { data: sessionData } = await getSupabase().auth.getSession();
-    console.log('authMe session:', sessionData.session ? 'exists' : 'null');
-
     const { data, error } = await getSupabase().auth.getUser();
-    console.log('authMe getUser error:', error);
     if (error || !data.user) throw new Error('UNAUTHORIZED');
 
-    const { data: profile, error: profileError } = await getSupabase()
-      .from('profiles')
-      .select('username, email')
-      .eq('id', data.user.id)
-      .maybeSingle() as unknown as { data: { username: string; email: string } | null; error: unknown };
+    const { user: authUser } = data;
+    const displayName = authUser.user_metadata?.full_name
+      || authUser.user_metadata?.name
+      || authUser.email?.split('@')[0]
+      || 'Trader';
+    const email = authUser.email || '';
 
-    console.log('authMe profile query error:', profileError);
+    // Try to get or create profile, but don't fail if RLS blocks
+    try {
+      const profileRes = await supabaseFetch(`/profiles?select=username,email&id=eq.${authUser.id}`);
+      const profiles = await profileRes.json() as Array<{ username: string; email: string }>;
+      const profile = profiles?.[0] || null;
 
-    if (profileError) {
-      console.log('Profile error details:', JSON.stringify(profileError));
+      if (profile) {
+        return { id: authUser.id, username: profile.username, email: profile.email };
+      }
+
+      // Auto-create profile
+      await supabaseFetch('/profiles', {
+        method: 'POST',
+        body: JSON.stringify({ id: authUser.id, username: displayName, email }),
+      });
+    } catch {
+      // RLS may block on first sign-in before profile exists — use metadata
     }
 
-    // Auto-create profile for OAuth sign-ins (Google)
-    if (!profile) {
-      const displayName = data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Trader';
-      const email = data.user.email || '';
-      await getSupabase().from('profiles').insert({
-        id: data.user.id,
-        username: displayName,
-        email,
-      } as never);
-      return { id: data.user.id, username: displayName, email };
-    }
-
-    return {
-      id: data.user.id,
-      username: profile?.username || data.user.email?.split('@')[0] || '',
-      email: profile?.email || data.user.email || '',
-    };
+    return { id: authUser.id, username: displayName, email };
   }
   const res = await fetch('/api/auth/me', {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('journalist_jwt')}` },

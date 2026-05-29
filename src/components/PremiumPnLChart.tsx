@@ -144,7 +144,7 @@ function niceScale(maxRaw: number, minRaw: number): { min: number; max: number; 
 const toShortDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
-const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDarkMode }: any) {
+const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDarkMode, bestDay, worstDay }: any) {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d || d.balance !== undefined) {
@@ -156,13 +156,20 @@ const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDa
       </div>
     );
   }
+  const isLoss = d.pnl < 0;
+  const isWin = d.pnl > 0;
+  const isBestDay = bestDay != null && d.pnl === bestDay && bestDay > 0;
+  const isWorstDay = worstDay != null && d.pnl === worstDay && worstDay < 0;
+  const badge = isLoss ? 'LOSS DAY' : isBestDay ? 'BEST DAY' : isWorstDay ? 'WORST DAY' : isWin ? 'WINNING DAY' : null;
+  const badgeColor = isLoss ? 'text-rose-500' : isBestDay ? 'text-emerald-500' : isWorstDay ? 'text-rose-400' : 'text-emerald-500';
   return (
     <div className={`px-3 py-2.5 rounded-xl text-xs font-mono shadow-xl border min-w-[180px] ${isDarkMode ? 'bg-[#181818] border-white/10' : 'bg-white border-gray-200'}`}>
-      <div className={`font-semibold mb-1.5 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{toShortDate(d.date)}</div>
+      <div className={`font-semibold mb-0.5 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{toShortDate(d.date)}</div>
+      {badge && <div className={`text-[9px] font-semibold uppercase tracking-wider mb-1.5 ${badgeColor}`}>{badge}</div>}
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>P&L</span>
-          <span className={`font-semibold ${d.pnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{d.pnl >= 0 ? '+' : ''}${d.pnl.toFixed(2)}</span>
+          <span className={`font-semibold ${isLoss ? 'text-rose-500' : 'text-emerald-500'}`}>{d.pnl >= 0 ? '+' : ''}${d.pnl.toFixed(2)}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Trades</span>
@@ -234,6 +241,10 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
     () => dayData.length > 0 ? Math.max(...dayData.map(d => d.pnl)) : 0,
     [dayData]
   );
+  const worstDay = useMemo(
+    () => dayData.length > 0 ? Math.min(...dayData.map(d => d.pnl)) : 0,
+    [dayData]
+  );
 
   const stats = useMemo(() => {
     const { tradingDays } = dayStats;
@@ -260,7 +271,11 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
     const vals = chartData.map(d => d.pnl);
     const rawMax = Math.max(...vals, 0);
     const rawMin = Math.min(...vals, 0);
-    return niceScale(rawMax, rawMin);
+    const posPad = rawMax * 0.15;
+    const negPad = Math.max(Math.abs(rawMin) * 2, rawMax * 0.2, 100);
+    const paddedMax = rawMax + posPad;
+    const paddedMin = Math.min(0, rawMin - negPad);
+    return niceScale(paddedMax, paddedMin);
   }, [mode, chartData, equityData]);
 
   const chartHeight = useMemo(() => {
@@ -395,8 +410,13 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                   ticks={scale.ticks}
                 />
                 <Tooltip
-                  content={<CustomTooltip isDarkMode={isDarkMode} />}
-                  cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', strokeDasharray: '4 4' }}
+                  content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} bestDay={bestDay} worstDay={worstDay} />}
+                  cursor={false}
+                />
+                <ReferenceLine
+                  y={0}
+                  stroke={isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}
+                  strokeWidth={1.5}
                 />
                 <Area
                   type="monotone"
@@ -433,8 +453,13 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                   ticks={scale.ticks}
                 />
                 <Tooltip
-                  content={<CustomTooltip isDarkMode={isDarkMode} />}
-                  cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', strokeDasharray: '4 4' }}
+                  content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} bestDay={bestDay} worstDay={worstDay} />}
+                  cursor={false}
+                />
+                <ReferenceLine
+                  y={0}
+                  stroke={isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}
+                  strokeWidth={1.5}
                 />
                 {avgPnl !== 0 && chartLen >= 3 && (
                   <ReferenceLine

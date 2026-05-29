@@ -1,14 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ShieldCheck, ArrowLeft } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { isSupabaseConfigured, getSupabase } from '../lib/supabase';
 import LogoIcon from '../components/LogoIcon';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
-  const email = searchParams.get('email') || '';
+  const [supabaseRecovery, setSupabaseRecovery] = useState(false);
 
   const {
     themeClasses, isDarkMode,
@@ -17,15 +16,31 @@ export default function ResetPassword() {
     handleResetPassword,
   } = useApp();
 
+  const isSupabase = isSupabaseConfigured();
+
+  // Detect Supabase recovery hash fragment
   useEffect(() => {
-    if (!token || !email) {
-      setResetError('Invalid reset link. Missing token or email.');
+    if (!isSupabase) return;
+    const hash = window.location.hash;
+    if (hash.includes('type=recovery')) {
+      setSupabaseRecovery(true);
+      // Supabase JS client auto-handles the session from the hash
+      getSupabase().auth.getSession().then(({ data }) => {
+        if (!data.session) {
+          setResetError('Invalid or expired reset link. Please request a new one.');
+        }
+      });
+    } else {
+      setResetError('Invalid reset link.');
     }
-  }, [token, email, setResetError]);
+  }, [isSupabase, setResetError]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleResetPassword(token, email);
+    if (isSupabase && supabaseRecovery) {
+      // For Supabase, token/email params are unused – session is already set from hash
+      handleResetPassword('', '', resetPassword);
+    }
   };
 
   return (
@@ -52,21 +67,8 @@ export default function ResetPassword() {
           </div>
         )}
 
-        {(!token || !email) ? (
-          <div className={`px-4 py-4 rounded border text-xs font-mono leading-relaxed ${isDarkMode ? 'bg-amber-950/40 border-amber-800/40 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
-            Invalid or missing reset link parameters. Please request a new password reset.
-          </div>
-        ) : (
+        {supabaseRecovery || (!isSupabase) ? (
           <form onSubmit={onSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                disabled
-                className={`w-full border rounded px-3 py-2.5 text-xs opacity-60 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
-              />
-            </div>
             <div>
               <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1.5">New Password <span className="text-gray-600">(min. 6 chars)</span></label>
               <input
@@ -90,6 +92,10 @@ export default function ResetPassword() {
               )}
             </button>
           </form>
+        ) : (
+          <div className={`px-4 py-4 rounded border text-xs font-mono leading-relaxed ${isDarkMode ? 'bg-amber-950/40 border-amber-800/40 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
+            Invalid or missing reset link. Please request a new password reset.
+          </div>
         )}
 
         <div className="text-center">

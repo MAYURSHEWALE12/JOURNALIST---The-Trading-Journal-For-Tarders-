@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, ShieldCheck, KeyRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { isSupabaseConfigured } from '../lib/supabase';
 import LogoIcon from '../components/LogoIcon';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
   
-  // 6 separate boxes for OTP
+  // 6 separate boxes for OTP (only used when Supabase NOT configured)
   const [otpArray, setOtpArray] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -21,6 +22,8 @@ export default function ForgotPassword() {
     resetLoading, resetError, setResetError,
     handleResetPassword,
   } = useApp();
+
+  const isSupabase = isSupabaseConfigured();
 
   // Reset errors and fields on mount or status change
   useEffect(() => {
@@ -126,78 +129,84 @@ export default function ForgotPassword() {
         )}
 
         {forgotSent ? (
-          <form onSubmit={handleResetSubmit} className="space-y-4">
-            
-            {/* Dev Mode Autofill Helper */}
-            {forgotResetUrl && (
-              <div 
-                onClick={() => {
-                  const digits = forgotResetUrl.split('');
-                  if (digits.length === 6) {
-                    setOtpArray(digits);
-                  }
-                }}
-                className={`px-4 py-3 rounded border text-xs font-mono break-all leading-relaxed cursor-pointer transition-all ${isDarkMode ? 'bg-gray-900 border-emerald-800/40 text-emerald-400' : 'bg-gray-50 border-emerald-200 text-emerald-700'}`}
-              >
-                💡 <strong className={themeClasses.textMain}>Dev OTP:</strong> <span className="font-bold underline tracking-widest text-emerald-400">{forgotResetUrl}</span> <span className="text-[10px] opacity-60">(Click to autofill)</span>
-              </div>
-            )}
-
-            {/* Premium 6-Digit OTP Boxes */}
-            <div className="space-y-2">
-              <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-500 text-center">Enter Verification Code</label>
-              <div className="flex justify-between gap-1.5 max-w-sm mx-auto">
-                {otpArray.map((digit, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={1}
-                    value={digit}
-                    ref={(el) => { inputRefs.current[index] = el; }}
-                    onChange={(e) => handleOtpChange(e.target.value, index)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    onPaste={index === 0 ? handlePaste : undefined}
-                    className={`w-full max-w-[40px] aspect-[4/5] sm:max-w-[44px] sm:h-12 border rounded-lg text-center font-mono font-bold text-lg focus:outline-none focus:border-gray-400 focus:ring-0 transition-all ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
-                  />
-                ))}
-              </div>
+          isSupabase ? (
+            <div className={`px-4 py-4 rounded border text-xs font-mono leading-relaxed ${isDarkMode ? 'bg-emerald-950/40 border-emerald-800/40 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+              ✅ A password reset link has been sent to <strong>{forgotEmail}</strong>. Check your inbox (and spam folder) and follow the link to reset your password.
             </div>
-
-            {/* New Password input */}
-            <div className="space-y-2">
-              <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1.5">New Password <span className="text-gray-600">(min. 6 chars)</span></label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={resetPassword}
-                onChange={(e) => setResetPassword(e.target.value)}
-                className={`w-full border rounded px-3 py-2.5 text-xs focus:outline-none focus:border-gray-400 transition-all ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={resetLoading}
-              className={`w-full py-3 rounded text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer ${resetLoading ? 'opacity-60 cursor-not-allowed' : ''} ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
-            >
-              {resetLoading ? (
-                <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> Resetting...</>
-              ) : (
-                <>Reset Password</>
+          ) : (
+            <form onSubmit={handleResetSubmit} className="space-y-4">
+              
+              {/* Dev Mode Autofill Helper */}
+              {forgotResetUrl && (
+                <div 
+                  onClick={() => {
+                    const digits = forgotResetUrl.split('');
+                    if (digits.length === 6) {
+                      setOtpArray(digits);
+                    }
+                  }}
+                  className={`px-4 py-3 rounded border text-xs font-mono break-all leading-relaxed cursor-pointer transition-all ${isDarkMode ? 'bg-gray-900 border-emerald-800/40 text-emerald-400' : 'bg-gray-50 border-emerald-200 text-emerald-700'}`}
+                >
+                  💡 <strong className={themeClasses.textMain}>Dev OTP:</strong> <span className="font-bold underline tracking-widest text-emerald-400">{forgotResetUrl}</span> <span className="text-[10px] opacity-60">(Click to autofill)</span>
+                </div>
               )}
-            </button>
 
-            <button
-              type="button"
-              onClick={() => { setForgotSent(false); setOtpArray(['', '', '', '', '', '']); }}
-              className={`w-full py-3 border rounded text-xs font-medium transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
-            >
-              Resend Code
-            </button>
-          </form>
+              {/* Premium 6-Digit OTP Boxes */}
+              <div className="space-y-2">
+                <label className="block text-[10px] uppercase font-mono tracking-wider text-gray-500 text-center">Enter Verification Code</label>
+                <div className="flex justify-between gap-1.5 max-w-sm mx-auto">
+                  {otpArray.map((digit, index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={1}
+                      value={digit}
+                      ref={(el) => { inputRefs.current[index] = el; }}
+                      onChange={(e) => handleOtpChange(e.target.value, index)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      onPaste={index === 0 ? handlePaste : undefined}
+                      className={`w-full max-w-[40px] aspect-[4/5] sm:max-w-[44px] sm:h-12 border rounded-lg text-center font-mono font-bold text-lg focus:outline-none focus:border-gray-400 focus:ring-0 transition-all ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* New Password input */}
+              <div className="space-y-2">
+                <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1.5">New Password <span className="text-gray-600">(min. 6 chars)</span></label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  className={`w-full border rounded px-3 py-2.5 text-xs focus:outline-none focus:border-gray-400 transition-all ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={resetLoading}
+                className={`w-full py-3 rounded text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer ${resetLoading ? 'opacity-60 cursor-not-allowed' : ''} ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
+              >
+                {resetLoading ? (
+                  <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> Resetting...</>
+                ) : (
+                  <>Reset Password</>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setForgotSent(false); setOtpArray(['', '', '', '', '', '']); }}
+                className={`w-full py-3 border rounded text-xs font-medium transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
+              >
+                Resend Code
+              </button>
+            </form>
+          )
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); handleForgotPassword(); }} className="space-y-4">
             <div className="space-y-2">

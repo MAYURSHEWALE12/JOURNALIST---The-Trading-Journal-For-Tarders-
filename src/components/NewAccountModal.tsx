@@ -5,6 +5,7 @@ export default function NewAccountModal() {
   const {
     isDarkMode, themeClasses, isAddAccountOpen, setIsAddAccountOpen,
     newAccountData, setNewAccountData, handleAddNewAccount,
+    isCreatingAccount,
   } = useApp();
 
   if (!isAddAccountOpen) return null;
@@ -47,10 +48,14 @@ export default function NewAccountModal() {
             />
           </div>
           <div className="flex justify-end pt-3">
-            <button type="submit"
-              className={`px-4 py-2 rounded text-xs font-bold cursor-pointer hover:bg-opacity-90 flex items-center gap-1 ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}
+            <button type="submit" disabled={isCreatingAccount}
+              className={`px-4 py-2 rounded text-xs font-bold cursor-pointer hover:bg-opacity-90 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}
             >
-              <Check className="w-4 h-4" /> Save Account
+              {isCreatingAccount ? (
+                <><span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> Saving...</>
+              ) : (
+                <><Check className="w-4 h-4" /> Save Account</>
+              )}
             </button>
           </div>
         </form>

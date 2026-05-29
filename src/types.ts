@@ -87,6 +87,7 @@ export interface NewTradeData {
   emotions: string[];
   screenshotUrl: string;
   screenshotUrls: string[];
+  tradeDate: string;
 }
 
 export interface EditTradeData {
@@ -106,5 +107,32 @@ export interface EditTradeData {
   emotions: string[];
   screenshotUrl: string;
   screenshotUrls: string[];
+  tradeDate: string;
 }
+
+export interface CalendarDay {
+  day: number;
+  date: string;
+  tradesCount: number;
+  pnl: number;
+}
+
+export function getWeekOfMonth(dateString: string): string {
+  const day = new Date(dateString).getDate();
+  if (day <= 7) return 'Week 1';
+  if (day <= 14) return 'Week 2';
+  if (day <= 21) return 'Week 3';
+  if (day <= 28) return 'Week 4';
+  return 'Week 5';
+}
+
+export function getShortTradeId(id: string): string {
+  if (!id) return '';
+  const parts = id.split('-');
+  if (parts.length >= 3) {
+    return `${parts[0]}-${parts[2]}`;
+  }
+  return id;
+}
+
 

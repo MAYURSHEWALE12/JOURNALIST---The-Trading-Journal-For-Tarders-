@@ -1,20 +1,84 @@
 import type { Trade, Account, User } from '../types';
+import { isSupabaseConfigured, getSupabase } from './supabase';
 
-export function authHeaders(): Record<string, string> {
+// ─── Helpers ───────────────────────────────────────────────────
+
+function authHeaders(): Record<string, string> {
   const token = localStorage.getItem('journalist_jwt');
   return token
     ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
     : { 'Content-Type': 'application/json' };
 }
 
+export function safeParseArray(val: unknown): string[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val as string[];
+  if (typeof val === 'string') {
+    try { return JSON.parse(val) as string[]; } catch { return []; }
+  }
+  return [];
+}
+
+function isSupabaseSession(): boolean {
+  return isSupabaseConfigured();
+}
+
+// ─── Accounts ──────────────────────────────────────────────────
+
 export async function fetchAccounts(): Promise<Account[]> {
+  if (isSupabaseSession()) {
+    const { data, error } = await getSupabase().from('accounts').select('*');
+    if (error) throw new Error(error.message);
+    return (data || []) as unknown as Account[];
+  }
   const res = await fetch('/api/accounts', { headers: authHeaders() });
   if (res.status === 401 || res.status === 403) throw new Error('UNAUTHORIZED');
   if (!res.ok) throw new Error('API server offline.');
   return res.json();
 }
 
+export async function createAccount(account: Account): Promise<void> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().from('accounts').insert(account as never);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const res = await fetch('/api/accounts', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(account),
+  });
+  if (!res.ok) throw new Error('Failed to save account.');
+}
+
+export async function deleteAccount(id: string): Promise<void> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().from('accounts').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  const res = await fetch(`/api/accounts/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to delete account.');
+}
+
+// ─── Trades ─────────────────────────────────────────────────────
+
 export async function fetchTrades(): Promise<Trade[]> {
+  if (isSupabaseSession()) {
+    const { data, error } = await getSupabase()
+      .from('trades')
+      .select('*')
+      .order('entryTime', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data || []).map((row: Record<string, unknown>) => ({
+      ...row,
+      tags: safeParseArray(row.tags),
+      emotionalState: safeParseArray(row.emotionalState),
+    })) as unknown as Trade[];
+  }
   const res = await fetch('/api/trades', { headers: authHeaders() });
   if (res.status === 401 || res.status === 403) throw new Error('UNAUTHORIZED');
   if (!res.ok) throw new Error('API server offline.');
@@ -27,6 +91,11 @@ export async function fetchTrades(): Promise<Trade[]> {
 }
 
 export async function createTrade(trade: Trade): Promise<void> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().from('trades').insert(trade as never);
+    if (error) throw new Error(error.message);
+    return;
+  }
   const res = await fetch('/api/trades', {
     method: 'POST',
     headers: authHeaders(),
@@ -36,6 +105,11 @@ export async function createTrade(trade: Trade): Promise<void> {
 }
 
 export async function updateTrade(id: string, trade: Partial<Trade>): Promise<void> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().from('trades').update(trade as never).eq('id', id);
+    if (error) throw new Error(error.message);
+    return;
+  }
   const res = await fetch(`/api/trades/${id}`, {
     method: 'PUT',
     headers: authHeaders(),
@@ -45,6 +119,11 @@ export async function updateTrade(id: string, trade: Partial<Trade>): Promise<vo
 }
 
 export async function deleteTrade(id: string): Promise<void> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().from('trades').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    return;
+  }
   const res = await fetch(`/api/trades/${id}`, {
     method: 'DELETE',
     headers: authHeaders(),
@@ -52,46 +131,112 @@ export async function deleteTrade(id: string): Promise<void> {
   if (!res.ok) throw new Error('Failed to delete trade.');
 }
 
-export async function createAccount(account: Account): Promise<void> {
-  const res = await fetch('/api/accounts', {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify(account),
-  });
-  if (!res.ok) throw new Error('Failed to save account.');
-}
-
-export async function deleteAccount(id: string): Promise<void> {
-  const res = await fetch(`/api/accounts/${id}`, {
-    method: 'DELETE',
-    headers: authHeaders(),
-  });
-  if (!res.ok) throw new Error('Failed to delete account.');
-}
+// ─── Auth ───────────────────────────────────────────────────────
 
 export async function authRegister(body: { username: string; email: string; password: string }): Promise<{ token: string; user: User }> {
+  if (isSupabaseSession()) {
+    const { data, error } = await getSupabase().auth.signUp({
+      email: body.email,
+      password: body.password,
+    });
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error('Registration failed.');
+
+    // Create profile entry
+    await getSupabase().from('profiles').insert({
+      id: data.user.id,
+      username: body.username,
+      email: body.email,
+    });
+
+    const user: User = { id: data.user.id, username: body.username, email: body.email };
+    return { token: data.session?.access_token || '', user };
+  }
   const res = await fetch('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Registration failed.');
-  return data;
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Registration failed.');
+  return result;
 }
 
 export async function authLogin(body: { email: string; password: string }): Promise<{ token: string; user: User }> {
+  if (isSupabaseSession()) {
+    const { data, error } = await getSupabase().auth.signInWithPassword({
+      email: body.email,
+      password: body.password,
+    });
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error('Login failed.');
+
+    const { data: profile } = await getSupabase()
+      .from('profiles')
+      .select('username, email')
+      .eq('id', data.user.id)
+      .single();
+
+    const user: User = {
+      id: data.user.id,
+      username: profile?.username || body.email.split('@')[0],
+      email: profile?.email || body.email,
+    };
+    localStorage.setItem('supabase_session', 'true');
+    return { token: data.session?.access_token || '', user };
+  }
   const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Login failed.');
-  return data;
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Login failed.');
+  return result;
 }
 
+export async function authLogout(): Promise<void> {
+  if (isSupabaseSession()) {
+    await getSupabase().auth.signOut();
+    localStorage.removeItem('supabase_session');
+    return;
+  }
+}
+
+export async function authMe(): Promise<User> {
+  if (isSupabaseSession()) {
+    const { data, error } = await getSupabase().auth.getUser();
+    if (error || !data.user) throw new Error('UNAUTHORIZED');
+
+    const { data: profile } = await getSupabase()
+      .from('profiles')
+      .select('username, email')
+      .eq('id', data.user.id)
+      .single();
+
+    return {
+      id: data.user.id,
+      username: profile?.username || data.user.email?.split('@')[0] || '',
+      email: profile?.email || data.user.email || '',
+    };
+  }
+  const res = await fetch('/api/auth/me', {
+    headers: { 'Authorization': `Bearer ${localStorage.getItem('journalist_jwt')}` },
+  });
+  if (!res.ok) throw new Error('UNAUTHORIZED');
+  return res.json();
+}
+
+// ─── Auth helpers (password reset, change password) ──
+
 export async function authForgotPassword(email: string): Promise<{ message?: string; devMode?: boolean; otp?: string; error?: string }> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
+    if (error) throw new Error(error.message);
+    return { message: 'Check your email for a password reset link.' };
+  }
   const res = await fetch('/api/auth/forgot-password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -103,6 +248,11 @@ export async function authForgotPassword(email: string): Promise<{ message?: str
 }
 
 export async function authResetPassword(email: string, token: string, password: string): Promise<{ message?: string; error?: string }> {
+  if (isSupabaseSession()) {
+    const { error } = await getSupabase().auth.updateUser({ password });
+    if (error) throw new Error(error.message);
+    return { message: 'Password updated successfully.' };
+  }
   const res = await fetch('/api/auth/reset-password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -122,21 +272,4 @@ export async function authChangePassword(oldPassword: string, newPassword: strin
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to change password.');
   return data;
-}
-
-export async function authMe(): Promise<User> {
-  const res = await fetch('/api/auth/me', {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('journalist_jwt')}` },
-  });
-  if (!res.ok) throw new Error('UNAUTHORIZED');
-  return res.json();
-}
-
-export function safeParseArray(val: unknown): string[] {
-  if (!val) return [];
-  if (Array.isArray(val)) return val as string[];
-  if (typeof val === 'string') {
-    try { return JSON.parse(val) as string[]; } catch { return []; }
-  }
-  return [];
 }

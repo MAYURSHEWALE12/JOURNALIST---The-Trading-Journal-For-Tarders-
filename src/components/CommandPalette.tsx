@@ -1,6 +1,7 @@
 import { Search, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { exportTradesToPDF } from '../lib/pdfExporter';
 
 export default function CommandPalette() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function CommandPalette() {
     isDarkMode, isCommandOpen,
     handleCommandAction, handleOpenNewTradeModal, accounts,
     activeAccountId, setActiveAccountId, activeAccount,
+    activeTrades, computedStats, user, calendarDays, setIsExportingPDF
   } = useApp();
 
   if (!isCommandOpen) return null;
@@ -38,6 +40,18 @@ export default function CommandPalette() {
                   Create a New Trade Record
                 </span>
                 <span className="text-[9px] font-mono text-gray-500">Shortcut P</span>
+              </button>
+              <button
+                onClick={() => handleCommandAction(async () => { setIsExportingPDF(true); try { await exportTradesToPDF(activeTrades, computedStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } })}
+                className={`w-full text-left px-3 py-2 rounded flex justify-between items-center transition-colors duration-150 cursor-pointer ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-[#1a1a1a]' : 'text-gray-600 hover:text-black hover:bg-gray-100'}`}
+              >
+                <span className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-file-text w-4 h-4 ${isDarkMode ? 'text-white' : 'text-black'}`} aria-hidden="true">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path>
+                  </svg>
+                  Export Performance PDF Report
+                </span>
+                <span className="text-[9px] font-mono text-gray-500">Shortcut Print</span>
               </button>
               <button
                 onClick={() => handleCommandAction(() => {

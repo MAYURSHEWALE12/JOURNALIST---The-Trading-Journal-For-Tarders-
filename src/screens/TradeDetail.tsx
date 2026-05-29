@@ -3,6 +3,7 @@ import { ChevronLeft, BookOpen, Compass, Camera } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { TradeDetailSkeleton } from '../components/Skeleton';
+import { getWeekOfMonth } from '../types';
 
 export default function TradeDetail() {
   const { tradeId } = useParams();
@@ -84,7 +85,7 @@ export default function TradeDetail() {
               <span>|</span>
               <span>{trade.strategy}</span>
               <span>|</span>
-              <span>{new Date(trade.entryTime).toLocaleString()}</span>
+              <span>{new Date(trade.entryTime).toLocaleString()} ({getWeekOfMonth(trade.entryTime)})</span>
             </div>
           </div>
           <div className="text-right">

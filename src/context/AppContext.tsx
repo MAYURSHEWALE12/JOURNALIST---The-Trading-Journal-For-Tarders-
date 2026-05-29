@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Trade, Account, Stats, TickerPrices, User, NewAccountData, NewTradeData, EditTradeData } from '../types';
+import type { Trade, Account, Stats, TickerPrices, User, NewAccountData, NewTradeData, EditTradeData, CalendarDay } from '../types';
+import { getShortTradeId } from '../types';
 import { INITIAL_TRADES } from '../data/mockTrades';
 import * as api from '../lib/api';
 
@@ -16,13 +17,6 @@ interface ThemeClasses {
   textMain: string;
   textSub: string;
   navActive: string;
-}
-
-interface CalendarDay {
-  day: number;
-  date: string;
-  tradesCount: number;
-  pnl: number;
 }
 
 interface AssetSummaryRow {
@@ -142,6 +136,12 @@ interface AppContextValue {
   handleEditTradeSubmit: (e: React.FormEvent) => Promise<void>;
   handleDeleteTrade: (id: string) => Promise<void>;
   handleCommandAction: (action: () => void) => void;
+  selectedDate: string | null;
+  setSelectedDate: React.Dispatch<React.SetStateAction<string | null>>;
+  isCreatingTrade: boolean;
+  isEditingTrade: boolean;
+  isDeletingTrade: boolean;
+  isCreatingAccount: boolean;
 
   // Analytics
   computedStats: Stats;
@@ -164,6 +164,14 @@ interface AppContextValue {
   setLandingMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   dataLoading: boolean;
   setDataLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  isExportingPDF: boolean;
+  setIsExportingPDF: React.Dispatch<React.SetStateAction<boolean>>;
+  currentYear: number;
+  setCurrentYear: React.Dispatch<React.SetStateAction<number>>;
+  currentMonth: number;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<number>>;
+  handlePrevMonth: () => void;
+  handleNextMonth: () => void;
 }
 
 const AppContext = createContext<AppContextValue>(null as unknown as AppContextValue);
@@ -230,7 +238,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [authUsername, setAuthUsername] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [dataLoading, setDataLoading] = useState(() => !!localStorage.getItem('journalist_jwt') && !!localStorage.getItem('journalist_user'));
+  const [dataLoading, setDataLoading] = useState(() => {
+    const hasJWT = !!localStorage.getItem('journalist_jwt') && !!localStorage.getItem('journalist_user');
+    const hasSupabase = !!localStorage.getItem('supabase_session');
+    return hasJWT || hasSupabase;
+  });
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isCreatingTrade, setIsCreatingTrade] = useState(false);
+  const [isEditingTrade, setIsEditingTrade] = useState(false);
+  const [isDeletingTrade, setIsDeletingTrade] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   // Password reset
   const [forgotEmail, setForgotEmail] = useState('');
@@ -309,8 +327,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setAccounts([]);
     setTrades([]);
     setActiveAccountId('');
+    api.authLogout();
     localStorage.removeItem('journalist_user');
     localStorage.removeItem('journalist_jwt');
+    localStorage.removeItem('supabase_session');
     localStorage.removeItem('journalist_active_screen');
     localStorage.removeItem('journalist_sandbox_accounts');
     localStorage.removeItem('journalist_sandbox_trades');
@@ -353,7 +373,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const loadAccountsFromServer = useCallback(async () => {
     const token = localStorage.getItem('journalist_jwt');
-    if (!token) return;
+    const supabaseSession = localStorage.getItem('supabase_session');
+    if (!token && !supabaseSession) return;
     try {
       const data = await api.fetchAccounts();
       if (data.length > 0) {
@@ -386,7 +407,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const loadTradesFromServer = useCallback(async () => {
     const token = localStorage.getItem('journalist_jwt');
-    if (!token) return;
+    const supabaseSession = localStorage.getItem('supabase_session');
+    if (!token && !supabaseSession) return;
     try {
       const data = await api.fetchTrades();
       if (data.length > 0) {
@@ -400,15 +422,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [handleLogOut, setTrades]);
 
-  // On mount: validate JWT and load data
+  // On mount: validate JWT / Supabase session and load data
   useEffect(() => {
     const token = localStorage.getItem('journalist_jwt');
+    const supabaseSession = localStorage.getItem('supabase_session');
     if (token && user) {
       api.authMe()
         .then(async () => {
           await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
         })
         .catch(() => { handleLogOut(); })
+        .finally(() => { setDataLoading(false); });
+    } else if (supabaseSession) {
+      api.authMe()
+        .then(async (su) => {
+          setUser(su);
+          localStorage.setItem('journalist_user', JSON.stringify(su));
+          await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
+        })
+        .catch(() => {
+          localStorage.removeItem('supabase_session');
+          handleLogOut();
+        })
         .finally(() => { setDataLoading(false); });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -417,6 +452,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const handleAddNewAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAccountData.name.trim()) return;
+    setIsCreatingAccount(true);
     const newAcc: Account = {
       id: `acc-${Math.floor(1000 + Math.random() * 9000)}`,
       name: newAccountData.name,
@@ -436,6 +472,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       setActiveAccountId(newAcc.id);
     }
+    setIsCreatingAccount(false);
     setIsAddAccountOpen(false);
     setNewAccountData({ name: '', type: 'Crypto', accountSize: '' });
   };
@@ -483,26 +520,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'WIN' | 'LOSS' | 'BREAKEVEN'>('ALL');
   const [dashboardViewMode, setDashboardViewMode] = useState<'CARDS' | 'TABLE'>('CARDS');
 
+  const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
+
+  const handlePrevMonth = useCallback(() => {
+    setCurrentMonth(prev => {
+      if (prev === 0) {
+        setCurrentYear(y => y - 1);
+        return 11;
+      }
+      return prev - 1;
+    });
+  }, []);
+
+  const handleNextMonth = useCallback(() => {
+    const today = new Date();
+    const maxYear = today.getFullYear();
+    const maxMonth = today.getMonth();
+
+    setCurrentMonth(prev => {
+      if (currentYear > maxYear || (currentYear === maxYear && prev >= maxMonth)) {
+        return prev;
+      }
+      if (prev === 11) {
+        setCurrentYear(y => y + 1);
+        return 0;
+      }
+      return prev + 1;
+    });
+  }, [currentYear]);
+
   const filteredTrades = useMemo(() => {
     return activeTrades.filter(t => {
-      const matchesSearch = t.asset.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = t.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            getShortTradeId(t.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            t.asset.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             t.strategy.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             t.notes.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesDate = !selectedDate || t.entryTime.startsWith(selectedDate);
+      return matchesSearch && matchesStatus && matchesDate;
     });
-  }, [activeTrades, searchTerm, statusFilter]);
+  }, [activeTrades, searchTerm, statusFilter, selectedDate]);
 
   const calendarDays = useMemo(() => {
     const days = [];
-    for (let i = 0; i < 31; i++) {
-      const dateStr = new Date(2026, 4, i + 1).toISOString().split('T')[0];
+    const numDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for (let i = 0; i < numDays; i++) {
+      const year = currentYear;
+      const month = String(currentMonth + 1).padStart(2, '0');
+      const day = String(i + 1).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
       const dailyTrades = activeTrades.filter(t => t.entryTime.startsWith(dateStr));
       const dailyPnl = dailyTrades.reduce((sum, t) => sum + t.netPnl, 0);
       days.push({ day: i + 1, date: dateStr, tradesCount: dailyTrades.length, pnl: dailyPnl });
     }
     return days;
-  }, [activeTrades]);
+  }, [activeTrades, currentYear, currentMonth]);
 
   const assetSummary = useMemo(() => {
     const map: Record<string, AssetSummaryRow> = {};
@@ -529,6 +604,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     entryPrice: '', exitPrice: '', quantity: '', netPnl: '',
     plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet',
     tagsString: '', notes: '', emotions: [] as string[], screenshotUrl: '', screenshotUrls: [] as string[],
+    tradeDate: new Date().toISOString().slice(0, 10),
   });
   const [isEditTradeOpen, setIsEditTradeOpen] = useState(false);
   const [editTradeData, setEditTradeData] = useState<EditTradeData | null>(null);
@@ -540,6 +616,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       alert('Please fill out essential fields.');
       return;
     }
+    setIsCreatingTrade(true);
     const priceE = parseFloat(newTradeData.entryPrice);
     const priceX = parseFloat(newTradeData.exitPrice || '0');
     const qty = parseFloat(newTradeData.quantity);
@@ -557,6 +634,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       autoStatus = 'BREAKEVEN';
     }
 
+    const dateStr = newTradeData.tradeDate || new Date().toISOString().slice(0, 10);
+    const tradeTime = new Date(dateStr + 'T12:00:00.000Z').toISOString();
     const newTrade: Trade = {
       id: generateId('TRD'),
       asset: newTradeData.asset.toUpperCase(),
@@ -565,8 +644,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       entryPrice: priceE,
       exitPrice: priceX,
       quantity: qty,
-      entryTime: new Date().toISOString(),
-      exitTime: new Date().toISOString(),
+      entryTime: tradeTime,
+      exitTime: tradeTime,
       netPnl: calcPnl,
       plannedR: parseFloat(newTradeData.plannedR),
       realizedR: parseFloat(newTradeData.realizedR),
@@ -588,9 +667,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
     }
+    setIsCreatingTrade(false);
     setIsNewTradeOpen(false);
     setNewTradeStep(1);
-    setNewTradeData({ asset: '', direction: 'LONG', status: 'WIN', entryPrice: '', exitPrice: '', quantity: '', netPnl: '', plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet', tagsString: '', notes: '', emotions: [], screenshotUrl: '', screenshotUrls: [] });
+    setNewTradeData({ asset: '', direction: 'LONG', status: 'WIN', entryPrice: '', exitPrice: '', quantity: '', netPnl: '', plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet', tagsString: '', notes: '', emotions: [], screenshotUrl: '', screenshotUrls: [], tradeDate: new Date().toISOString().slice(0, 10) });
   };
 
   const handleOpenNewTradeModal = () => {
@@ -612,6 +692,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       notes: trade.notes, emotions: [...trade.emotionalState],
       screenshotUrl: trade.screenshotUrl || '',
       screenshotUrls: trade.screenshotUrls || [],
+      tradeDate: trade.entryTime ? trade.entryTime.slice(0, 10) : new Date().toISOString().slice(0, 10),
     });
     setIsEditTradeOpen(true);
   };
@@ -619,6 +700,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const handleEditTradeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editTradeData) return;
+    setIsEditingTrade(true);
 
     const pnlVal = parseFloat(editTradeData.netPnl);
     let autoStatus = editTradeData.status;
@@ -632,6 +714,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    const dateStr = editTradeData.tradeDate || new Date().toISOString().slice(0, 10);
+    const tradeTime = new Date(dateStr + 'T12:00:00.000Z').toISOString();
     const updated: Trade = {
       id: editTradeData.id, asset: editTradeData.asset.toUpperCase(),
       direction: editTradeData.direction, status: autoStatus,
@@ -642,8 +726,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       tags: editTradeData.tagsString.split(',').map((s: string) => s.trim()).filter(Boolean),
       notes: editTradeData.notes || 'No description provided.',
       emotionalState: editTradeData.emotions.length > 0 ? editTradeData.emotions : ['Neutral'],
-      entryTime: trades.find(t => t.id === editTradeData.id)?.entryTime || new Date().toISOString(),
-      exitTime: trades.find(t => t.id === editTradeData.id)?.exitTime || new Date().toISOString(),
+      entryTime: tradeTime,
+      exitTime: tradeTime,
       accountId: activeAccountId,
       screenshotUrl: editTradeData.screenshotUrls[0] || undefined,
       screenshotUrls: editTradeData.screenshotUrls || [],
@@ -654,17 +738,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       setTrades(prev => prev.map(t => t.id === updated.id ? updated : t));
     }
+    setIsEditingTrade(false);
     setIsEditTradeOpen(false);
     setEditTradeData(null);
   };
 
   const handleDeleteTrade = async (tradeId: string) => {
+    setIsDeletingTrade(true);
     try {
       await api.deleteTrade(tradeId);
       await loadTradesFromServer();
     } catch {
       setTrades(prev => prev.filter(t => t.id !== tradeId));
     }
+    setIsDeletingTrade(false);
     setDeleteConfirmId(null);
     navigate('/timeline');
   };
@@ -773,7 +860,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     computedStats, equityCurveData, calendarDays, assetSummary,
     tickerPrices, mousePos, showCursorFollower, candleHeight,
     faqOpen, setFaqOpen, landingMobileMenuOpen, setLandingMobileMenuOpen,
-    dataLoading, setDataLoading,
+    dataLoading, setDataLoading, isExportingPDF, setIsExportingPDF,
+    currentYear, setCurrentYear, currentMonth, setCurrentMonth,
+    handlePrevMonth, handleNextMonth,
+    selectedDate, setSelectedDate,
+    isCreatingTrade, isEditingTrade, isDeletingTrade, isCreatingAccount,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

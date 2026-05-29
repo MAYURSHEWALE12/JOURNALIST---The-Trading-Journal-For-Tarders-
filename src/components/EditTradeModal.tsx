@@ -8,6 +8,7 @@ export default function EditTradeModal() {
   const {
     isDarkMode, themeClasses, isEditTradeOpen, editTradeData,
     setEditTradeData, setIsEditTradeOpen, handleEditTradeSubmit,
+    isEditingTrade,
   } = useApp();
 
   if (!isEditTradeOpen || !editTradeData) return null;
@@ -29,10 +30,15 @@ export default function EditTradeModal() {
           </button>
         </div>
         <form onSubmit={handleEditTradeSubmit} className="p-6 space-y-5">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Asset Pair</label>
               <input type="text" required value={editTradeData.asset} onChange={e => update('asset', e.target.value)}
+                className={`w-full border rounded py-2 px-3 text-sm font-mono focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} focus:border-gray-400`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1.5 ${themeClasses.textSub}`}>Trade Date</label>
+              <input type="date" required value={editTradeData.tradeDate} onChange={e => update('tradeDate', e.target.value)}
                 className={`w-full border rounded py-2 px-3 text-sm font-mono focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} focus:border-gray-400`} />
             </div>
             <div>
@@ -141,8 +147,14 @@ export default function EditTradeModal() {
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => { setIsEditTradeOpen(false); setEditTradeData(null); }}
               className={`flex-1 py-2.5 border rounded text-xs font-mono uppercase tracking-widest cursor-pointer transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-400`}>Cancel</button>
-            <button type="submit"
-              className={`flex-1 py-2.5 border rounded text-xs font-mono uppercase tracking-widest cursor-pointer font-bold transition ${isDarkMode ? 'bg-white text-black border-white hover:bg-gray-100' : 'bg-black text-white border-black hover:bg-gray-900'}`}>Save Changes</button>
+            <button type="submit" disabled={isEditingTrade}
+              className={`flex-1 py-2.5 border rounded text-xs font-mono uppercase tracking-widest cursor-pointer font-bold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 ${isDarkMode ? 'bg-white text-black border-white hover:bg-gray-100' : 'bg-black text-white border-black hover:bg-gray-900'}`}>
+              {isEditingTrade ? (
+                <><span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> Saving...</>
+              ) : (
+                'Save Changes'
+              )}
+            </button>
           </div>
         </form>
       </div>

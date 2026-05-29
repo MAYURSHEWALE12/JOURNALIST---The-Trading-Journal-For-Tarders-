@@ -1,7 +1,7 @@
 import { useApp } from '../context/AppContext';
 
 export default function DeleteConfirmModal() {
-  const { isDarkMode, themeClasses, deleteConfirmId, setDeleteConfirmId, handleDeleteTrade } = useApp();
+  const { isDarkMode, themeClasses, deleteConfirmId, setDeleteConfirmId, handleDeleteTrade, isDeletingTrade } = useApp();
 
   if (!deleteConfirmId) return null;
 
@@ -24,9 +24,14 @@ export default function DeleteConfirmModal() {
           </button>
           <button
             onClick={() => handleDeleteTrade(deleteConfirmId)}
-            className="flex-1 py-2.5 border border-rose-700 bg-rose-900/30 rounded text-xs font-mono uppercase tracking-widest text-rose-400 hover:bg-rose-900/50 hover:border-rose-500 transition cursor-pointer"
+            disabled={isDeletingTrade}
+            className="flex-1 py-2.5 border border-rose-700 bg-rose-900/30 rounded text-xs font-mono uppercase tracking-widest text-rose-400 hover:bg-rose-900/50 hover:border-rose-500 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
           >
-            Yes, Delete
+            {isDeletingTrade ? (
+              <><span className="inline-block w-3 h-3 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" /> Deleting...</>
+            ) : (
+              'Yes, Delete'
+            )}
           </button>
         </div>
       </div>

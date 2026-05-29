@@ -86,6 +86,19 @@ function TradeDetailPage() {
   return <TradeDetail />;
 }
 
+function ExportingOverlay() {
+  const { isExportingPDF } = useApp();
+  if (!isExportingPDF) return null;
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="flex flex-col items-center gap-3">
+        <span className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <span className="text-white text-xs font-mono tracking-wider">Generating PDF Statement...</span>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -101,6 +114,7 @@ export default function App() {
           <Route path="/trade/:tradeId" element={<WorkspaceLayout><TradeDetailPage /></WorkspaceLayout>} />
         </Routes>
         <CursorFollower />
+        <ExportingOverlay />
       </AppProvider>
     </BrowserRouter>
   );

@@ -8,6 +8,7 @@ import { dirname, join } from 'path';
 import { randomBytes } from 'crypto';
 import { readFileSync } from 'fs';
 import nodemailer from 'nodemailer';
+import puppeteer from 'puppeteer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -775,6 +776,48 @@ app.delete('/api/trades/:id', verifyToken, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Trade deleted.' });
   });
+});
+
+// ==========================================
+// SCREENSHOT ENDPOINT (Puppeteer)
+// ==========================================
+
+let screenshotBrowser = null;
+
+async function getScreenshotBrowser() {
+  if (!screenshotBrowser) {
+    screenshotBrowser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    });
+  }
+  return screenshotBrowser;
+}
+
+app.get('/api/screenshot', async (req, res) => {
+  const { url } = req.query;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'Missing ?url= parameter' });
+  }
+
+  try {
+    const browser = await getScreenshotBrowser();
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 720 });
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+
+    // Wait extra for chart rendering
+    await new Promise(r => setTimeout(r, 2000));
+
+    const buffer = await page.screenshot({ type: 'jpeg', quality: 80 });
+    await page.close();
+
+    res.set('Content-Type', 'image/jpeg');
+    res.send(buffer);
+  } catch (err) {
+    console.error('Screenshot error:', err.message);
+    res.status(500).json({ error: 'Failed to take screenshot' });
+  }
 });
 
 // ==========================================

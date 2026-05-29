@@ -1,6 +1,7 @@
 import { BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TimelineSkeleton } from '../components/Skeleton';
+import { getWeekOfMonth, getShortTradeId } from '../types';
 
 export default function Timeline() {
   const { themeClasses, isDarkMode, activeTrades, setSelectedScreenshot, dataLoading } = useApp();
@@ -25,12 +26,15 @@ export default function Timeline() {
             <div className={`border rounded p-4 md:p-5 hover:border-gray-400 transition space-y-3 ${themeClasses.bgPanel} ${themeClasses.border}`}>
 
               <div className="flex justify-between items-start flex-wrap gap-2">
-                <div className="flex items-center space-x-3">
-                  <span className={`text-xs font-mono font-medium ${themeClasses.textSub}`}>{t.id.slice(0, 8)}</span>
+                <div className="flex items-center space-x-3 flex-wrap gap-y-1">
+                  <span className={`text-xs font-mono font-medium ${themeClasses.textSub}`}>{getShortTradeId(t.id)}</span>
                   <h3 className={`font-display font-bold text-base ${themeClasses.textMain}`}>{t.asset}</h3>
                   <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${t.direction === 'LONG' ? 'bg-brand-emerald' : 'bg-brand-rose'}`} />
                     {t.direction}
+                  </span>
+                  <span className="text-[10px] font-mono text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded border border-gray-500/10">
+                    {new Date(t.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} • {getWeekOfMonth(t.entryTime)}
                   </span>
                 </div>
                 <span className={`text-[11px] font-bold font-mono ${themeClasses.textMain}`}>

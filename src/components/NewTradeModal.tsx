@@ -10,6 +10,7 @@ export default function NewTradeModal() {
   const {
     isDarkMode, themeClasses, isNewTradeOpen, setIsNewTradeOpen,
     newTradeStep, setNewTradeStep, newTradeData, setNewTradeData, handleAddNewTrade,
+    isCreatingTrade,
   } = useApp();
 
   if (!isNewTradeOpen) return null;
@@ -42,11 +43,17 @@ export default function NewTradeModal() {
         <form onSubmit={handleAddNewTrade} className="p-6 space-y-4">
           {newTradeStep === 1 && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Asset Pair *</label>
                   <input type="text" placeholder="e.g. BTCUSD" required value={newTradeData.asset}
                     onChange={(e) => update('asset', e.target.value)}
+                    className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`} />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Trade Date</label>
+                  <input type="date" required value={newTradeData.tradeDate}
+                    onChange={(e) => update('tradeDate', e.target.value)}
                     className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`} />
                 </div>
                 <div>
@@ -196,9 +203,13 @@ export default function NewTradeModal() {
               <div className="flex justify-between pt-3">
                 <button type="button" onClick={() => setNewTradeStep(2)}
                   className={`px-4 py-2 border rounded text-xs font-semibold cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textMain}`}>Back</button>
-                <button type="submit"
-                  className={`px-4 py-2 rounded text-xs font-bold cursor-pointer hover:bg-opacity-90 flex items-center gap-1 ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                  <Check className="w-4 h-4" /> Save Trade Record
+                <button type="submit" disabled={isCreatingTrade}
+                  className={`px-4 py-2 rounded text-xs font-bold cursor-pointer hover:bg-opacity-90 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                  {isCreatingTrade ? (
+                    <><span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> Saving...</>
+                  ) : (
+                    <><Check className="w-4 h-4" /> Save Trade Record</>
+                  )}
                 </button>
               </div>
             </div>

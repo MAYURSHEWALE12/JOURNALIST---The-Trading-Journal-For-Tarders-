@@ -1,6 +1,7 @@
 import {
-  TrendingUp, TrendingDown, BookOpen, Calendar,
-  Search, Sparkles, BarChart3, LayoutGrid, List
+  TrendingUp, TrendingDown, BookOpen,
+  Search, Sparkles, BarChart3, LayoutGrid, List,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -8,6 +9,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { DashboardSkeleton } from '../components/Skeleton';
+import { exportTradesToPDF } from '../lib/pdfExporter';
+import { getWeekOfMonth, getShortTradeId } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -17,7 +20,10 @@ export default function Dashboard() {
     filteredTrades, searchTerm, setSearchTerm, statusFilter, setStatusFilter,
     dashboardViewMode, setDashboardViewMode,
     trades, setSelectedScreenshot,
-    dataLoading
+    dataLoading,
+    activeTrades, activeAccountId, accounts, user,
+    currentYear, currentMonth, handlePrevMonth, handleNextMonth,
+    setIsExportingPDF, selectedDate, setSelectedDate
   } = useApp();
 
   if (dataLoading) {
@@ -116,8 +122,35 @@ export default function Dashboard() {
         <div className={`border rounded p-5 flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border}`}>
           <div>
             <div className="flex justify-between items-center mb-4">
-              <span className={`text-xs font-semibold uppercase tracking-wider font-mono ${themeClasses.textMain}`}>Daily Performance Calendar</span>
-              <Calendar className="w-4 h-4 text-gray-500" />
+              <div className="space-y-0.5">
+                <span className={`text-[10px] font-semibold uppercase tracking-wider font-mono block ${themeClasses.textSub}`}>Daily Performance Calendar</span>
+                <div className={`text-xs font-display font-bold leading-tight ${themeClasses.textMain}`}>
+                  {new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                </div>
+              </div>
+              <div className="flex items-center space-x-1">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  className={`p-1 border rounded transition cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover}`}
+                  title="Previous Month"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  disabled={currentYear > new Date().getFullYear() || (currentYear === new Date().getFullYear() && currentMonth >= new Date().getMonth())}
+                  className={`p-1 border rounded transition ${
+                    (currentYear > new Date().getFullYear() || (currentYear === new Date().getFullYear() && currentMonth >= new Date().getMonth()))
+                      ? 'opacity-30 cursor-not-allowed border-white/[0.04]'
+                      : `cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover}`
+                  }`}
+                  title="Next Month"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-7 gap-1 md:gap-1.5">
@@ -144,7 +177,10 @@ export default function Dashboard() {
                   <div
                     key={d.day}
                     title={`Date: ${d.date}\nP/L: $${d.pnl}`}
-                    className={`h-10 rounded font-mono flex flex-col items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer relative group p-1 ${bgColor}`}
+                    onClick={() => setSelectedDate(selectedDate === d.date && d.pnl !== 0 ? null : d.date)}
+                    className={`h-10 rounded font-mono flex flex-col items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer relative group p-1 ${bgColor} ${
+                      selectedDate === d.date ? 'ring-2 ring-white scale-110 z-10' : ''
+                    }`}
                   >
                     <span className="text-[9px] font-bold leading-none">{d.day}</span>
                     {d.pnl !== 0 && (
@@ -162,6 +198,11 @@ export default function Dashboard() {
             <span className={`w-2.5 h-2.5 rounded inline-block ${isDarkMode ? 'bg-brand-emerald/20 border border-brand-emerald/40' : 'bg-emerald-100 border border-emerald-300'}`}></span> Win Day
             <span className={`w-2.5 h-2.5 rounded inline-block ${isDarkMode ? 'bg-brand-rose/20 border border-brand-rose/30' : 'bg-rose-100 border border-rose-300'}`}></span> Loss Day
             <span className={`w-2.5 h-2.5 rounded inline-block ${isDarkMode ? 'bg-[#1e1e1e]' : 'bg-gray-200'}`}></span> Flat Day
+            {selectedDate && (
+              <button onClick={() => setSelectedDate(null)} className={`ml-auto text-[9px] px-2 py-0.5 rounded border cursor-pointer transition font-semibold ${themeClasses.border} ${themeClasses.bgCard} hover:border-gray-400 ${themeClasses.textMain}`}>
+                Clear filter
+              </button>
+            )}
           </div>
         </div>
 
@@ -239,6 +280,11 @@ export default function Dashboard() {
           <div className="flex items-center space-x-2">
             <span className={`text-xs font-semibold uppercase tracking-wider font-mono ${themeClasses.textMain}`}>Logged Trades database</span>
             <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${themeClasses.bgCard} ${themeClasses.textSub}`}>{filteredTrades.length} Active Records</span>
+            {selectedDate && (
+              <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${isDarkMode ? 'bg-brand-emerald/15 text-brand-emerald border border-brand-emerald/30' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                📅 {new Date(selectedDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -262,6 +308,15 @@ export default function Dashboard() {
               <option value="LOSS">Losses</option>
               <option value="BREAKEVEN">Breakevens</option>
             </select>
+            <button
+              onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(activeTrades, computedStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
+              className={`px-3 py-1.5 border text-xs rounded transition font-bold flex items-center gap-1.5 cursor-pointer ${
+                isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Export PDF
+            </button>
 
             <div className={`flex border rounded items-center overflow-hidden ${themeClasses.border}`}>
               <button
@@ -341,7 +396,7 @@ export default function Dashboard() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className={`text-sm font-bold tracking-tight ${themeClasses.textMain}`}>{t.asset}</h4>
-                            <span className="text-[9px] font-mono text-gray-500">{entryDate}</span>
+                            <span className="text-[9px] font-mono text-gray-500">{entryDate} • {getWeekOfMonth(t.entryTime)}</span>
                           </div>
                           <span className={`font-mono text-xs font-bold ${t.netPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
                             {t.netPnl >= 0 ? `+$${t.netPnl.toFixed(2)}` : `-$${Math.abs(t.netPnl).toFixed(2)}`}
@@ -409,27 +464,32 @@ export default function Dashboard() {
           )
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr className="border-b border-border-subtle text-[11px] text-gray-500 font-mono uppercase">
-                  <th className="pb-3 pl-3">ID</th>
-                  <th className="pb-3">Asset</th>
-                  <th className="pb-3">Direction</th>
-                  <th className="pb-3">Setup Strategy</th>
-                  <th className="pb-3">Win/Loss</th>
-                  <th className="pb-3">PnL Target ($)</th>
-                  <th className="pb-3 text-right pr-3">Action</th>
+                <tr style={{ borderBottom: isDarkMode ? '1px solid #26272B' : '1px solid #e5e7eb' }}>
+                  <th className="pb-3 pl-3 font-normal text-[11px] text-gray-500 font-mono uppercase">ID</th>
+                  <th className="pb-3 font-normal text-[11px] text-gray-500 font-mono uppercase">Asset</th>
+                  <th className="pb-3 font-normal text-[11px] text-gray-500 font-mono uppercase">Direction</th>
+                  <th className="pb-3 font-normal text-[11px] text-gray-500 font-mono uppercase">Setup Strategy</th>
+                  <th className="pb-3 font-normal text-[11px] text-gray-500 font-mono uppercase">Win/Loss</th>
+                  <th className="pb-3 font-normal text-[11px] text-gray-500 font-mono uppercase">PnL ($)</th>
+                  <th className="pb-3 pr-3 text-right font-normal text-[11px] text-gray-500 font-mono uppercase">Action</th>
                 </tr>
               </thead>
-              <tbody className={`text-xs divide-y font-mono ${isDarkMode ? 'divide-border-subtle/50' : 'divide-gray-100'}`}>
+              <tbody className="text-xs font-mono">
                 {filteredTrades.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-gray-500">No trading logs matched active database records.</td>
+                    <td colSpan={7} className="py-12 text-center text-gray-500 text-sm font-sans">
+                      No trades matched your filters.
+                    </td>
                   </tr>
                 ) : (
                   filteredTrades.map((t) => (
-                    <tr key={t.id} className={`transition ${isDarkMode ? 'hover:bg-[#141414]/50' : 'hover:bg-gray-50'}`}>
-                      <td className={`py-3.5 pl-3 font-mono font-medium ${themeClasses.textSub}`}>{t.id.slice(0, 8)}</td>
+                    <tr key={t.id} className="transition" style={{ borderBottom: isDarkMode ? '1px solid #26272B' : '1px solid #f3f4f6' }}>
+                      <td className={`py-3.5 pl-3 font-mono font-medium ${themeClasses.textSub}`}>
+                        <div>{getShortTradeId(t.id)}</div>
+                        <div className="text-[9px] text-gray-400 font-sans mt-0.5">{getWeekOfMonth(t.entryTime)}</div>
+                      </td>
                       <td className={`py-3.5 font-sans font-bold ${themeClasses.textMain}`}>{t.asset}</td>
                       <td className="py-3.5">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}>
@@ -443,20 +503,45 @@ export default function Dashboard() {
                         <span className={`text-[11px] uppercase ${themeClasses.textSub}`}>{t.status}</span>
                       </td>
                       <td className={`py-3.5 font-bold ${themeClasses.textMain}`}>
-                        {t.netPnl >= 0 ? `+$${t.netPnl.toFixed(2)}` : `-$${Math.abs(t.netPnl).toFixed(2)}`}
+                        <span style={{ color: t.netPnl > 0 ? '#10b981' : t.netPnl < 0 ? '#f43f5e' : undefined }}>
+                          {t.netPnl >= 0 ? `+$${t.netPnl.toFixed(2)}` : `-$${Math.abs(t.netPnl).toFixed(2)}`}
+                        </span>
                       </td>
-                      <td className="py-3.5 text-right pr-3">
+                      <td className="py-3.5 pr-3 text-right">
                         <button
                           onClick={() => navigate('/trade/' + t.id)}
                           className={`px-2.5 py-1 border rounded text-[10px] transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
                         >
-                          Review Post
+                          Review
                         </button>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
+              {filteredTrades.length > 0 && (
+                <tfoot>
+                  <tr style={{ borderTop: isDarkMode ? '2px solid #26272B' : '2px solid #e5e7eb' }}>
+                    <td colSpan={5} className="py-3 pl-3">
+                      <span className={`font-mono text-[10px] uppercase tracking-wider`} style={{ color: isDarkMode ? '#666' : '#999' }}>
+                        Net Total
+                      </span>
+                    </td>
+                    <td className="py-3 font-mono text-sm font-bold" style={{
+                      color: (() => {
+                        const total = filteredTrades.reduce((s, t) => s + t.netPnl, 0);
+                        return total > 0 ? '#10b981' : total < 0 ? '#f43f5e' : isDarkMode ? '#ccc' : '#333';
+                      })(),
+                    }}>
+                      {(() => {
+                        const total = filteredTrades.reduce((s, t) => s + t.netPnl, 0);
+                        return total >= 0 ? `+$${total.toFixed(2)}` : `-$${Math.abs(total).toFixed(2)}`;
+                      })()}
+                    </td>
+                    <td className="pr-3"></td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         )}

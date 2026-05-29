@@ -35,8 +35,12 @@ export default function AuthPage() {
 
         {/* Error Message */}
         {authError && (
-          <div className={`px-4 py-3 rounded border text-xs font-mono ${isDarkMode ? 'bg-red-950/50 border-red-800/50 text-red-400' : 'bg-red-50 border-red-200 text-red-700'}`}>
-            ⚠ {authError}
+          <div className={`px-4 py-3 rounded border text-xs font-mono ${
+            authError.startsWith('✅')
+              ? (isDarkMode ? 'bg-emerald-950/50 border-emerald-800/50 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700')
+              : (isDarkMode ? 'bg-red-950/50 border-red-800/50 text-red-400' : 'bg-red-50 border-red-200 text-red-700')
+          }`}>
+            {authError}
           </div>
         )}
 

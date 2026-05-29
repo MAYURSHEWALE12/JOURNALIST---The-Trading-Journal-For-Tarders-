@@ -149,7 +149,13 @@ export async function authRegister(body: { username: string; email: string; pass
       email: body.email,
     } as never);
 
+    // If email confirmation is required, session will be null
+    if (!data.session) {
+      throw new Error('✅ Account created! Check your email to confirm your account before logging in.');
+    }
+
     const user: User = { id: data.user.id, username: body.username, email: body.email };
+    localStorage.setItem('supabase_session', 'true');
     return { token: data.session?.access_token || '', user };
   }
   const res = await fetch('/api/auth/register', {

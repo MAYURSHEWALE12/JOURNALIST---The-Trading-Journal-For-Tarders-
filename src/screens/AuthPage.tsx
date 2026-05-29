@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { authSignInWithGoogle } from '../lib/api';
 import LogoIcon from '../components/LogoIcon';
+import Seo from '../components/Seo';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -17,6 +18,11 @@ export default function AuthPage() {
 
   return (
     <div className={`min-h-screen flex flex-col justify-center items-center select-none px-6 ${themeClasses.bgBase}`}>
+      <Seo 
+        title="Sign In / Register | Secure Google Auth" 
+        description="Access your secure personal cloud trading ledger. Supports cross-device sync and Google one-click OAuth."
+        path="/auth" 
+      />
       <div className={`absolute top-4 left-6 flex items-center space-x-3 cursor-pointer`} onClick={() => navigate('/')}>
         <div className={`w-7 h-7 rounded flex items-center justify-center ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
           <LogoIcon className="w-4 h-4" isDark={isDarkMode} />

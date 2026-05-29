@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { TradeDetailSkeleton } from '../components/Skeleton';
 import { getWeekOfMonth } from '../types';
+import Seo from '../components/Seo';
 
 export default function TradeDetail() {
   const { tradeId } = useParams();
@@ -42,6 +43,11 @@ export default function TradeDetail() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto fade-in-on-scroll is-visible">
+      <Seo 
+        title={`Trade Analysis: ${trade.asset}`} 
+        description={`Detailed trading journal analysis of the ${trade.direction} trade on ${trade.asset}. Realized R-Multiple: ${trade.realizedR}R.`}
+        path={`/trade/${tradeId}`} 
+      />
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
         <button

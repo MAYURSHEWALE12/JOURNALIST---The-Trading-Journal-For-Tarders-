@@ -3,6 +3,7 @@ import { Cell, PieChart, Pie, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid
 import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
 import { JournalistScore } from '../components/JournalistScore';
+import Seo from '../components/Seo';
 
 export default function Analytics() {
   const { themeClasses, isDarkMode, activeTrades, computedStats, dataLoading, activeAccountId, accounts, user, calendarDays, setIsExportingPDF } = useApp();
@@ -14,13 +15,14 @@ export default function Analytics() {
   if (activeTrades.length === 0) {
     return (
       <div className={`border rounded p-12 text-center max-w-xl mx-auto space-y-5 my-12 ${themeClasses.bgPanel} ${themeClasses.border}`}>
+        <Seo title="Advanced Analytics & Statistics" path="/analytics" />
         <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${isDarkMode ? 'bg-white/10 text-white' : 'bg-black/5 text-black'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
         </div>
         <div className="space-y-2">
-          <h3 className={`font-display font-bold text-lg ${themeClasses.textMain}`}>No trades logged yet</h3>
+          <h3 className={`font-display font-bold text-lg ${themeClasses.textMain}`}>Analytics Unavailable</h3>
           <p className={`text-xs max-w-md mx-auto leading-relaxed ${themeClasses.textSub}`}>
-            Analytics require at least one active trade record. Head to the dashboard and log a trade entry to unlock statistical insights, R-ratio distributions, and diagnostic tag matrices.
+            Your systematic dashboard has zero logged trades. Log your first session on the overview panel to compute premium analytics indices.
           </p>
         </div>
       </div>
@@ -37,6 +39,7 @@ export default function Analytics() {
 
   return (
     <div className="space-y-6">
+      <Seo title="Advanced Analytics & Statistics" path="/analytics" />
       <div className="flex justify-between items-center">
         <div>
           <h2 className={`text-xl font-display font-semibold ${themeClasses.textMain}`}>Systematic Analytics Core</h2>

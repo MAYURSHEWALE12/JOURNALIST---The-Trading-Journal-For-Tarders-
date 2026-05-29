@@ -10,6 +10,8 @@ import KpiDashboard from '../components/KpiDashboard';
 import { exportTradesToPDF } from '../lib/pdfExporter';
 import { getWeekOfMonth, getShortTradeId } from '../types';
 
+import Seo from '../components/Seo';
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const {
@@ -30,6 +32,7 @@ export default function Dashboard() {
 
   return (
     <>
+      <Seo title="Overview Workspace" path="/dashboard" />
       {/* KPI DASHBOARD */}
       <KpiDashboard
         trades={activeTrades}

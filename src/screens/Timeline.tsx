@@ -2,6 +2,7 @@ import { BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TimelineSkeleton } from '../components/Skeleton';
 import { getWeekOfMonth, getShortTradeId } from '../types';
+import Seo from '../components/Seo';
 
 export default function Timeline() {
   const { themeClasses, isDarkMode, activeTrades, setSelectedScreenshot, dataLoading } = useApp();
@@ -12,6 +13,7 @@ export default function Timeline() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      <Seo title="Journal Timeline Feed" path="/timeline" />
 
       <div>
         <h2 className={`text-xl font-display font-semibold ${themeClasses.textMain}`}>Interactive Journal Feed</h2>

@@ -9,6 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import LogoIcon from '../components/LogoIcon';
+import Seo from '../components/Seo';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -62,6 +63,11 @@ export default function LandingPage() {
 
   return (
     <div className={`min-h-screen flex flex-col justify-between select-none relative overflow-hidden ${themeClasses.bgBase}`}>
+      <Seo 
+        title="Premium Minimalist Trading Journal & Advanced Analytics" 
+        description="Log trades, track custom metrics, analyze Profit Factor and R-Multiples with an institutional-grade monochrome trading journal backed by Supabase."
+        path="/" 
+      />
 
       {/* Animated Background Dot Grid */}
       <div className={`absolute inset-0 pointer-events-none z-0 opacity-80 animate-pan ${isDarkMode ? 'dot-grid-dark' : 'dot-grid-light'}`} />

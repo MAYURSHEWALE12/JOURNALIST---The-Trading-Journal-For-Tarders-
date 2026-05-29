@@ -1,4 +1,4 @@
-# Journalist — Stark Monochrome Trading Journal
+# Journalist —  Trading Journal
 
 **Journalist** is a high-performance, full-stack trading journal and analytics dashboard designed for traders tracking activity across **Crypto, Futures, Forex, Equities, and Indices**. Built with a premium, Notion-inspired black-and-white minimalist design system, it delivers high-density portfolio analytics, qualitative mindset tracking, and multi-screenshot trade reviews side-effect-free.
 

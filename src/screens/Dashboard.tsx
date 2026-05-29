@@ -379,8 +379,23 @@ export default function Dashboard() {
             {/* The Sharable Card Container */}
             <div 
               id="journalist-portfolio-card"
-              className="w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0"
+              className={`w-[340px] aspect-[4/5] rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300 border ${
+                glowTheme === 'emerald' 
+                  ? 'border-emerald-500/20 bg-gradient-to-br from-[#0c1410] via-[#09090b] to-[#040405]' 
+                  : glowTheme === 'indigo'
+                    ? 'border-indigo-500/20 bg-gradient-to-br from-[#0e0e16] via-[#09090b] to-[#040405]'
+                    : 'border-white/10 bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405]'
+              }`}
             >
+              {/* Soft Ambient Glow Orb */}
+              <div className={`absolute inset-0 pointer-events-none select-none transition-all duration-500 ${
+                glowTheme === 'emerald' 
+                  ? 'bg-[radial-gradient(circle_at_50%_40%,rgba(16,185,129,0.06),transparent_60%)]' 
+                  : glowTheme === 'indigo'
+                    ? 'bg-[radial-gradient(circle_at_50%_40%,rgba(99,102,241,0.06),transparent_60%)]'
+                    : 'bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.03),transparent_60%)]'
+              }`} />
+
               {/* Rotating Logo Watermark */}
               <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
                 <LogoIcon className="w-full h-full text-white" isDark={true} />
@@ -388,7 +403,13 @@ export default function Dashboard() {
 
               {/* User Profile Header */}
               <div className="flex items-center gap-3 relative z-10">
-                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300 ${
+                  glowTheme === 'emerald' 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                    : glowTheme === 'indigo'
+                      ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400'
+                      : 'bg-white/10 border-white/20 text-white'
+                }`}>
                   {user?.username?.slice(0, 2) || 'TR'}
                 </div>
                 <div>
@@ -428,7 +449,13 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Journal Score</div>
-                    <div className="text-indigo-400 text-sm font-bold font-mono mt-1.5">{scoreObj.score}</div>
+                    <div className={`text-sm font-bold font-mono mt-1.5 transition-colors duration-300 ${
+                      glowTheme === 'emerald' 
+                        ? 'text-emerald-400' 
+                        : glowTheme === 'indigo'
+                          ? 'text-indigo-400'
+                          : 'text-white'
+                    }`}>{scoreObj.score}</div>
                   </div>
                 </div>
               </div>
@@ -441,7 +468,13 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Journalist Level</div>
-                  <div className="text-indigo-400 text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight">
+                  <div className={`text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight transition-colors duration-300 ${
+                    glowTheme === 'emerald' 
+                      ? 'text-emerald-400' 
+                      : glowTheme === 'indigo'
+                        ? 'text-indigo-400'
+                        : 'text-white'
+                  }`}>
                     {scoreObj.levelLabel}
                   </div>
                 </div>

@@ -589,8 +589,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         </div>
       </div>
 
-      {/* Secondary KPIs Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Secondary KPIs Grid (2-column layout on mobile to maintain visual balance) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 md:gap-4">
         {secondaryKpis.map((kpi) => (
           <KpiCard
             key={kpi.label}

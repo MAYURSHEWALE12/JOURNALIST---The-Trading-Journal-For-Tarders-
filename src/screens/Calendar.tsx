@@ -111,153 +111,170 @@ export default function Calendar() {
 
   return (
     <div className="space-y-6 select-none max-w-7xl mx-auto pb-12">
-      <Seo title="Interactive Trading Calendar" path="/calendar" />
+      <Seo title="Trading Calendar" path="/calendar" />
 
-      {/* Title Header */}
+      {/* Header Info Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className={`text-xl font-display font-semibold ${themeClasses.textMain}`}>Interactive Trading Calendar</h2>
-          <p className={`text-xs ${themeClasses.textSub}`}>Track your daily P&L, trading streaks, and mental checklist consistency on a visual month grid.</p>
+          <h2 className={`text-xl md:text-2xl font-display font-extrabold tracking-tight ${themeClasses.textMain}`}>
+            Trading Calendar
+          </h2>
+          <p className={`text-xs md:text-sm font-sans mt-0.5 ${themeClasses.textSub}`}>
+            Detailed monthly timeline overview of your aggregate execution performance.
+          </p>
         </div>
 
-        {/* Aggregate Mini-stats strip */}
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className={`px-4 py-2 border rounded-xl flex items-center gap-3 bg-neutral-900/10 ${themeClasses.border}`}>
+        {/* Aggregated Quick-Stats bar */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className={`px-4 py-2.5 border rounded-xl flex items-center gap-3 transition-colors duration-200 bg-white/40 dark:bg-white/[0.02] ${themeClasses.border}`}>
             <span className={`w-2.5 h-2.5 rounded-full ${monthlyPnl >= 0 ? 'bg-brand-emerald animate-pulse' : 'bg-brand-rose'}`} />
             <div>
-              <p className="text-[9px] uppercase font-mono tracking-wider text-gray-500">Month PNL</p>
-              <p className={`text-xs font-mono font-bold ${monthlyPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
+              <p className="text-[9px] uppercase font-mono tracking-widest text-gray-500">Month PNL</p>
+              <p className={`text-xs md:text-sm font-mono font-bold ${monthlyPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
                 {monthlyPnl >= 0 ? '+' : ''}${monthlyPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
           
-          <div className={`px-4 py-2 border rounded-xl flex items-center gap-3 bg-neutral-900/10 ${themeClasses.border}`}>
+          <div className={`px-4 py-2.5 border rounded-xl flex items-center gap-3 transition-colors duration-200 bg-white/40 dark:bg-white/[0.02] ${themeClasses.border}`}>
             <TrendingUp className="w-4 h-4 text-emerald-400" />
             <div>
-              <p className="text-[9px] uppercase font-mono tracking-wider text-gray-500">Win Rate</p>
-              <p className={`text-xs font-mono font-bold ${themeClasses.textMain}`}>{monthlyWinRate}%</p>
+              <p className="text-[9px] uppercase font-mono tracking-widest text-gray-500">Win Rate</p>
+              <p className={`text-xs md:text-sm font-mono font-bold ${themeClasses.textMain}`}>{monthlyWinRate}%</p>
             </div>
           </div>
 
-          <div className={`px-4 py-2 border rounded-xl flex items-center gap-3 bg-neutral-900/10 ${themeClasses.border}`}>
+          <div className={`px-4 py-2.5 border rounded-xl flex items-center gap-3 transition-colors duration-200 bg-white/40 dark:bg-white/[0.02] ${themeClasses.border}`}>
             <BookOpen className="w-4 h-4 text-gray-400" />
             <div>
-              <p className="text-[9px] uppercase font-mono tracking-wider text-gray-500">Total Trades</p>
-              <p className={`text-xs font-mono font-bold ${themeClasses.textMain}`}>{monthlyAggregate.length} trades</p>
+              <p className="text-[9px] uppercase font-mono tracking-widest text-gray-500">Total Trades</p>
+              <p className={`text-xs md:text-sm font-mono font-bold ${themeClasses.textMain}`}>{monthlyAggregate.length} trades</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Calendar Navigation Box */}
-      <div className={`border rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl ${themeClasses.bgPanel} ${themeClasses.border}`}>
+      <div className={`border rounded-2xl overflow-hidden shadow-xl transition-all duration-200 p-4 md:p-6 ${themeClasses.bgPanel} ${themeClasses.border}`}>
         {/* Navigation Toolbar */}
-        <div className={`p-4 border-b flex items-center justify-between ${themeClasses.border} bg-neutral-950/20`}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="flex items-center space-x-2">
             <button 
               onClick={handlePrevMonth}
-              className={`p-2 rounded-lg border transition hover:border-gray-500 cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
+              title="Previous Month"
             >
               <ChevronLeft className="w-4.5 h-4.5" />
             </button>
             <button 
               onClick={handleNextMonth}
-              className={`p-2 rounded-lg border transition hover:border-gray-500 cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
+              title="Next Month"
             >
               <ChevronRight className="w-4.5 h-4.5" />
             </button>
             <button 
               onClick={handleToday}
-              className={`px-3 py-1.5 text-xs font-bold font-mono border rounded-lg transition hover:border-gray-500 cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
+              className={`px-3 py-2 text-xs font-bold font-mono border rounded-xl transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
             >
               Today
             </button>
           </div>
 
-          <h3 className={`font-display text-lg font-extrabold tracking-tight ${themeClasses.textMain}`}>
+          <h3 className={`font-display text-xl font-extrabold tracking-tight ${themeClasses.textMain}`}>
             {MONTHS[currentMonth]} {currentYear}
           </h3>
 
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-brand-emerald" />
-            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Live Sync</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-neutral-900/5 dark:bg-white/5 border-neutral-700/10 dark:border-white/5">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-emerald animate-ping" />
+            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Active Sync</span>
           </div>
         </div>
 
         {/* Days of Week Header */}
-        <div className={`grid grid-cols-7 border-b text-center py-3 bg-neutral-900/30 ${themeClasses.border}`}>
+        <div className="grid grid-cols-7 gap-2 md:gap-3 text-center mb-3">
           {WEEKDAYS.map(w => (
-            <span key={w} className="text-xs uppercase font-mono font-bold tracking-widest text-gray-500">
+            <span key={w} className="text-xs uppercase font-mono font-bold tracking-widest text-gray-400 py-1">
               {w}
             </span>
           ))}
         </div>
 
-        {/* Grid of Days */}
-        <div className="grid grid-cols-7 divide-x divide-y divide-white/[0.04] border-l border-t border-white/[0.04]">
+        {/* Premium Grid of Day Cards (Separated by Gap, matching reference design) */}
+        <div className="grid grid-cols-7 gap-2 md:gap-3">
           {cells.map((cell, index) => {
             const dayTrades = tradesByDate[cell.dateString] || [];
             const dayPnl = dayTrades.reduce((sum, t) => sum + t.netPnl, 0);
             const hasTrades = dayTrades.length > 0;
             
-            // Build cell styling
-            let cellBg = 'bg-transparent';
-            let cellHover = 'hover:bg-neutral-800/20';
+            // Premium background and border computations (soft glassmorphism)
+            let cellBg = isDarkMode ? 'bg-white/[0.01] border-white/[0.04]' : 'bg-black/[0.02] border-black/[0.03]';
+            let cellHover = 'hover:border-neutral-400 dark:hover:border-neutral-700';
             let pnlColor = 'text-gray-500';
+            let numberColor = cell.isCurrentMonth ? themeClasses.textMain : 'text-gray-400 dark:text-gray-600';
             
-            if (cell.isCurrentMonth && hasTrades) {
-              if (dayPnl > 0) {
-                cellBg = isDarkMode ? 'bg-emerald-950/15 border-emerald-500/10' : 'bg-emerald-50 border-emerald-200';
-                cellHover = isDarkMode ? 'hover:bg-emerald-950/25 hover:border-emerald-500/20' : 'hover:bg-emerald-100/80';
-                pnlColor = isDarkMode ? 'text-brand-emerald' : 'text-emerald-700';
-              } else if (dayPnl < 0) {
-                cellBg = isDarkMode ? 'bg-rose-950/15 border-rose-500/10' : 'bg-rose-50 border-rose-200';
-                cellHover = isDarkMode ? 'hover:bg-rose-950/25 hover:border-rose-500/20' : 'hover:bg-rose-100/80';
-                pnlColor = isDarkMode ? 'text-brand-rose' : 'text-rose-700';
-              } else {
-                cellBg = isDarkMode ? 'bg-neutral-800/10 border-neutral-700/10' : 'bg-gray-50 border-gray-200';
-                pnlColor = themeClasses.textSub;
+            if (cell.isCurrentMonth) {
+              if (hasTrades) {
+                if (dayPnl > 0) {
+                  cellBg = isDarkMode 
+                    ? 'bg-emerald-950/20 border-emerald-500/20 shadow-[inset_0_1px_1px_rgba(16,185,129,0.05)]' 
+                    : 'bg-emerald-50 border-emerald-200/80';
+                  cellHover = isDarkMode ? 'hover:bg-emerald-950/35 hover:border-emerald-500/40' : 'hover:bg-emerald-100 hover:border-emerald-300';
+                  pnlColor = isDarkMode ? 'text-brand-emerald' : 'text-emerald-700';
+                } else if (dayPnl < 0) {
+                  cellBg = isDarkMode 
+                    ? 'bg-rose-950/20 border-rose-500/20 shadow-[inset_0_1px_1px_rgba(239,68,68,0.05)]' 
+                    : 'bg-rose-50 border-rose-200/80';
+                  cellHover = isDarkMode ? 'hover:bg-rose-950/35 hover:border-rose-500/40' : 'hover:bg-rose-100 hover:border-rose-300';
+                  pnlColor = isDarkMode ? 'text-brand-rose' : 'text-rose-700';
+                } else {
+                  cellBg = isDarkMode ? 'bg-neutral-800/10 border-neutral-700/15' : 'bg-gray-100 border-gray-300/60';
+                  pnlColor = themeClasses.textSub;
+                }
               }
+            } else {
+              // Outside month padding cells
+              cellBg = isDarkMode ? 'bg-transparent border-transparent' : 'bg-transparent border-transparent';
+              cellHover = 'pointer-events-none opacity-20';
             }
 
             return (
               <div 
                 key={`${cell.dateString}-${index}`}
                 onClick={() => hasTrades && setSelectedDayTrades({ day: cell.day, trades: dayTrades })}
-                className={`min-h-[90px] md:min-h-[110px] p-2 flex flex-col justify-between transition-all select-none border-b border-r border-white/[0.04] relative ${cell.isCurrentMonth ? '' : 'opacity-25 pointer-events-none'} ${cellBg} ${hasTrades ? 'cursor-pointer' : ''} ${cellHover}`}
+                className={`min-h-[85px] md:min-h-[110px] p-3 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${hasTrades ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
                 {/* Day label */}
                 <div className="flex justify-between items-start">
-                  <span className={`text-[10px] md:text-xs font-mono font-bold ${cell.isCurrentMonth ? themeClasses.textMain : 'text-gray-600'}`}>
+                  <span className={`text-[11px] md:text-xs font-mono font-bold ${numberColor}`}>
                     {cell.day}
                   </span>
                   
-                  {/* Subtle indicators (notes / screenshots) */}
-                  {hasTrades && (
+                  {/* Subtle dots for notes / screenshots */}
+                  {hasTrades && cell.isCurrentMonth && (
                     <div className="flex items-center gap-1">
                       {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" title="Has Notes" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
                       )}
                       {dayTrades.some(t => t.screenshotUrl) && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400" title="Has Screenshots" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500/80 dark:bg-violet-400/80" title="Has Screenshots" />
                       )}
                     </div>
                   )}
                 </div>
 
                 {/* Day aggregates (PNL & Trades Count) */}
-                {hasTrades ? (
-                  <div className="space-y-0.5 text-center md:text-right pb-1">
-                    <p className={`text-[10px] md:text-xs font-mono font-black ${pnlColor}`}>
+                {hasTrades && cell.isCurrentMonth ? (
+                  <div className="space-y-0.5 text-right mt-2">
+                    <p className={`text-xs md:text-sm font-mono font-extrabold ${pnlColor}`}>
                       {dayPnl >= 0 ? '+' : ''}${Math.round(dayPnl).toLocaleString()}
                     </p>
-                    <p className={`text-[8px] md:text-[9px] uppercase font-mono tracking-wider ${themeClasses.textSub}`}>
+                    <p className={`text-[8px] md:text-[9px] uppercase font-mono tracking-widest ${themeClasses.textSub}`}>
                       {dayTrades.length} {dayTrades.length === 1 ? 'trade' : 'trades'}
                     </p>
                   </div>
                 ) : (
-                  <div className="h-6" /> // Placeholder spacing
+                  <div className="h-6" /> // Placeholder layout balancer
                 )}
               </div>
             );
@@ -265,7 +282,7 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* Slide-over Side Drawer showing day details */}
+      {/* Elegant glassmorphic Drawer Side Panel */}
       {selectedDayTrades && (
         <div className="fixed inset-0 z-50 overflow-hidden select-none">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity" onClick={() => setSelectedDayTrades(null)} />
@@ -285,7 +302,7 @@ export default function Calendar() {
                 </div>
                 <button 
                   onClick={() => setSelectedDayTrades(null)}
-                  className={`p-1.5 rounded-lg border transition hover:border-gray-500 cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textSub}`}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textSub}`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -301,12 +318,12 @@ export default function Calendar() {
                         setSelectedDayTrades(null);
                         navigate(`/trade/${t.id}`);
                       }}
-                      className={`border rounded-xl p-4 transition-all hover:scale-[1.01] hover:shadow-lg cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} hover:border-gray-500`}
+                      className={`border rounded-xl p-4 transition-all hover:scale-[1.01] hover:shadow-lg cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} hover:border-gray-400 dark:hover:border-gray-500`}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className={`text-[8px] uppercase font-mono font-bold px-1.5 py-0.5 rounded leading-none ${t.direction === 'LONG' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50' : 'bg-rose-950 text-rose-400 border border-rose-900/50'}`}>
+                            <span className={`text-[8px] uppercase font-mono font-bold px-1.5 py-0.5 rounded leading-none ${t.direction === 'LONG' ? (isDarkMode ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50' : 'bg-emerald-50 text-emerald-700 border border-emerald-200') : (isDarkMode ? 'bg-rose-950 text-rose-400 border border-rose-900/50' : 'bg-rose-50 text-rose-700 border border-rose-200')}`}>
                               {t.direction}
                             </span>
                             <span className={`text-xs font-black uppercase tracking-tight ${themeClasses.textMain}`}>{t.asset}</span>

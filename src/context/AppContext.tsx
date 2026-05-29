@@ -348,9 +348,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         });
         
-        // Only update the public profiles table username column if it's explicitly changing (to avoid DB errors on missing columns)
-        if (updates.username !== undefined) {
-          await api.updateProfileUsername(user.id, updates.username);
+        // Fail-safe persistent sync: Try to update all columns on public profiles table
+        try {
+          const token = localStorage.getItem('journalist_jwt');
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`;
+          const res = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              username: updatedUser.username,
+              avatar_url: updatedUser.avatarUrl,
+              trading_bio: updatedUser.tradingBio,
+              twitter_handle: updatedUser.twitterHandle,
+              telegram_handle: updatedUser.telegramHandle,
+            })
+          });
+          
+          if (!res.ok && updates.username !== undefined) {
+            await api.updateProfileUsername(user.id, updates.username);
+          }
+        } catch {
+          if (updates.username !== undefined) {
+            await api.updateProfileUsername(user.id, updates.username);
+          }
         }
       } catch (err) {
         console.error('Failed to sync profile to Supabase:', err);

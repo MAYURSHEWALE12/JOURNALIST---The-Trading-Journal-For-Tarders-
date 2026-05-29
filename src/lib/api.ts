@@ -299,8 +299,15 @@ export async function authMe(): Promise<User> {
 
     // Get or create profile — insert is handled by DB trigger
     try {
-      const profileRes = await supabaseFetch(`/profiles?select=username,email&id=eq.${authUser.id}`);
-      const profiles = await profileRes.json() as Array<{ username: string; email: string }>;
+      const profileRes = await supabaseFetch(`/profiles?select=username,email,avatar_url,trading_bio,twitter_handle,telegram_handle&id=eq.${authUser.id}`);
+      const profiles = await profileRes.json() as Array<{
+        username: string;
+        email: string;
+        avatar_url?: string;
+        trading_bio?: string;
+        twitter_handle?: string;
+        telegram_handle?: string;
+      }>;
       const profile = profiles?.[0] || null;
 
       if (profile) {
@@ -308,10 +315,10 @@ export async function authMe(): Promise<User> {
           id: authUser.id,
           username: profile.username,
           email: profile.email,
-          avatarUrl,
-          tradingBio,
-          twitterHandle,
-          telegramHandle,
+          avatarUrl: profile.avatar_url || avatarUrl,
+          tradingBio: profile.trading_bio || tradingBio,
+          twitterHandle: profile.twitter_handle || twitterHandle,
+          telegramHandle: profile.telegram_handle || telegramHandle,
         };
       }
     } catch {

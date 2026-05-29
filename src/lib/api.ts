@@ -209,6 +209,16 @@ export async function authLogout(): Promise<void> {
   }
 }
 
+export async function authSignInWithGoogle(): Promise<void> {
+  const { error } = await getSupabase().auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/dashboard',
+    },
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function authMe(): Promise<User> {
   if (isSupabaseSession()) {
     const { data, error } = await getSupabase().auth.getUser();
@@ -219,6 +229,18 @@ export async function authMe(): Promise<User> {
       .select('username, email')
       .eq('id', data.user.id)
       .maybeSingle() as unknown as { data: { username: string; email: string } | null; error: unknown };
+
+    // Auto-create profile for OAuth sign-ins (Google)
+    if (!profile) {
+      const displayName = data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Trader';
+      const email = data.user.email || '';
+      await getSupabase().from('profiles').insert({
+        id: data.user.id,
+        username: displayName,
+        email,
+      } as never);
+      return { id: data.user.id, username: displayName, email };
+    }
 
     return {
       id: data.user.id,

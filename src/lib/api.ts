@@ -266,11 +266,17 @@ export async function authMe(): Promise<User> {
     if (error || !data.user) throw new Error('UNAUTHORIZED');
 
     const { user: authUser } = data;
-    const displayName = authUser.user_metadata?.full_name
+    const displayName = authUser.user_metadata?.username
+      || authUser.user_metadata?.full_name
       || authUser.user_metadata?.name
       || authUser.email?.split('@')[0]
       || 'Trader';
     const email = authUser.email || '';
+
+    const avatarUrl = authUser.user_metadata?.avatar_url || '';
+    const tradingBio = authUser.user_metadata?.trading_bio || '';
+    const twitterHandle = authUser.user_metadata?.twitter_handle || '';
+    const telegramHandle = authUser.user_metadata?.telegram_handle || '';
 
     // Get or create profile — insert is handled by DB trigger
     try {
@@ -279,7 +285,15 @@ export async function authMe(): Promise<User> {
       const profile = profiles?.[0] || null;
 
       if (profile) {
-        return { id: authUser.id, username: profile.username, email: profile.email };
+        return {
+          id: authUser.id,
+          username: profile.username,
+          email: profile.email,
+          avatarUrl,
+          tradingBio,
+          twitterHandle,
+          telegramHandle,
+        };
       }
 
       // No profile yet — trigger may not have fired, try INSERT once (may fail RLS, that's ok)
@@ -291,7 +305,15 @@ export async function authMe(): Promise<User> {
       // Fallback to metadata
     }
 
-    return { id: authUser.id, username: displayName, email };
+    return {
+      id: authUser.id,
+      username: displayName,
+      email,
+      avatarUrl,
+      tradingBio,
+      twitterHandle,
+      telegramHandle,
+    };
   }
   const res = await fetch('/api/auth/me', {
     headers: { 'Authorization': `Bearer ${localStorage.getItem('journalist_jwt')}` },

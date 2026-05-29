@@ -1,4 +1,4 @@
-import { Sliders, Sun, Moon, Plus, Bell } from 'lucide-react';
+import { Sliders, Sun, Moon, Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
 
@@ -28,18 +28,14 @@ export default function Header() {
         </div>
       </div>
       <div className="flex items-center gap-2 md:gap-4">
-        <button onClick={() => setIsDarkMode(!isDarkMode)}
-          className={`w-8 md:w-9 h-8 md:h-9 rounded-lg border flex items-center justify-center transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.bgHover}`}>
-          {isDarkMode ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-black" />}
-        </button>
         <button onClick={handleOpenNewTradeModal}
           className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold tracking-tight transition shadow-sm flex items-center gap-1.5 cursor-pointer ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}>
           <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Trade</span><span className="sm:hidden">Add</span>
         </button>
-        <div className={`w-8 md:w-9 h-8 md:h-9 rounded-lg border flex items-center justify-center cursor-pointer relative transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.bgHover}`}>
-          <Bell className={`w-4 h-4 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`} />
-          <span className={`absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full animate-ping ${isDarkMode ? 'bg-white' : 'bg-black'}`} />
-        </div>
+        <button onClick={() => setIsDarkMode(!isDarkMode)}
+          className={`w-8 md:w-9 h-8 md:h-9 rounded-lg border flex items-center justify-center transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.bgHover}`}>
+          {isDarkMode ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-black" />}
+        </button>
       </div>
     </header>
   );

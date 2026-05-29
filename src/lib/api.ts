@@ -198,6 +198,25 @@ export async function authRegister(body: { username: string; email: string; pass
   return result;
 }
 
+export async function updateProfileUsername(id: string, username: string): Promise<void> {
+  if (isSupabaseSession()) {
+    const res = await supabaseFetch(`/profiles?id=eq.${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=representation' },
+      body: JSON.stringify({ username }),
+    });
+    if (!res.ok) throw new Error('Failed to update public profile.');
+    return;
+  }
+  const res = await fetch(`/api/profiles/${id}`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify({ username }),
+  });
+  if (!res.ok) throw new Error('Failed to update public profile.');
+}
+
+
 export async function authLogin(body: { email: string; password: string }): Promise<{ token: string; user: User }> {
   if (isSupabaseSession()) {
     const { data, error } = await getSupabase().auth.signInWithPassword({

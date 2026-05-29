@@ -350,20 +350,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         
         // Only update the public profiles table username column if it's explicitly changing (to avoid DB errors on missing columns)
         if (updates.username !== undefined) {
-          const token = localStorage.getItem('journalist_jwt');
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`;
-          await fetch(url, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({
-              username: updates.username
-            })
-          });
+          await api.updateProfileUsername(user.id, updates.username);
         }
       } catch (err) {
         console.error('Failed to sync profile to Supabase:', err);

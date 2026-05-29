@@ -59,11 +59,16 @@ export default function Calendar() {
   const currentMonth = currentDate.getMonth(); // 0-indexed
 
   // Navigation handlers
+  const todayDate = new Date();
+  const isNextMonthDisabled = currentYear > todayDate.getFullYear() || 
+    (currentYear === todayDate.getFullYear() && currentMonth >= todayDate.getMonth());
+
   const handlePrevMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
   };
 
   const handleNextMonth = () => {
+    if (isNextMonthDisabled) return;
     setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
   };
 
@@ -208,7 +213,8 @@ export default function Calendar() {
             </button>
             <button 
               onClick={handleNextMonth}
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
+              disabled={isNextMonthDisabled}
+              className={`p-2 rounded-xl border transition-all ${isNextMonthDisabled ? 'opacity-30 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:border-gray-500'} ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textMain}`}
               title="Next Month"
             >
               <ChevronRight className="w-4.5 h-4.5" />

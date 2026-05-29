@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar, BarChart3, LineChart } from 'lucide-react';
+import { Calendar, BarChart3, LineChart } from 'lucide-react';
 
 type ChartMode = 'daily' | 'weekly' | 'monthly' | 'equity';
 
@@ -24,7 +24,17 @@ interface PremiumPnLChartProps {
     netPnl: number;
     status: string;
   }>;
-  themeClasses: Record<string, string>;
+  themeClasses: {
+    bgBase: string;
+    bgPanel: string;
+    bgCard: string;
+    bgHover: string;
+    border: string;
+    borderActive: string;
+    textMain: string;
+    textSub: string;
+    navActive: string;
+  };
   isDarkMode: boolean;
 }
 
@@ -332,7 +342,7 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
                 />
               </AreaChart>
             ) : (
-              <BarChart data={visibleData} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
+              <BarChart data={visibleData as DayData[]} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke={isDarkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'}
@@ -362,7 +372,7 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
                   animationDuration={350}
                   animationEasing="ease-out"
                   shape={(props: any) => {
-                    const { x, y, width, height, fill, payload } = props;
+                    const { x, y, width, height, payload } = props;
                     const isPositive = payload.pnl >= 0;
                     const barColor = isPositive
                       ? (isDarkMode ? '#22c55e' : '#16a34a')

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { DashboardSkeleton } from '../components/Skeleton';
 import PremiumPnLChart from '../components/PremiumPnLChart';
+import { exportTradesToPDF } from '../lib/pdfExporter';
 import { getWeekOfMonth, getShortTradeId } from '../types';
 
 export default function Dashboard() {

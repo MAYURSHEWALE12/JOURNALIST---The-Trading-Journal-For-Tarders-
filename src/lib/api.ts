@@ -330,6 +330,24 @@ export async function authMe(): Promise<User> {
           twitterHandle: profile.twitter_handle || twitterHandle,
           telegramHandle: profile.telegram_handle || telegramHandle,
         };
+      } else {
+        // Self-healing: if no profile exists (e.g. Gmail login without DB trigger), create it now
+        try {
+          await supabaseFetch('/profiles', {
+            method: 'POST',
+            body: JSON.stringify({
+              id: authUser.id,
+              username: displayName,
+              email: email,
+              avatar_url: avatarUrl,
+              trading_bio: tradingBio,
+              twitter_handle: twitterHandle,
+              telegram_handle: telegramHandle,
+            }),
+          });
+        } catch (err) {
+          console.error('Failed to auto-create public profile:', err);
+        }
       }
     } catch {
       // Fallback to metadata

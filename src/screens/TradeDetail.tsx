@@ -6,7 +6,7 @@ import { TradeDetailSkeleton } from '../components/Skeleton';
 import { getWeekOfMonth } from '../types';
 import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 
 export default function TradeDetail() {
   const { tradeId } = useParams();

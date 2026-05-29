@@ -12,7 +12,7 @@ import { exportTradesToPDF } from '../lib/pdfExporter';
 import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
 import { computeJournalistScore } from '../lib/journalistScore';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -384,22 +384,31 @@ export default function Dashboard() {
             {/* The Sharable Card Container */}
             <div 
               id="journalist-portfolio-card"
-              className={`w-[340px] aspect-[4/5] rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300 border ${
-                glowTheme === 'emerald' 
-                  ? 'border-emerald-500/20 bg-gradient-to-br from-[#0c1410] via-[#09090b] to-[#040405]' 
+              className="w-[340px] aspect-[4/5] rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300 border"
+              style={{
+                background: glowTheme === 'emerald' 
+                  ? 'linear-gradient(135deg, #0c1410 0%, #09090b 50%, #040405 100%)' 
                   : glowTheme === 'indigo'
-                    ? 'border-indigo-500/20 bg-gradient-to-br from-[#0e0e16] via-[#09090b] to-[#040405]'
-                    : 'border-white/10 bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405]'
-              }`}
+                    ? 'linear-gradient(135deg, #0e0e16 0%, #09090b 50%, #040405 100%)'
+                    : 'linear-gradient(135deg, #0e0e11 0%, #09090b 50%, #040405 100%)',
+                borderColor: glowTheme === 'emerald' 
+                  ? 'rgba(16,185,129,0.2)' 
+                  : glowTheme === 'indigo'
+                    ? 'rgba(99,102,241,0.2)'
+                    : 'rgba(255,255,255,0.1)'
+              }}
             >
               {/* Soft Ambient Glow Orb */}
-              <div className={`absolute inset-0 pointer-events-none select-none transition-all duration-500 ${
-                glowTheme === 'emerald' 
-                  ? 'bg-[radial-gradient(circle_at_50%_40%,rgba(16,185,129,0.06),transparent_60%)]' 
-                  : glowTheme === 'indigo'
-                    ? 'bg-[radial-gradient(circle_at_50%_40%,rgba(99,102,241,0.06),transparent_60%)]'
-                    : 'bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.03),transparent_60%)]'
-              }`} />
+              <div 
+                className="absolute inset-0 pointer-events-none select-none transition-all duration-500" 
+                style={{
+                  background: glowTheme === 'emerald' 
+                    ? 'radial-gradient(circle at 50% 40%, rgba(16,185,129,0.06) 0%, transparent 60%)' 
+                    : glowTheme === 'indigo'
+                      ? 'radial-gradient(circle at 50% 40%, rgba(99,102,241,0.06) 0%, transparent 60%)'
+                      : 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03) 0%, transparent 60%)'
+                }}
+              />
 
               {/* Rotating Logo Watermark */}
               <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
@@ -408,18 +417,19 @@ export default function Dashboard() {
 
               {/* User Profile Header */}
               <div className="flex items-center gap-3 relative z-10">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300 ${
-                  glowTheme === 'emerald' 
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
-                    : glowTheme === 'indigo'
-                      ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400'
-                      : 'bg-white/10 border-white/20 text-white'
-                }`}>
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300"
+                  style={{
+                    backgroundColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.1)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)',
+                    borderColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.3)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.2)',
+                    color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                  }}
+                >
                   {user?.username?.slice(0, 2) || 'TR'}
                 </div>
                 <div>
-                  <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
-                  <div className="text-gray-500 text-[9px] font-mono mt-0.5">
+                  <div className="text-xs font-bold font-mono text-white" style={{ color: '#ffffff' }}>{user?.username || 'JournalistTrader'}</div>
+                  <div className="text-[9px] font-mono mt-0.5" style={{ color: '#a3a3a3' }}>
                     Portfolio &bull; {activeAccountName}
                   </div>
                 </div>
@@ -427,73 +437,70 @@ export default function Dashboard() {
 
               {/* Core Account Performance Stats */}
               <div className="my-auto relative z-10 py-2">
-                <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold leading-none">Net cumulative profit</div>
+                <div className="text-[8px] font-mono uppercase tracking-widest font-bold leading-none text-gray-500" style={{ color: '#737373' }}>Net cumulative profit</div>
                 
                 {/* Huge PNL display with selective Glow themes */}
-                <div className={`mt-1 font-display text-4.5xl font-black tracking-tight leading-none ${
-                  computedStats.totalPnl >= 0 
-                    ? glowTheme === 'emerald' 
-                      ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.2)]'
-                      : glowTheme === 'indigo'
-                        ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                        : 'text-emerald-400 drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]'
-                    : 'text-rose-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.15)]'
-                }`}>
+                <div 
+                  className="mt-1 font-display text-4.5xl font-black tracking-tight leading-none"
+                  style={{
+                    color: computedStats.totalPnl >= 0 ? '#34d399' : '#f87171'
+                  }}
+                >
                   {computedStats.totalPnl >= 0 ? '+' : ''}${computedStats.totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
 
                 {/* Sub-KPI Grid */}
-                <div className="mt-8 grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+                <div className="mt-8 grid grid-cols-3 gap-2 border-t pt-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                   <div>
-                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Win Rate</div>
-                    <div className="text-white text-sm font-bold font-mono mt-1.5">{winRate}%</div>
+                    <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none text-gray-500" style={{ color: '#737373' }}>Win Rate</div>
+                    <div className="text-sm font-bold font-mono mt-1.5 text-white" style={{ color: '#ffffff' }}>{winRate}%</div>
                   </div>
                   <div>
-                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Profit Factor</div>
-                    <div className="text-white text-sm font-bold font-mono mt-1.5">{computedStats.profitFactor}x</div>
+                    <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none text-gray-500" style={{ color: '#737373' }}>Profit Factor</div>
+                    <div className="text-sm font-bold font-mono mt-1.5 text-white" style={{ color: '#ffffff' }}>{computedStats.profitFactor}x</div>
                   </div>
                   <div>
-                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Journal Score</div>
-                    <div className={`text-sm font-bold font-mono mt-1.5 transition-colors duration-300 ${
-                      glowTheme === 'emerald' 
-                        ? 'text-emerald-400' 
-                        : glowTheme === 'indigo'
-                          ? 'text-indigo-400'
-                          : 'text-white'
-                    }`}>{scoreObj.score}</div>
+                    <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none text-gray-500" style={{ color: '#737373' }}>Journal Score</div>
+                    <div 
+                      className="text-sm font-bold font-mono mt-1.5 transition-colors duration-300"
+                      style={{
+                        color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                      }}
+                    >
+                      {scoreObj.score}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Lower detailed metadata */}
-              <div className="border-t border-white/5 pt-4 grid grid-cols-2 gap-4 relative z-10 font-mono">
+              <div className="border-t pt-4 grid grid-cols-2 gap-4 relative z-10 font-mono" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                 <div>
-                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Total Trades</div>
-                  <div className="text-white text-xs font-semibold mt-0.5">{activeTrades.length} documented</div>
+                  <div className="text-[8px] uppercase tracking-widest font-bold text-gray-500" style={{ color: '#737373' }}>Total Trades</div>
+                  <div className="text-xs font-semibold mt-0.5 text-white" style={{ color: '#ffffff' }}>{activeTrades.length} documented</div>
                 </div>
                 <div>
-                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Journalist Level</div>
-                  <div className={`text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight transition-colors duration-300 ${
-                    glowTheme === 'emerald' 
-                      ? 'text-emerald-400' 
-                      : glowTheme === 'indigo'
-                        ? 'text-indigo-400'
-                        : 'text-white'
-                  }`}>
+                  <div className="text-[8px] uppercase tracking-widest font-bold text-gray-500" style={{ color: '#737373' }}>Journalist Level</div>
+                  <div 
+                    className="text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight transition-colors duration-300"
+                    style={{
+                      color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                    }}
+                  >
                     {scoreObj.levelLabel}
                   </div>
                 </div>
               </div>
 
               {/* Branding Footer */}
-              <div className="border-t border-white/5 pt-4 mt-4 flex items-center justify-between relative z-10 select-none">
+              <div className="border-t pt-4 mt-4 flex items-center justify-between relative z-10 select-none" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
                     <LogoIcon className="w-3.5 h-3.5" isDark={false} />
                   </div>
                   <div>
-                    <div className="text-white text-[10px] font-extrabold font-display tracking-tight leading-none">JOURNALIST</div>
-                    <div className="text-gray-500 text-[7px] font-mono mt-0.5 leading-none">Systematic Portfolio Core</div>
+                    <div className="text-[10px] font-extrabold font-display tracking-tight leading-none text-white" style={{ color: '#ffffff' }}>JOURNALIST</div>
+                    <div className="text-[7px] font-mono mt-0.5 leading-none text-gray-500" style={{ color: '#737373' }}>Systematic Portfolio Core</div>
                   </div>
                 </div>
 

@@ -379,7 +379,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
       {/* Chart */}
       <div className="px-2 md:px-3 pb-4">
         <div className={chartHeight}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="99%" height="100%">
             {mode === 'equity' ? (
               <AreaChart data={visibleData as any} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
                 <defs>

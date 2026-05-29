@@ -466,8 +466,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const { data } = await supabase.auth.getSession();
       if (cancelled) return;
 
-      if (!data.session) {
-        // No session and no SIGNED_IN in 4s → stop loading
+      if (data.session) {
+        // Session exists — ensure token is set and load data
+        if (data.session.access_token) {
+          api.setAccessToken(data.session.access_token);
+        }
+        await loadData();
+      } else {
+        // No session — wait for SIGNED_IN from OAuth redirect
         setTimeout(() => {
           if (!cancelled) { setDataLoading(false); subscription?.unsubscribe(); }
         }, 4000);
@@ -488,6 +494,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       type: newAccountData.type,
       createdAt: new Date().toISOString(),
       accountSize: parseFloat(newAccountData.accountSize) || 0,
+      user_id: user?.id,
     };
     try {
       await api.createAccount(newAcc);
@@ -685,6 +692,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       accountId: activeAccountId,
       screenshotUrl: newTradeData.screenshotUrls[0] || undefined,
       screenshotUrls: newTradeData.screenshotUrls,
+      user_id: user?.id,
     };
     try {
       await api.createTrade(newTrade);
@@ -760,6 +768,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       accountId: activeAccountId,
       screenshotUrl: editTradeData.screenshotUrls[0] || undefined,
       screenshotUrls: editTradeData.screenshotUrls || [],
+      user_id: user?.id,
     };
     try {
       await api.updateTrade(updated.id, updated);

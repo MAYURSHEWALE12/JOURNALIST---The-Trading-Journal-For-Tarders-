@@ -18,6 +18,7 @@ export interface Trade {
   screenshotUrl?: string;
   screenshotUrls?: string[];
   accountId?: string;
+  user_id?: string;
 }
 
 export interface Account {
@@ -26,6 +27,7 @@ export interface Account {
   type: string;
   createdAt: string;
   accountSize?: number;
+  user_id?: string;
 }
 
 export type Screen = 'LANDING' | 'AUTH' | 'DASHBOARD' | 'ANALYTICS' | 'TIMELINE' | 'TRADE_DETAIL';

@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
-import { STRATEGIES, EMOTIONAL_STATES } from '../types';
+import { EMOTIONAL_STATES } from '../types';
 import type { NewTradeData } from '../types';
 
 export default function NewTradeModal() {
   const [screenshotInput, setScreenshotInput] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const {
     isDarkMode, themeClasses, isNewTradeOpen, setIsNewTradeOpen,
     newTradeStep, setNewTradeStep, newTradeData, setNewTradeData, handleAddNewTrade,
-    isCreatingTrade,
+    isCreatingTrade, activeTrades,
   } = useApp();
 
   if (!isNewTradeOpen) return null;
@@ -24,6 +25,12 @@ export default function NewTradeModal() {
       emotions: prev.emotions.includes(em) ? prev.emotions.filter((x: string) => x !== em) : [...prev.emotions, em],
     }));
   };
+
+  // Dynamically pull all unique strategies from existing activeTrades
+  const uniqueStrategies = Array.from(new Set(activeTrades.map(t => t.strategy).filter(Boolean)));
+  const filteredStrategies = uniqueStrategies.filter(s =>
+    s.toLowerCase().includes((newTradeData.strategy || '').toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -125,12 +132,34 @@ export default function NewTradeModal() {
           )}
           {newTradeStep === 2 && (
             <div className="space-y-4">
-              <div>
+              <div className="relative">
                 <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Strategy Used</label>
-                <select value={newTradeData.strategy} onChange={(e) => update('strategy', e.target.value)}
-                  className={`w-full border rounded px-3 py-2 text-xs focus:outline-none cursor-pointer focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}>
-                  {STRATEGIES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <input
+                  type="text"
+                  placeholder="e.g. ICT Silver Bullet, ORB Breakdown"
+                  value={newTradeData.strategy}
+                  onChange={(e) => update('strategy', e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className={`w-full border rounded px-3 py-2 text-xs focus:outline-none focus:border-gray-400 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+                />
+                {showSuggestions && filteredStrategies.length > 0 && (
+                  <div className={`absolute left-0 right-0 mt-1 border rounded shadow-xl max-h-36 overflow-y-auto z-50 font-mono text-xs ${themeClasses.bgPanel} ${themeClasses.border}`}>
+                    {filteredStrategies.map((s, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          update('strategy', s);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-white/5 transition text-gray-400 hover:text-white cursor-pointer"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1">Pills/Tags (comma separated)</label>

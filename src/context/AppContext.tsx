@@ -638,7 +638,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     asset: '', direction: 'LONG' as 'LONG' | 'SHORT',
     status: 'WIN' as 'WIN' | 'LOSS' | 'BREAKEVEN',
     entryPrice: '', exitPrice: '', quantity: '', netPnl: '',
-    plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet',
+    plannedR: '2', realizedR: '2', strategy: '',
     tagsString: '', notes: '', emotions: [] as string[], screenshotUrl: '', screenshotUrls: [] as string[],
     tradeDate: new Date().toISOString().slice(0, 10),
     entryTime: '12:00',
@@ -713,7 +713,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsCreatingTrade(false);
     setIsNewTradeOpen(false);
     setNewTradeStep(1);
-    setNewTradeData({ asset: '', direction: 'LONG', status: 'WIN', entryPrice: '', exitPrice: '', quantity: '', netPnl: '', plannedR: '2', realizedR: '2', strategy: 'ICT Silver Bullet', tagsString: '', notes: '', emotions: [], screenshotUrl: '', screenshotUrls: [], tradeDate: new Date().toISOString().slice(0, 10), entryTime: '12:00', exitTime: '12:00' });
+    setNewTradeData({ asset: '', direction: 'LONG', status: 'WIN', entryPrice: '', exitPrice: '', quantity: '', netPnl: '', plannedR: '2', realizedR: '2', strategy: '', tagsString: '', notes: '', emotions: [], screenshotUrl: '', screenshotUrls: [], tradeDate: new Date().toISOString().slice(0, 10), entryTime: '12:00', exitTime: '12:00' });
   };
 
   const handleOpenNewTradeModal = () => {

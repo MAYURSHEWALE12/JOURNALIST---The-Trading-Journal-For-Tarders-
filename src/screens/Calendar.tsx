@@ -111,6 +111,15 @@ export default function Calendar() {
 
   return (
     <div className="space-y-6 select-none max-w-7xl mx-auto pb-12">
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        .animate-slide-up {
+          animation: slideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
       <Seo title="Trading Calendar" path="/calendar" />
 
       {/* Header Info Section */}
@@ -282,100 +291,103 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* Elegant glassmorphic Drawer Side Panel */}
+      {/* Elegant glassmorphic iPhone-style Bottom Sheet */}
       {selectedDayTrades && (
-        <div className="fixed inset-0 z-50 overflow-hidden select-none">
+        <div className="fixed inset-0 z-50 flex items-end justify-center select-none">
+          {/* Backdrop overlay */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity" onClick={() => setSelectedDayTrades(null)} />
           
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-            <div className={`w-screen max-w-md border-l shadow-2xl flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border}`}>
-              
-              {/* Drawer Header */}
-              <div className={`p-4 border-b flex items-center justify-between bg-neutral-950/20 ${themeClasses.border}`}>
-                <div>
-                  <h3 className={`font-display text-base font-bold ${themeClasses.textMain}`}>
-                    Trades Log &bull; Day {selectedDayTrades.day}
-                  </h3>
-                  <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">
-                    {MONTHS[currentMonth]} {currentYear}
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setSelectedDayTrades(null)}
-                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textSub}`}
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          {/* iOS Bottom Sheet Container */}
+          <div className={`w-full max-w-xl rounded-t-[2.5rem] border-t shadow-2xl flex flex-col justify-between overflow-hidden relative max-h-[82vh] animate-slide-up ${themeClasses.bgPanel} ${themeClasses.border}`}>
+            
+            {/* iOS Grab Handle */}
+            <div className="w-12 h-1.5 bg-neutral-300 dark:bg-neutral-800 rounded-full mx-auto my-3.5 shrink-0 cursor-pointer" onClick={() => setSelectedDayTrades(null)} />
+            
+            {/* Drawer Header */}
+            <div className={`px-5 pb-4 pt-2 border-b flex items-center justify-between bg-neutral-950/10 ${themeClasses.border}`}>
+              <div>
+                <h3 className={`font-display text-base font-black ${themeClasses.textMain}`}>
+                  Trades Log &bull; Day {selectedDayTrades.day}
+                </h3>
+                <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-0.5">
+                  {MONTHS[currentMonth]} {currentYear}
+                </p>
               </div>
+              <button 
+                onClick={() => setSelectedDayTrades(null)}
+                className={`p-1.5 rounded-full border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textSub}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              {/* Drawer Content */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {selectedDayTrades.trades.map(t => {
-                  return (
-                    <div 
-                      key={t.id}
-                      onClick={() => {
-                        setSelectedDayTrades(null);
-                        navigate(`/trade/${t.id}`);
-                      }}
-                      className={`border rounded-xl p-4 transition-all hover:scale-[1.01] hover:shadow-lg cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} hover:border-gray-400 dark:hover:border-gray-500`}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[8px] uppercase font-mono font-bold px-1.5 py-0.5 rounded leading-none ${t.direction === 'LONG' ? (isDarkMode ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50' : 'bg-emerald-50 text-emerald-700 border border-emerald-200') : (isDarkMode ? 'bg-rose-950 text-rose-400 border border-rose-900/50' : 'bg-rose-50 text-rose-700 border border-rose-200')}`}>
-                              {t.direction}
-                            </span>
-                            <span className={`text-xs font-black uppercase tracking-tight ${themeClasses.textMain}`}>{t.asset}</span>
-                          </div>
-                          <p className="text-[9px] font-mono text-gray-500">{getShortTradeId(t.id)}</p>
+            {/* Drawer Content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {selectedDayTrades.trades.map(t => {
+                return (
+                  <div 
+                    key={t.id}
+                    onClick={() => {
+                      setSelectedDayTrades(null);
+                      navigate(`/trade/${t.id}`);
+                    }}
+                    className={`border rounded-xl p-4 transition-all hover:scale-[1.01] hover:shadow-lg cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} hover:border-gray-400 dark:hover:border-gray-500`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[8px] uppercase font-mono font-bold px-1.5 py-0.5 rounded leading-none ${t.direction === 'LONG' ? (isDarkMode ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50' : 'bg-emerald-50 text-emerald-700 border border-emerald-200') : (isDarkMode ? 'bg-rose-950 text-rose-400 border border-rose-900/50' : 'bg-rose-50 text-rose-700 border border-rose-200')}`}>
+                            {t.direction}
+                          </span>
+                          <span className={`text-xs font-black uppercase tracking-tight ${themeClasses.textMain}`}>{t.asset}</span>
                         </div>
-                        
-                        <span className={`px-2 py-0.5 text-[8px] font-mono font-black uppercase rounded border ${t.status === 'WIN' ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald' : t.status === 'LOSS' ? 'border-brand-rose/40 bg-brand-rose/10 text-brand-rose' : 'border-gray-600 bg-gray-800 text-gray-300'}`}>
-                          {t.status}
-                        </span>
+                        <p className="text-[9px] font-mono text-gray-500">{getShortTradeId(t.id)}</p>
                       </div>
+                      
+                      <span className={`px-2 py-0.5 text-[8px] font-mono font-black uppercase rounded border ${t.status === 'WIN' ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald' : t.status === 'LOSS' ? 'border-brand-rose/40 bg-brand-rose/10 text-brand-rose' : 'border-gray-600 bg-gray-800 text-gray-300'}`}>
+                        {t.status}
+                      </span>
+                    </div>
 
-                      {/* Micro visual indicator of screenshot if present */}
-                      {t.screenshotUrl && (
-                        <div className="w-full aspect-video rounded-lg overflow-hidden border border-white/[0.04] bg-neutral-950/20 relative my-2">
-                          <img 
-                            src={getDirectImageUrl(t.screenshotUrl)} 
-                            alt="Setup screenshot" 
-                            className="w-full h-full object-cover opacity-80" 
-                          />
-                        </div>
-                      )}
+                    {/* Micro visual indicator of screenshot if present */}
+                    {t.screenshotUrl && (
+                      <div className="w-full aspect-video rounded-lg overflow-hidden border border-white/[0.04] bg-neutral-950/20 relative my-2">
+                        <img 
+                          src={getDirectImageUrl(t.screenshotUrl)} 
+                          alt="Setup screenshot" 
+                          className="w-full h-full object-cover opacity-80" 
+                        />
+                      </div>
+                    )}
 
-                      <div className="flex justify-between items-end border-t border-dashed border-neutral-700/20 pt-2 mt-2">
-                        <div>
-                          <span className="text-[8px] uppercase tracking-widest font-mono text-gray-500">Net P&L</span>
-                          <p className={`font-mono text-sm font-black ${t.netPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
-                            {t.netPnl >= 0 ? '+' : ''}${t.netPnl.toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[8px] uppercase tracking-widest font-mono text-gray-500">Realized R</span>
-                          <p className={`font-mono text-xs font-semibold ${themeClasses.textMain}`}>{t.realizedR}R</p>
-                        </div>
+                    <div className="flex justify-between items-end border-t border-dashed border-neutral-700/20 pt-2 mt-2">
+                      <div>
+                        <span className="text-[8px] uppercase tracking-widest font-mono text-gray-500">Net P&L</span>
+                        <p className={`font-mono text-sm font-black ${t.netPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
+                          {t.netPnl >= 0 ? '+' : ''}${t.netPnl.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[8px] uppercase tracking-widest font-mono text-gray-500">Realized R</span>
+                        <p className={`font-mono text-xs font-semibold ${themeClasses.textMain}`}>{t.realizedR}R</p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Drawer Footer */}
-              <div className={`p-4 border-t bg-neutral-950/20 ${themeClasses.border}`}>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 uppercase font-mono text-[9px] tracking-wider">Total Daily Result</span>
-                  <span className={`font-mono font-bold text-base ${selectedDayTrades.trades.reduce((s, t) => s + t.netPnl, 0) >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
-                    {selectedDayTrades.trades.reduce((s, t) => s + t.netPnl, 0) >= 0 ? '+' : ''}
-                    ${selectedDayTrades.trades.reduce((s, t) => s + t.netPnl, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-              </div>
-
+                  </div>
+                );
+              })}
             </div>
+
+            {/* Drawer Footer */}
+            <div className={`p-5 border-t bg-neutral-950/10 ${themeClasses.border}`}>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-500 uppercase font-mono text-[9px] tracking-wider">Total Daily Result</span>
+                <span className={`font-mono font-bold text-base ${selectedDayTrades.trades.reduce((s, t) => s + t.netPnl, 0) >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
+                  {selectedDayTrades.trades.reduce((s, t) => s + t.netPnl, 0) >= 0 ? '+' : ''}
+                  ${selectedDayTrades.trades.reduce((s, t) => s + t.netPnl, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

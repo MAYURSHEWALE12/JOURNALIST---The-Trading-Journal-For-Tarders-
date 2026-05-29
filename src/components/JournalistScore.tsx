@@ -1,7 +1,4 @@
 import { useMemo } from 'react';
-import {
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip,
-} from 'recharts';
 import { computeJournalistScore, type JournalistScoreResult } from '../lib/journalistScore';
 import type { Trade } from '../types';
 
@@ -41,15 +38,127 @@ const levelBadgeColors: Record<string, string> = {
   needsImprovement: 'bg-rose-500/10 border-rose-500/20 text-rose-500',
 };
 
+// Pure dynamic SVG Radar Chart for maximum reliability and React 19 compatibility
+function SvgRadarChart({ data, isDarkMode }: { data: { metric: string; value: number }[]; isDarkMode: boolean }) {
+  const center = 100;
+  const maxVal = 100;
+  const r = 60; // Max radius
+
+  // Calculate points for the 5 axes
+  const points = useMemo(() => {
+    return data.map((d, i) => {
+      const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2; // Offset by 90deg to start at top
+      const valueRatio = Math.min(d.value / maxVal, 1);
+      const x = center + r * valueRatio * Math.cos(angle);
+      const y = center + r * valueRatio * Math.sin(angle);
+      return { x, y, label: d.metric, angle };
+    });
+  }, [data]);
+
+  // Polygon path string for the filled area
+  const polyPath = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+  // Grid rings (100%, 75%, 50%, 25%)
+  const gridRings = [0.25, 0.5, 0.75, 1.0];
+
+  return (
+    <div className="w-full h-full flex items-center justify-center p-2">
+      <svg viewBox="0 0 200 200" className="w-full h-full max-h-[190px] overflow-visible">
+        {/* Grid Rings */}
+        {gridRings.map((ratio, idx) => {
+          const ringPoints = Array.from({ length: 5 }).map((_, i) => {
+            const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+            const x = center + r * ratio * Math.cos(angle);
+            const y = center + r * ratio * Math.sin(angle);
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          }).join(' ');
+          
+          return (
+            <polygon
+              key={`ring-${idx}`}
+              points={ringPoints}
+              fill="none"
+              stroke={isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+              strokeWidth="0.75"
+            />
+          );
+        })}
+
+        {/* Axis Lines & Labels */}
+        {points.map((p, i) => {
+          const outerX = center + r * Math.cos(p.angle);
+          const outerY = center + r * Math.sin(p.angle);
+          
+          // Position labels slightly outside the outer point
+          const labelDist = r + 15;
+          const labelX = center + labelDist * Math.cos(p.angle);
+          const labelY = center + labelDist * Math.sin(p.angle);
+          
+          // Text alignments based on position
+          let textAnchor: 'inherit' | 'end' | 'middle' | 'start' = 'middle';
+          if (Math.abs(Math.cos(p.angle)) > 0.1) {
+            textAnchor = Math.cos(p.angle) > 0 ? 'start' : 'end';
+          }
+
+          return (
+            <g key={`axis-${i}`}>
+              {/* Line */}
+              <line
+                x1={center}
+                y1={center}
+                x2={outerX}
+                y2={outerY}
+                stroke={isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
+                strokeWidth="0.75"
+              />
+              {/* Metric Name Label */}
+              <text
+                x={labelX}
+                y={labelY + 2}
+                textAnchor={textAnchor}
+                fill={isDarkMode ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)'}
+                className="text-[7.5px] font-mono select-none"
+              >
+                {p.label}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Filled Data Polygon */}
+        <polygon
+          points={polyPath}
+          fill={isDarkMode ? 'rgba(129, 140, 248, 0.15)' : 'rgba(99, 102, 241, 0.12)'}
+          stroke={isDarkMode ? '#818cf8' : '#6366f1'}
+          strokeWidth="1.5"
+          className="transition-all duration-500"
+        />
+
+        {/* Data points (dots on corners) */}
+        {points.map((p, i) => (
+          <circle
+            key={`dot-${i}`}
+            cx={p.x}
+            cy={p.y}
+            r="2"
+            fill={isDarkMode ? '#818cf8' : '#6366f1'}
+            className="transition-all duration-500"
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScoreProps) {
   const score = useMemo(() => computeJournalistScore(trades), [trades]);
 
   const radarData = useMemo(() => [
-    { metric: 'Win Rate', value: score.winRateScore, fullMark: 100 },
-    { metric: 'Profit Factor', value: score.profitFactorScore, fullMark: 100 },
-    { metric: 'Risk Mgmt', value: score.riskManagementScore, fullMark: 100 },
-    { metric: 'Consistency', value: score.consistencyScore, fullMark: 100 },
-    { metric: 'Discipline', value: score.disciplineScore, fullMark: 100 },
+    { metric: 'Win Rate', value: score.winRateScore },
+    { metric: 'Profit Factor', value: score.profitFactorScore },
+    { metric: 'Risk Mgmt', value: score.riskManagementScore },
+    { metric: 'Consistency', value: score.consistencyScore },
+    { metric: 'Discipline', value: score.disciplineScore },
   ], [score]);
 
   if (trades.length < 2) {
@@ -97,51 +206,9 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
         </div>
       </div>
 
-      {/* Radar Chart */}
-      <div className="px-2 h-44 md:h-52 lg:h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={radarData} margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-            <PolarGrid
-              stroke={isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
-            />
-            <PolarAngleAxis
-              dataKey="metric"
-              tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: 9, fontFamily: 'ui-monospace, monospace' }}
-              axisLine={false}
-            />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 100]}
-              tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)', fontSize: 8, fontFamily: 'ui-monospace, monospace' }}
-              axisLine={false}
-            />
-            <Tooltip
-              content={({ active, payload }: any) => {
-                if (!active || !payload?.length) return null;
-                const d = payload[0];
-                if (!d) return null;
-                return (
-                  <div className={`px-3 py-2 rounded-xl text-xs font-mono shadow-xl border min-w-[140px] ${isDarkMode ? 'bg-[#181818] border-white/10' : 'bg-white border-gray-200'}`}>
-                    <div className={`font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{d.payload.metric}</div>
-                    <div className={`text-lg font-bold ${d.value >= 70 ? 'text-emerald-500' : d.value >= 40 ? 'text-amber-500' : 'text-rose-500'}`}>
-                      {d.value}/100
-                    </div>
-                  </div>
-                );
-              }}
-            />
-            <Radar
-              name="Score"
-              dataKey="value"
-              stroke={isDarkMode ? '#818cf8' : '#6366f1'}
-              fill={isDarkMode ? '#818cf8' : '#6366f1'}
-              fillOpacity={0.1}
-              strokeWidth={1.5}
-              animationDuration={500}
-              animationEasing="ease-out"
-            />
-          </RadarChart>
-        </ResponsiveContainer>
+      {/* Dynamic SVG Radar Chart */}
+      <div className="px-2 h-44 md:h-52 lg:h-56 flex items-center justify-center">
+        <SvgRadarChart data={radarData} isDarkMode={isDarkMode} />
       </div>
 
       {/* Score breakdown */}

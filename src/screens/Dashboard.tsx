@@ -195,7 +195,8 @@ export default function Dashboard() {
                   day: 'numeric'
                 });
                 const entryTime = t.entryTime ? new Date(t.entryTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-                const exitTime = t.exitTime ? new Date(t.exitTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+                const exitTimeRaw = t.exitTime ? new Date(t.exitTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+                const exitTime = exitTimeRaw && exitTimeRaw !== entryTime ? exitTimeRaw : '';
 
                 const screenshots = t.screenshotUrls && t.screenshotUrls.length > 0
                   ? t.screenshotUrls

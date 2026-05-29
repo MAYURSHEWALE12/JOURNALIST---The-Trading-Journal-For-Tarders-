@@ -76,8 +76,19 @@ export default function Sidebar() {
             <button onClick={() => { setIsCommandOpen(true); setMobileMenuOpen(false); }}
               className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded text-sm text-gray-400 transition-all cursor-pointer ${themeClasses.bgHover}`}>
               <Search className="w-4.5 h-4.5" />
+              {!sidebarCollapsed && (
+                <div className="flex-1 flex justify-between items-center">
+                  <span>Command Bar</span>
+                  <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">⌘K</kbd>
+                </div>
+              )}
+            </button>
+          </nav>
+        </div>
+
+        <div className={`p-3 border-t ${themeClasses.border}`}>
           {!sidebarCollapsed && (
-            <div className="space-y-1 mb-2">
+            <div className="space-y-1.5 mb-3">
               <button onClick={async () => {
                 try {
                   const pwd = prompt('Enter a new password (min 6 chars):');
@@ -100,17 +111,6 @@ export default function Sidebar() {
               </button>
             </div>
           )}
-          {!sidebarCollapsed && (
-                <div className="flex-1 flex justify-between items-center">
-                  <span>Command Bar</span>
-                  <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">⌘K</kbd>
-                </div>
-              )}
-            </button>
-          </nav>
-        </div>
-
-        <div className={`p-3 border-t ${themeClasses.border}`}>
           <div className="flex items-center space-x-3 overflow-hidden">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeClasses.bgCard}`}>
               <User className={`w-4 h-4 ${isDarkMode ? 'text-white' : 'text-black'}`} />

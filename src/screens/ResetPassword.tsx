@@ -18,20 +18,45 @@ export default function ResetPassword() {
 
   const isSupabase = isSupabaseConfigured();
 
-  // Detect Supabase recovery hash fragment
+  // Detect Supabase recovery context
   useEffect(() => {
     if (!isSupabase) return;
+    
     const hash = window.location.hash;
-    if (hash.includes('type=recovery')) {
+    const search = window.location.search;
+    
+    const isRecovery = 
+      hash.includes('type=recovery') || 
+      hash.includes('access_token') || 
+      search.includes('code=') || 
+      search.includes('type=recovery');
+
+    if (isRecovery) {
       setSupabaseRecovery(true);
-      // Supabase JS client auto-handles the session from the hash
+      setResetError('');
+      // Verify session exists
       getSupabase().auth.getSession().then(({ data }) => {
         if (!data.session) {
-          setResetError('Invalid or expired reset link. Please request a new one.');
+          // If a code is in the URL, wait a moment for the supabase client to exchange it
+          setTimeout(() => {
+            getSupabase().auth.getSession().then(({ data: secondData }) => {
+              if (!secondData.session) {
+                setResetError('Invalid or expired reset link. Please request a new one.');
+              }
+            });
+          }, 1000);
         }
       });
     } else {
-      setResetError('Invalid reset link.');
+      // Fallback: check if we already have an active session (redirect already processed)
+      getSupabase().auth.getSession().then(({ data }) => {
+        if (data.session) {
+          setSupabaseRecovery(true);
+          setResetError('');
+        } else {
+          setResetError('Invalid or missing reset link. Please request a new password reset.');
+        }
+      });
     }
   }, [isSupabase, setResetError]);
 

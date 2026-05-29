@@ -380,14 +380,14 @@ export default function Dashboard() {
 
       {/* Portfolio Performance Card Modal */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto select-none">
-          <div className="flex flex-col items-center gap-6 my-auto">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto select-none">
+          <div className="flex flex-col items-center gap-5 my-auto w-full max-w-[340px] sm:max-w-sm py-4">
             {/* Modal Header */}
-            <div className="flex justify-between items-center w-full max-w-sm px-2">
-              <span className="text-white font-mono text-xs uppercase tracking-widest font-bold">Generate Performance Card</span>
+            <div className="flex justify-between items-center w-full px-1">
+              <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate Performance Card</span>
               <button 
                 onClick={() => setIsShareModalOpen(false)}
-                className="text-gray-400 hover:text-white transition cursor-pointer"
+                className="text-gray-400 hover:text-white transition cursor-pointer p-1 rounded-full hover:bg-white/5"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -396,7 +396,7 @@ export default function Dashboard() {
             {/* The Sharable Card Container */}
             <div 
               id="journalist-portfolio-card"
-              className="w-[340px] aspect-[4/5] rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300 border"
+              className="w-full max-w-[340px] aspect-[4/5] rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300 border"
               style={{
                 background: glowTheme === 'emerald' 
                   ? 'linear-gradient(135deg, #0c1410 0%, #09090b 50%, #040405 100%)' 
@@ -404,9 +404,9 @@ export default function Dashboard() {
                     ? 'linear-gradient(135deg, #0e0e16 0%, #09090b 50%, #040405 100%)'
                     : 'linear-gradient(135deg, #0e0e11 0%, #09090b 50%, #040405 100%)',
                 borderColor: glowTheme === 'emerald' 
-                  ? 'rgba(16,185,129,0.2)' 
+                  ? 'rgba(16,185,129,0.3)' 
                   : glowTheme === 'indigo'
-                    ? 'rgba(99,102,241,0.2)'
+                    ? 'rgba(99,102,241,0.3)'
                     : 'rgba(255,255,255,0.1)'
               }}
             >
@@ -557,20 +557,31 @@ export default function Dashboard() {
               <div>
                 <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Select Glow Theme</label>
                 <div className="flex gap-2">
-                  {(['slate', 'emerald', 'indigo'] as const).map(t => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setGlowTheme(t)}
-                      className={`px-3 py-1 border text-[10px] font-bold rounded-lg uppercase transition cursor-pointer ${
-                        glowTheme === t
-                          ? 'bg-white text-black border-white'
-                          : `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500`
-                      }`}
-                    >
-                      {t} Glow
-                    </button>
-                  ))}
+                  {(['slate', 'emerald', 'indigo'] as const).map(t => {
+                    const isActive = glowTheme === t;
+                    let themeButtonClass = '';
+                    if (isActive) {
+                      if (t === 'emerald') {
+                        themeButtonClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]';
+                      } else if (t === 'indigo') {
+                        themeButtonClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]';
+                      } else {
+                        themeButtonClass = 'bg-white text-black border-white';
+                      }
+                    } else {
+                      themeButtonClass = `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`;
+                    }
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setGlowTheme(t)}
+                        className={`px-3.5 py-2 border text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all duration-300 cursor-pointer ${themeButtonClass}`}
+                      >
+                        {t} Glow
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

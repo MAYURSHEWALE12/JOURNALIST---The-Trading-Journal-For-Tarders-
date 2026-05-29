@@ -145,4 +145,26 @@ export function getShortTradeId(id: string): string {
   return id;
 }
 
+export function getDirectImageUrl(url: string | undefined): string {
+  if (!url) return '';
+  const cleanUrl = url.trim();
+
+  // 1. TradingView share URLs: https://www.tradingview.com/x/ABCDEF/
+  const tvRegex = /(?:https?:\/\/)?(?:www\.)?tradingview\.com\/x\/([a-zA-Z0-9]+)\/?/;
+  const tvMatch = cleanUrl.match(tvRegex);
+  if (tvMatch && tvMatch[1]) {
+    return `https://s3.tradingview.com/x/${tvMatch[1]}.png`;
+  }
+
+  // 2. Gyazo URLs: https://gyazo.com/abcdef1234567890
+  const gyazoRegex = /(?:https?:\/\/)?(?:www\.)?gyazo\.com\/([a-fA-F0-9]+)\/?$/;
+  const gyazoMatch = cleanUrl.match(gyazoRegex);
+  if (gyazoMatch && gyazoMatch[1]) {
+    return `https://i.gyazo.com/${gyazoMatch[1]}.png`;
+  }
+
+  return cleanUrl;
+}
+
+
 

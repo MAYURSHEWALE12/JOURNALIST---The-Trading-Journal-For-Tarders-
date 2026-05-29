@@ -1,7 +1,7 @@
 import { BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { TimelineSkeleton } from '../components/Skeleton';
-import { getWeekOfMonth, getShortTradeId } from '../types';
+import { getWeekOfMonth, getShortTradeId, getDirectImageUrl } from '../types';
 import Seo from '../components/Seo';
 
 export default function Timeline() {
@@ -66,8 +66,8 @@ export default function Timeline() {
               </div>
 
               {t.screenshotUrl && (
-                <div className={`mt-4 rounded overflow-hidden border max-h-60 max-w-full sm:max-w-lg cursor-pointer transition hover:border-gray-500 ${themeClasses.border}`} onClick={() => setSelectedScreenshot(t.screenshotUrl || null)}>
-                  <img src={t.screenshotUrl} alt={`${t.asset} screenshot`} className="w-full h-full object-cover grayscale hover:grayscale-0 transition duration-300" />
+                <div className={`mt-4 rounded overflow-hidden border max-h-60 max-w-full sm:max-w-lg cursor-pointer transition hover:border-gray-500 ${themeClasses.border}`} onClick={() => setSelectedScreenshot(getDirectImageUrl(t.screenshotUrl) || null)}>
+                  <img src={getDirectImageUrl(t.screenshotUrl)} alt={`${t.asset} screenshot`} className="w-full h-full object-cover grayscale hover:grayscale-0 transition duration-300" />
                 </div>
               )}
 

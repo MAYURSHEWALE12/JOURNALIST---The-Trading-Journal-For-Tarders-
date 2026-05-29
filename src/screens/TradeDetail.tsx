@@ -3,7 +3,7 @@ import { ChevronLeft, BookOpen, Compass, Camera, Share2, Download, X } from 'luc
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { TradeDetailSkeleton } from '../components/Skeleton';
-import { getWeekOfMonth } from '../types';
+import { getWeekOfMonth, getDirectImageUrl } from '../types';
 import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
 import html2canvas from 'html2canvas-pro';
@@ -214,10 +214,10 @@ export default function TradeDetail() {
               <div className="space-y-4 w-full h-full flex flex-col">
                 <div
                   className={`flex-1 relative group cursor-zoom-in rounded overflow-hidden border aspect-video flex items-center justify-center bg-black/5 ${isDarkMode ? 'border-border-subtle bg-white/5' : 'border-gray-300'}`}
-                  onClick={() => setSelectedScreenshot(screenshots[activeImageIndex])}
+                  onClick={() => setSelectedScreenshot(getDirectImageUrl(screenshots[activeImageIndex]))}
                 >
                   <img
-                    src={screenshots[activeImageIndex]}
+                    src={getDirectImageUrl(screenshots[activeImageIndex])}
                     alt={`Trade Chart ${activeImageIndex + 1}`}
                     className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
                   />
@@ -264,7 +264,7 @@ export default function TradeDetail() {
                         }`}
                       >
                         <img
-                          src={url}
+                          src={getDirectImageUrl(url)}
                           alt={`Thumbnail ${idx + 1}`}
                           className="w-full h-full object-cover grayscale"
                         />

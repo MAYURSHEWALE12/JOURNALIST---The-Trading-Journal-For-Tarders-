@@ -13,6 +13,7 @@ import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
 import { computeJournalistScore } from '../lib/journalistScore';
 import html2canvas from 'html2canvas-pro';
+import { getDirectImageUrl } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -273,6 +274,17 @@ export default function Dashboard() {
                         {t.status}
                       </span>
                     </div>
+
+                    {/* Render elegant, glassmorphic thumbnail if screenshot is present */}
+                    {t.screenshotUrl && (
+                      <div className="w-full aspect-video rounded-lg overflow-hidden border border-white/[0.04] bg-neutral-950/20 relative transition-colors">
+                        <img 
+                          src={getDirectImageUrl(t.screenshotUrl)} 
+                          alt="Trade chart setup" 
+                          className="w-full h-full object-cover opacity-75 hover:opacity-100 transition-opacity duration-300"
+                        />
+                      </div>
+                    )}
 
                     <div className="flex justify-between items-end border-t border-dashed border-neutral-700/20 pt-3 mt-1">
                       <div className="space-y-0.5">

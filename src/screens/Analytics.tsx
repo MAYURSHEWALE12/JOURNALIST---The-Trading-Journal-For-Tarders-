@@ -2,7 +2,7 @@ import { useApp } from '../context/AppContext';
 import { Cell, PieChart, Pie, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
-import { JournalistScore } from '../components/JournalistScore';
+import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
 
 export default function Analytics() {

@@ -176,5 +176,5 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
   );
 }
 
-export { JournalistScore };
+export default JournalistScore;
 export type { JournalistScoreResult };

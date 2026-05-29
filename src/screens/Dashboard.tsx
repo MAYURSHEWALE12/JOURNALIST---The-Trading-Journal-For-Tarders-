@@ -1,12 +1,13 @@
 import {
   TrendingUp, TrendingDown, BookOpen,
-  Search, Sparkles, BarChart3, LayoutGrid, List,
+  Search, LayoutGrid, List,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { DashboardSkeleton } from '../components/Skeleton';
 import PremiumPnLChart from '../components/PremiumPnLChart';
+import KpiDashboard from '../components/KpiDashboard';
 import { exportTradesToPDF } from '../lib/pdfExporter';
 import { getWeekOfMonth, getShortTradeId } from '../types';
 
@@ -17,7 +18,7 @@ export default function Dashboard() {
     computedStats, calendarDays, assetSummary,
     filteredTrades, searchTerm, setSearchTerm, statusFilter, setStatusFilter,
     dashboardViewMode, setDashboardViewMode,
-    trades, setSelectedScreenshot,
+    setSelectedScreenshot,
     dataLoading,
     activeTrades, activeAccountId, accounts, user,
     currentYear, currentMonth, handlePrevMonth, handleNextMonth,
@@ -30,54 +31,8 @@ export default function Dashboard() {
 
   return (
     <>
-      {/* STAT WIDGETS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-        <div className={`border rounded p-5 flex flex-col justify-between transition hover:border-gray-400 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className={`flex justify-between items-center text-xs font-mono ${themeClasses.textSub}`}>
-            <span>Net Cumulative Returns</span>
-            <TrendingUp className="w-4 h-4 text-gray-400" />
-          </div>
-          <div className="mt-2.5">
-            <span className={`font-display font-bold text-2xl ${themeClasses.textMain}`}>${computedStats.totalPnl.toFixed(2)}</span>
-            <div className={`text-[10px] mt-1 font-mono ${themeClasses.textSub}`}>absolute return balance</div>
-          </div>
-        </div>
-
-        <div className={`border rounded p-5 flex flex-col justify-between transition hover:border-gray-400 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className={`flex justify-between items-center text-xs font-mono ${themeClasses.textSub}`}>
-            <span>Win Rate Ratio</span>
-            <Sparkles className="w-4 h-4 text-gray-400" />
-          </div>
-          <div className="mt-2.5">
-            <span className={`font-display font-bold text-2xl ${themeClasses.textMain}`}>{computedStats.winRate}%</span>
-            <div className={`text-[10px] mt-1 font-mono ${themeClasses.textSub}`}>{computedStats.wins} W / {computedStats.losses} L</div>
-          </div>
-        </div>
-
-        <div className={`border rounded p-5 flex flex-col justify-between transition hover:border-gray-400 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className={`flex justify-between items-center text-xs font-mono ${themeClasses.textSub}`}>
-            <span>Profit Factor Index</span>
-            <BarChart3 className="w-4 h-4 text-gray-400" />
-          </div>
-          <div className="mt-2.5">
-            <span className={`font-display font-bold text-2xl ${themeClasses.textMain}`}>{computedStats.profitFactor}</span>
-            <div className={`text-[10px] mt-1 font-mono ${themeClasses.textSub}`}>performance calculation</div>
-          </div>
-        </div>
-
-        <div className={`border rounded p-5 flex flex-col justify-between transition hover:border-gray-400 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className={`flex justify-between items-center text-xs font-mono ${themeClasses.textSub}`}>
-            <span>Average Return P/L</span>
-            <TrendingDown className="w-4 h-4 text-gray-400" />
-          </div>
-          <div className="mt-2.5">
-            <span className={`font-display font-bold text-2xl ${themeClasses.textMain}`}>${computedStats.averagePnl.toFixed(2)}</span>
-            <div className={`text-[10px] mt-1 font-mono ${themeClasses.textSub}`}>{trades.length} entries analyzed</div>
-          </div>
-        </div>
-
-      </div>
+      {/* KPI DASHBOARD */}
+      <KpiDashboard trades={activeTrades} computedStats={computedStats} themeClasses={themeClasses} isDarkMode={isDarkMode} />
 
       {/* GRAPHS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

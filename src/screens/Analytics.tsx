@@ -4,11 +4,7 @@ import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
 import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
-import LogoIcon from '../components/LogoIcon';
-import { computeJournalistScore } from '../lib/journalistScore';
-import { memo, useState } from 'react';
-import { Share2, Download, X } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { memo } from 'react';
 
 const CustomScatterTooltip = memo(function CustomScatterTooltip({ active, payload, isDarkMode }: any) {
   if (!active || !payload?.length) return null;
@@ -67,10 +63,6 @@ const CustomDonutTooltip = memo(function CustomDonutTooltip({ active, payload, i
 export default function Analytics() {
   const { themeClasses, isDarkMode, activeTrades, computedStats, dataLoading, activeAccountId, accounts, user, calendarDays, setIsExportingPDF } = useApp();
 
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [glowTheme, setGlowTheme] = useState<'slate' | 'emerald' | 'indigo'>('indigo');
-  const [isExporting, setIsExporting] = useState(false);
-
   if (dataLoading) {
     return <AnalyticsSkeleton />;
   }
@@ -101,33 +93,6 @@ export default function Analytics() {
   const uniqueTags = Array.from(new Set(activeTrades.flatMap(t => t.tags || [])));
   const winRate = activeTrades.length > 0 ? Math.round((computedStats.wins / activeTrades.length) * 100) : 0;
 
-  const scoreObj = computeJournalistScore(activeTrades);
-  const activeAccountName = accounts.find(a => a.id === activeAccountId)?.name || 'Default Account';
-
-  const exportPortfolioCard = async () => {
-    const cardElement = document.getElementById('journalist-portfolio-card');
-    if (!cardElement) return;
-    setIsExporting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 150));
-      const canvas = await html2canvas(cardElement, {
-        useCORS: true,
-        backgroundColor: null,
-        scale: 3, // Ultra-high resolution for professional look
-        logging: false,
-      });
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `Journalist_Portfolio_${activeAccountName.replace(/\s+/g, '_')}_Card.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error('Failed to export portfolio card:', err);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <Seo title="Advanced Analytics & Statistics" path="/analytics" />
@@ -137,12 +102,6 @@ export default function Analytics() {
           <p className={`text-xs ${themeClasses.textSub}`}>Discover statistical edges, duration efficiencies, and risk profiles in stark layout.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsShareModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 border rounded text-xs font-mono uppercase tracking-widest transition cursor-pointer border-indigo-800/40 bg-indigo-900/10 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20"
-          >
-            <Share2 className="w-3.5 h-3.5" /> Share Performance
-          </button>
           <button
             onClick={() => alert('Exporting portfolio metrics to CSV...')}
             className={`px-3.5 py-1.5 border text-xs rounded transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
@@ -250,160 +209,6 @@ export default function Analytics() {
           )}
         </div>
       </div>
-
-      {/* Portfolio Performance Card Modal */}
-      {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto select-none">
-          <div className="flex flex-col items-center gap-6 my-auto">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center w-full max-w-sm px-2">
-              <span className="text-white font-mono text-xs uppercase tracking-widest font-bold">Generate Performance Card</span>
-              <button 
-                onClick={() => setIsShareModalOpen(false)}
-                className="text-gray-400 hover:text-white transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* The Sharable Card Container */}
-            <div 
-              id="journalist-portfolio-card"
-              className="w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0"
-            >
-              {/* Rotating Logo Watermark */}
-              <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
-                <LogoIcon className="w-full h-full text-white" isDark={true} />
-              </div>
-
-              {/* User Profile Header */}
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase">
-                  {user?.username?.slice(0, 2) || 'TR'}
-                </div>
-                <div>
-                  <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
-                  <div className="text-gray-500 text-[9px] font-mono mt-0.5">
-                    Portfolio &bull; {activeAccountName}
-                  </div>
-                </div>
-              </div>
-
-              {/* Core Account Performance Stats */}
-              <div className="my-auto relative z-10 py-2">
-                <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold leading-none">Net cumulative profit</div>
-                
-                {/* Huge PNL display with selective Glow themes */}
-                <div className={`mt-1 font-display text-4.5xl font-black tracking-tight leading-none ${
-                  computedStats.totalPnl >= 0 
-                    ? glowTheme === 'emerald' 
-                      ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.2)]'
-                      : glowTheme === 'indigo'
-                        ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                        : 'text-emerald-400 drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]'
-                    : 'text-rose-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.15)]'
-                }`}>
-                  {computedStats.totalPnl >= 0 ? '+' : ''}${computedStats.totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </div>
-
-                {/* Sub-KPI Grid */}
-                <div className="mt-8 grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
-                  <div>
-                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Win Rate</div>
-                    <div className="text-white text-sm font-bold font-mono mt-1.5">{winRate}%</div>
-                  </div>
-                  <div>
-                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Profit Factor</div>
-                    <div className="text-white text-sm font-bold font-mono mt-1.5">{computedStats.profitFactor}x</div>
-                  </div>
-                  <div>
-                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Journal Score</div>
-                    <div className="text-indigo-400 text-sm font-bold font-mono mt-1.5">{scoreObj.score}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lower detailed metadata */}
-              <div className="border-t border-white/5 pt-4 grid grid-cols-2 gap-4 relative z-10 font-mono">
-                <div>
-                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Total Trades</div>
-                  <div className="text-white text-xs font-semibold mt-0.5">{activeTrades.length} documented</div>
-                </div>
-                <div>
-                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Journalist Level</div>
-                  <div className="text-indigo-400 text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight">
-                    {scoreObj.levelLabel}
-                  </div>
-                </div>
-              </div>
-
-              {/* Branding Footer */}
-              <div className="border-t border-white/5 pt-4 mt-4 flex items-center justify-between relative z-10 select-none">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
-                    <LogoIcon className="w-3.5 h-3.5" isDark={false} />
-                  </div>
-                  <div>
-                    <div className="text-white text-[10px] font-extrabold font-display tracking-tight leading-none">JOURNALIST</div>
-                    <div className="text-gray-500 text-[7px] font-mono mt-0.5 leading-none">Systematic Portfolio Core</div>
-                  </div>
-                </div>
-
-                {/* Vector QR Code mock */}
-                <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
-                    <rect x="1" y="1" width="7" height="7" />
-                    <rect x="16" y="1" width="7" height="7" />
-                    <rect x="16" y="16" width="7" height="7" />
-                    <rect x="1" y="16" width="7" height="7" />
-                    <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
-                    <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
-                    <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
-                    <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Control Panel */}
-            <div className="space-y-4 font-mono text-xs w-full max-w-sm px-2">
-              {/* Theme selection */}
-              <div>
-                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Select Glow Theme</label>
-                <div className="flex gap-2">
-                  {(['slate', 'emerald', 'indigo'] as const).map(t => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setGlowTheme(t)}
-                      className={`px-3 py-1 border text-[10px] font-bold rounded-lg uppercase transition cursor-pointer ${
-                        glowTheme === t
-                          ? 'bg-white text-black border-white'
-                          : `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500`
-                      }`}
-                    >
-                      {t} Glow
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Download CTA */}
-              <button
-                onClick={exportPortfolioCard}
-                disabled={isExporting}
-                className="w-full py-3 mt-2 rounded-xl text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer bg-white text-black hover:bg-gray-200"
-              >
-                {isExporting ? (
-                  <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> EXPORTING...</>
-                ) : (
-                  <><Download className="w-3.5 h-3.5" /> DOWNLOAD ACCOUNT CARD</>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

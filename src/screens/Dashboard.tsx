@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import {
-  TrendingUp, TrendingDown, BookOpen,
-  Search, LayoutGrid, List
+  TrendingUp, TrendingDown,
+  Search, LayoutGrid, List, Share2, Download, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -8,9 +9,10 @@ import { DashboardSkeleton } from '../components/Skeleton';
 import PremiumPnLChart from '../components/PremiumPnLChart';
 import KpiDashboard from '../components/KpiDashboard';
 import { exportTradesToPDF } from '../lib/pdfExporter';
-import { getWeekOfMonth, getShortTradeId } from '../types';
-
 import Seo from '../components/Seo';
+import LogoIcon from '../components/LogoIcon';
+import { computeJournalistScore } from '../lib/journalistScore';
+import html2canvas from 'html2canvas';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,20 +21,68 @@ export default function Dashboard() {
     computedStats, calendarDays, assetSummary,
     filteredTrades, searchTerm, setSearchTerm, statusFilter, setStatusFilter,
     dashboardViewMode, setDashboardViewMode,
-    setSelectedScreenshot,
     dataLoading,
     activeTrades, activeAccountId, accounts, user,
     currentYear, currentMonth, handlePrevMonth, handleNextMonth,
     setIsExportingPDF, selectedDate, setSelectedDate
   } = useApp();
 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [glowTheme, setGlowTheme] = useState<'slate' | 'emerald' | 'indigo'>('indigo');
+  const [isExporting, setIsExporting] = useState(false);
+
   if (dataLoading) {
     return <DashboardSkeleton />;
   }
 
+  const scoreObj = computeJournalistScore(activeTrades);
+  const activeAccountName = accounts.find(a => a.id === activeAccountId)?.name || 'Default Account';
+  const winRate = activeTrades.length > 0 ? Math.round((activeTrades.filter(t => t.status === 'WIN').length / activeTrades.length) * 100) : 0;
+
+  const exportPortfolioCard = async () => {
+    const cardElement = document.getElementById('journalist-portfolio-card');
+    if (!cardElement) return;
+    setIsExporting(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 150));
+      const canvas = await html2canvas(cardElement, {
+        useCORS: true,
+        backgroundColor: null,
+        scale: 3,
+        logging: false,
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `Journalist_Portfolio_${activeAccountName.replace(/\s+/g, '_')}_Card.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to export portfolio card:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <>
       <Seo title="Overview Workspace" path="/dashboard" />
+      
+      {/* Dashboard Top Header Actions */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className={`text-xl font-display font-semibold ${themeClasses.textMain}`}>Overview Workspace</h2>
+          <p className={`text-xs ${themeClasses.textSub}`}>Track separate portfolios, calendar performance heatmaps, and key statistics.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsShareModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 border rounded text-xs font-mono uppercase tracking-widest transition cursor-pointer border-indigo-800/40 bg-indigo-900/10 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20"
+          >
+            <Share2 className="w-3.5 h-3.5" /> Share Performance
+          </button>
+        </div>
+      </div>
+
       {/* KPI DASHBOARD */}
       <KpiDashboard
         trades={activeTrades}
@@ -52,72 +102,72 @@ export default function Dashboard() {
       <PremiumPnLChart trades={activeTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} />
 
       {/* ASSET PERFORMANCE SUMMARY */}
-        {assetSummary.rows.length > 0 && (
-          <div className={`border rounded p-4 md:p-5 flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border}`}>
-            <div className="flex flex-col h-full">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex flex-col gap-1">
-                  <span className={`text-xs font-semibold uppercase tracking-wider font-mono leading-tight ${themeClasses.textMain}`}>Asset Summary</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono w-max ${themeClasses.bgCard} ${themeClasses.textSub}`}>{assetSummary.rows.length} pairs tracked</span>
-                </div>
-
-                <div className="flex flex-col gap-1.5 items-end">
-                  {assetSummary.best && (
-                    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold border ${isDarkMode ? 'border-emerald-800/60 bg-emerald-950/40 text-emerald-400' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}`}>
-                      <TrendingUp className="w-2.5 h-2.5" />
-                      {assetSummary.best.asset}: +${assetSummary.best.totalPnl.toFixed(0)}
-                    </div>
-                  )}
-                  {assetSummary.worst && assetSummary.worst.totalPnl < 0 && (
-                    <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold border ${isDarkMode ? 'border-rose-800/60 bg-rose-950/40 text-rose-400' : 'border-rose-300 bg-rose-50 text-rose-700'}`}>
-                      <TrendingDown className="w-2.5 h-2.5" />
-                      {assetSummary.worst.asset}: ${assetSummary.worst.totalPnl.toFixed(0)}
-                    </div>
-                  )}
-                </div>
+      {assetSummary.rows.length > 0 && (
+        <div className={`border rounded p-4 md:p-5 flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border}`}>
+          <div className="flex flex-col h-full">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-col gap-1">
+                <span className={`text-xs font-semibold uppercase tracking-wider font-mono leading-tight ${themeClasses.textMain}`}>Asset Summary</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono w-max ${themeClasses.bgCard} ${themeClasses.textSub}`}>{assetSummary.rows.length} pairs tracked</span>
               </div>
 
-              <div className="flex-1 overflow-y-auto min-h-0 pr-1 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
-                <div className="overflow-x-auto">
-                <table className="w-full text-[10px] font-mono border-collapse">
-                  <thead className="sticky top-0 z-10 bg-inherit">
-                    <tr className={`border-b ${themeClasses.border}`}>
-                      <th className={`text-left py-1.5 pr-2 uppercase tracking-wider ${themeClasses.textSub}`}>Pair</th>
-                      <th className={`text-right py-1.5 px-1 uppercase tracking-wider ${themeClasses.textSub}`}>Trds</th>
-                      <th className={`text-right py-1.5 px-1 uppercase tracking-wider ${themeClasses.textSub}`}>Win%</th>
-                      <th className={`text-right py-1.5 pl-1 uppercase tracking-wider ${themeClasses.textSub}`}>PnL</th>
-                    </tr>
-                  </thead>
-                  <tbody className={`divide-y ${themeClasses.border}`}>
-                    {assetSummary.rows.map(row => {
-                      const winRate = row.trades > 0 ? Math.round((row.wins / row.trades) * 100) : 0;
-                      const isPositive = row.totalPnl >= 0;
-                      return (
-                        <tr key={row.asset} className={`transition ${themeClasses.bgHover}`}>
-                          <td className="py-2 pr-2">
-                            <span className={`font-bold tracking-tight ${themeClasses.textMain}`}>{row.asset}</span>
-                          </td>
-                          <td className={`py-2 px-1 text-right ${themeClasses.textSub}`}>{row.trades}</td>
-                          <td className="py-2 px-1 text-right">
-                            <span className={`font-semibold ${winRate >= 50 ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600') : (isDarkMode ? 'text-rose-400' : 'text-rose-600')}`}>
-                              {winRate}%
-                            </span>
-                          </td>
-                          <td className="py-2 pl-1 text-right">
-                            <span className={`font-bold ${isPositive ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600') : (isDarkMode ? 'text-rose-400' : 'text-rose-600')}`}>
-                              {isPositive ? '+' : ''}{row.totalPnl.toFixed(0)}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                </div>
+              <div className="flex flex-col gap-1.5 items-end">
+                {assetSummary.best && (
+                  <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold border ${isDarkMode ? 'border-emerald-800/60 bg-emerald-950/40 text-emerald-400' : 'border-emerald-300 bg-emerald-50 text-emerald-700'}`}>
+                    <TrendingUp className="w-2.5 h-2.5" />
+                    {assetSummary.best.asset}: +${assetSummary.best.totalPnl.toFixed(0)}
+                  </div>
+                )}
+                {assetSummary.worst && assetSummary.worst.totalPnl < 0 && (
+                  <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold border ${isDarkMode ? 'border-rose-800/60 bg-rose-950/40 text-rose-400' : 'border-rose-300 bg-rose-50 text-rose-700'}`}>
+                    <TrendingDown className="w-2.5 h-2.5" />
+                    {assetSummary.worst.asset}: ${assetSummary.worst.totalPnl.toFixed(0)}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto min-h-0 pr-1 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+              <div className="overflow-x-auto">
+              <table className="w-full text-[10px] font-mono border-collapse">
+                <thead className="sticky top-0 z-10 bg-inherit">
+                  <tr className={`border-b ${themeClasses.border}`}>
+                    <th className={`text-left py-1.5 pr-2 uppercase tracking-wider ${themeClasses.textSub}`}>Pair</th>
+                    <th className={`text-right py-1.5 px-1 uppercase tracking-wider ${themeClasses.textSub}`}>Trds</th>
+                    <th className={`text-right py-1.5 px-1 uppercase tracking-wider ${themeClasses.textSub}`}>Win%</th>
+                    <th className={`text-right py-1.5 pl-1 uppercase tracking-wider ${themeClasses.textSub}`}>PnL</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${themeClasses.border}`}>
+                  {assetSummary.rows.map(row => {
+                    const winRate = row.trades > 0 ? Math.round((row.wins / row.trades) * 100) : 0;
+                    const isPositive = row.totalPnl >= 0;
+                    return (
+                      <tr key={row.asset} className={`transition ${themeClasses.bgHover}`}>
+                        <td className="py-2 pr-2">
+                          <span className={`font-bold tracking-tight ${themeClasses.textMain}`}>{row.asset}</span>
+                        </td>
+                        <td className={`py-2 px-1 text-right ${themeClasses.textSub}`}>{row.trades}</td>
+                        <td className="py-2 px-1 text-right">
+                          <span className={`font-semibold ${winRate >= 50 ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600') : (isDarkMode ? 'text-rose-400' : 'text-rose-600')}`}>
+                            {winRate}%
+                          </span>
+                        </td>
+                        <td className="py-2 pl-1 text-right">
+                          <span className={`font-bold ${isPositive ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600') : (isDarkMode ? 'text-rose-400' : 'text-rose-600')}`}>
+                            {isPositive ? '+' : ''}{row.totalPnl.toFixed(0)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {/* TABLE DB */}
       <div className={`border rounded p-4 md:p-5 space-y-4 ${themeClasses.bgPanel} ${themeClasses.border}`}>
@@ -198,115 +248,37 @@ export default function Dashboard() {
                 const exitTimeRaw = t.exitTime ? new Date(t.exitTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
                 const exitTime = exitTimeRaw && exitTimeRaw !== entryTime ? exitTimeRaw : '';
 
-                const screenshots = t.screenshotUrls && t.screenshotUrls.length > 0
-                  ? t.screenshotUrls
-                  : (t.screenshotUrl ? [t.screenshotUrl] : []);
-
                 return (
-                  <div
-                    key={t.id}
-                    className={`border rounded-lg overflow-hidden flex flex-col justify-between transition-all duration-200 hover:border-gray-400 ${themeClasses.bgPanel} ${themeClasses.border} shadow-sm`}
-                  >
-                    {/* Screenshot Header (if exists) */}
-                    {screenshots.length > 0 ? (
-                      <div className="h-28 md:h-36 flex divide-x divide-white/10 overflow-hidden border-b border-border-subtle relative group cursor-pointer">
-                        {screenshots.map((url, idx) => (
-                          <div
-                            key={idx}
-                            className="flex-1 h-full overflow-hidden relative group/img bg-black/5"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedScreenshot(url || null);
-                            }}
-                          >
-                            <img
-                              src={url}
-                              alt={`${t.asset} setup ${idx + 1}`}
-                              className="w-full h-full object-cover grayscale group-hover/img:grayscale-0 group-hover/img:scale-105 transition-all duration-300"
-                            />
-                          </div>
-                        ))}
-                        <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-sm text-[9px] font-mono px-1.5 py-0.5 rounded text-white border border-white/10 uppercase pointer-events-none">
-                          {screenshots.length > 1 ? `${screenshots.length} Screenshots` : 'Screenshot'}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className={`h-28 md:h-36 flex items-center justify-center border-b ${themeClasses.border} ${themeClasses.bgCard} opacity-60 text-gray-500`}>
-                        <BookOpen className="w-5 h-5 opacity-40 mr-1.5" />
-                        <span className="text-[10px] font-mono tracking-tight uppercase">Journaled Trade Notes Only</span>
-                      </div>
-                    )}
-
-                    {/* Core Card Body */}
-                    <div className="p-3 md:p-4 space-y-3 flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="min-w-0 shrink">
-                            <h4 className={`text-sm font-bold tracking-tight truncate ${themeClasses.textMain}`}>{t.asset}</h4>
-                            <span className="text-[8px] md:text-[9px] font-mono text-gray-500">{entryDate} • {entryTime}{exitTime ? `-${exitTime}` : ''}</span>
-                          </div>
-                          <span className={`font-mono text-xs font-bold shrink-0 ${t.netPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
-                            {t.netPnl >= 0 ? `+$${t.netPnl.toFixed(2)}` : `-$${Math.abs(t.netPnl).toFixed(2)}`}
-                          </span>
-                        </div>
-
-                        {/* Submetrics row */}
-                        <div className="flex flex-wrap gap-1 mt-2.5">
-                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-mono font-bold border ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${t.direction === 'LONG' ? 'bg-brand-emerald' : 'bg-brand-rose'}`} />
+                  <div key={t.id}
+                    onClick={() => navigate(`/trade/${t.id}`)}
+                    className={`border rounded-xl p-5 md:p-6 transition select-none flex flex-col justify-between space-y-4 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 cursor-pointer ${themeClasses.bgPanel} ${themeClasses.border} hover:border-gray-500`}>
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] uppercase font-mono font-bold px-1.5 py-0.5 rounded leading-none ${t.direction === 'LONG' ? (isDarkMode ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50' : 'bg-emerald-50 text-emerald-700 border border-emerald-200') : (isDarkMode ? 'bg-rose-950 text-rose-400 border border-rose-900/50' : 'bg-rose-50 text-rose-700 border border-rose-200')}`}>
                             {t.direction}
                           </span>
-
-                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-mono font-bold border ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'WIN' ? 'bg-brand-emerald animate-pulse' : t.status === 'LOSS' ? 'bg-brand-rose' : 'bg-gray-400'}`} />
-                            {t.status}
-                          </span>
-
-                          {t.strategy && (
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-sans border ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub}`}>
-                              {t.strategy}
-                            </span>
-                          )}
+                          <span className={`text-xs font-black uppercase tracking-tight ${themeClasses.textMain}`}>{t.asset}</span>
                         </div>
-
-                        {/* Tags row */}
-                        {t.tags && t.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {t.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="text-[7px] md:text-[8px] font-mono px-1.5 py-0.2 bg-white/5 border border-white/10 rounded text-gray-400">
-                                #{tag.toUpperCase()}
-                              </span>
-                            ))}
-                            {t.tags.length > 3 && (
-                              <span className="text-[7px] md:text-[8px] font-mono px-1.5 py-0.2 text-gray-500">
-                                +{t.tags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Short notes preview */}
-                        <p className={`text-[9px] md:text-[10px] leading-relaxed mt-2.5 font-sans line-clamp-2 ${themeClasses.textSub}`}>
-                          {t.notes}
+                        <p className={`text-[10px] font-mono ${themeClasses.textSub}`}>
+                          {entryDate} &bull; {entryTime}{exitTime ? `-${exitTime}` : ''}
                         </p>
                       </div>
+                      <span className={`px-2.5 py-1 text-[9px] font-mono font-black uppercase tracking-wider rounded border leading-none ${t.status === 'WIN' ? (isDarkMode ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald' : 'border-emerald-300 bg-emerald-100 text-emerald-800') : t.status === 'LOSS' ? (isDarkMode ? 'border-brand-rose/40 bg-brand-rose/10 text-brand-rose' : 'border-rose-300 bg-rose-100 text-rose-800') : (isDarkMode ? 'border-gray-600 bg-gray-800 text-gray-300' : 'border-gray-300 bg-gray-200 text-gray-700')}`}>
+                        {t.status}
+                      </span>
+                    </div>
 
-                      {/* Psychology Tags */}
-                      <div className="pt-2 border-t border-border-subtle/40 flex justify-between items-center gap-2">
-                        <div className="flex gap-1 flex-wrap min-w-0">
-                          {t.emotionalState && t.emotionalState.slice(0, 2).map((em) => (
-                            <span key={em} className="text-[7px] md:text-[8px] font-mono text-gray-500 border border-gray-500/20 px-1 py-0.5 rounded truncate">
-                              {em}
-                            </span>
-                          ))}
+                    <div className="flex justify-between items-end border-t border-dashed border-neutral-700/20 pt-3 mt-1">
+                      <div className="space-y-0.5">
+                        <span className={`text-[8px] uppercase tracking-widest font-mono ${themeClasses.textSub}`}>Net Result</span>
+                        <div className={`font-display text-lg font-extrabold ${t.netPnl >= 0 ? (isDarkMode ? 'text-brand-emerald' : 'text-emerald-600') : (isDarkMode ? 'text-brand-rose' : 'text-rose-600')}`}>
+                          {t.netPnl >= 0 ? '+' : ''}${t.netPnl.toFixed(2)}
                         </div>
-
-                        <button
-                          onClick={() => navigate('/trade/' + t.id)}
-                          className={`px-2 py-1 border rounded text-[8px] md:text-[9px] font-bold tracking-tight transition cursor-pointer shrink-0 ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
-                        >
-                          Review
-                        </button>
+                      </div>
+                      <div className="text-right space-y-0.5">
+                        <span className={`text-[8px] uppercase tracking-widest font-mono ${themeClasses.textSub}`}>Realized R</span>
+                        <div className={`font-mono text-xs font-semibold ${themeClasses.textMain}`}>{t.realizedR}R</div>
                       </div>
                     </div>
                   </div>
@@ -315,89 +287,233 @@ export default function Dashboard() {
             </div>
           )
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: isDarkMode ? '1px solid #26272B' : '1px solid #e5e7eb' }}>
-                  <th className="pb-3 pl-3 font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase">ID</th>
-                  <th className="pb-3 font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase">Asset</th>
-                  <th className="pb-3 hidden sm:table-cell font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase">Direction</th>
-                  <th className="pb-3 hidden md:table-cell font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase">Strategy</th>
-                  <th className="pb-3 font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase">W/L</th>
-                  <th className="pb-3 font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase">PnL</th>
-                  <th className="pb-3 pr-3 text-right font-normal text-[10px] md:text-[11px] text-gray-500 font-mono uppercase"></th>
-                </tr>
-              </thead>
-              <tbody className="text-[10px] md:text-xs font-mono">
-                {filteredTrades.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-12 text-center text-gray-500 text-sm font-sans">
-                      No trades matched your filters.
-                    </td>
+          filteredTrades.length === 0 ? (
+            <div className="py-12 text-center text-gray-500 font-mono text-xs">No trading logs matched active database records.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className={`border-b font-mono text-[9px] uppercase tracking-widest ${themeClasses.textSub}`}>
+                    <th className="py-3 px-3">Date</th>
+                    <th className="py-3 px-1">Pair</th>
+                    <th className="py-3 px-1">Direction</th>
+                    <th className="py-3 px-1">Outcome</th>
+                    <th className="py-3 px-1 text-right">Size</th>
+                    <th className="py-3 px-1 text-right">R-Multiple</th>
+                    <th className="py-3 px-3 text-right">Net P&L</th>
+                    <th className="py-3 pr-3"></th>
                   </tr>
-                ) : (
-                  filteredTrades.map((t) => (
-                    <tr key={t.id} className="transition" style={{ borderBottom: isDarkMode ? '1px solid #26272B' : '1px solid #f3f4f6' }}>
-                      <td className={`py-2.5 md:py-3.5 pl-3 font-mono font-medium ${themeClasses.textSub}`}>
-                        <div className="truncate max-w-[50px] md:max-w-none">{getShortTradeId(t.id)}</div>
-                        <div className="text-[8px] md:text-[9px] text-gray-400 font-sans mt-0.5">{getWeekOfMonth(t.entryTime)}</div>
+                </thead>
+                <tbody className={`divide-y text-xs font-mono ${themeClasses.border} ${themeClasses.textMain}`}>
+                  {filteredTrades.map((t) => {
+                    const rowDate = new Date(t.entryTime).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    });
+                    return (
+                      <tr key={t.id}
+                        onClick={() => navigate(`/trade/${t.id}`)}
+                        className={`transition cursor-pointer ${themeClasses.bgHover}`}>
+                        <td className="py-2.5 md:py-3 px-3 text-gray-500">{rowDate}</td>
+                        <td className="py-2.5 md:py-3 px-1 font-bold">{t.asset}</td>
+                        <td className="py-2.5 md:py-3 px-1">
+                          <span className={`font-bold ${t.direction === 'LONG' ? 'text-emerald-500' : 'text-rose-500'}`}>{t.direction}</span>
+                        </td>
+                        <td className="py-2.5 md:py-3 px-1">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${t.status === 'WIN' ? 'bg-emerald-500/10 text-emerald-400' : t.status === 'LOSS' ? 'bg-rose-500/10 text-rose-400' : 'bg-gray-500/10 text-gray-400'}`}>
+                            {t.status}
+                          </span>
+                        </td>
+                        <td className="py-2.5 md:py-3 px-1 text-right">{t.quantity}</td>
+                        <td className="py-2.5 md:py-3 px-1 text-right">{t.realizedR}R</td>
+                        <td className={`py-2.5 md:py-3 px-3 text-right font-bold ${t.netPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {t.netPnl >= 0 ? '+' : ''}${t.netPnl.toFixed(2)}
+                        </td>
+                        <td className="py-2.5 md:py-3 pr-3 text-right text-gray-600 hover:text-white transition">&rarr;</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                {filteredTrades.length > 1 && (
+                  <tfoot>
+                    <tr className={`border-t border-double font-bold uppercase tracking-widest font-mono text-[9px] ${themeClasses.border} ${themeClasses.textSub}`}>
+                      <td className="py-3 px-3">Total Cumulative</td>
+                      <td colSpan={5}></td>
+                      <td className="py-2.5 md:py-3 font-mono text-xs md:text-sm font-bold text-right" style={{
+                        color: (() => {
+                          const total = filteredTrades.reduce((s, t) => s + t.netPnl, 0);
+                          return total > 0 ? '#10b981' : total < 0 ? '#f43f5e' : isDarkMode ? '#ccc' : '#333';
+                        })(),
+                      }}>
+                        {(() => {
+                          const total = filteredTrades.reduce((s, t) => s + t.netPnl, 0);
+                          return total >= 0 ? `+$${total.toFixed(2)}` : `-$${Math.abs(total).toFixed(2)}`;
+                        })()}
                       </td>
-                      <td className={`py-2.5 md:py-3.5 font-sans font-bold ${themeClasses.textMain}`}>{t.asset}</td>
-                      <td className="py-2.5 md:py-3.5 hidden sm:table-cell">
-                        <span className={`inline-flex items-center gap-1.5 px-1.5 md:px-2 py-0.5 rounded text-[9px] md:text-[10px] font-semibold border ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${t.direction === 'LONG' ? 'bg-brand-emerald' : 'bg-brand-rose'}`} />
-                          {t.direction}
-                        </span>
-                      </td>
-                      <td className={`py-2.5 md:py-3.5 font-sans hidden md:table-cell ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t.strategy}</td>
-                      <td className="py-2.5 md:py-3.5 whitespace-nowrap">
-                        <span className={`inline-block w-1.5 h-1.5 md:w-2 md:h-2 rounded-full mr-1 md:mr-2 ${t.status === 'WIN' ? 'bg-brand-emerald animate-pulse' : t.status === 'LOSS' ? 'bg-brand-rose' : 'bg-gray-400'}`} />
-                        <span className={`text-[9px] md:text-[11px] uppercase ${themeClasses.textSub}`}>{t.status}</span>
-                      </td>
-                      <td className={`py-2.5 md:py-3.5 font-bold ${themeClasses.textMain} whitespace-nowrap`}>
-                        <span className="text-[10px] md:text-xs" style={{ color: t.netPnl > 0 ? '#10b981' : t.netPnl < 0 ? '#f43f5e' : undefined }}>
-                          {t.netPnl >= 0 ? `+$${t.netPnl.toFixed(0)}` : `-$${Math.abs(t.netPnl).toFixed(0)}`}
-                        </span>
-                      </td>
-                      <td className="py-2.5 md:py-3.5 pr-3 text-right">
-                        <button
-                          onClick={() => navigate('/trade/' + t.id)}
-                          className={`px-2 md:px-2.5 py-1 border rounded text-[9px] md:text-[10px] transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
-                        >
-                          Open
-                        </button>
-                      </td>
+                      <td className="pr-3"></td>
                     </tr>
-                  ))
+                  </tfoot>
                 )}
-              </tbody>
-              {filteredTrades.length > 0 && (
-                <tfoot>
-                  <tr style={{ borderTop: isDarkMode ? '2px solid #26272B' : '2px solid #e5e7eb' }}>
-                    <td colSpan={4} className="py-2.5 md:py-3 pl-3">
-                      <span className={`font-mono text-[9px] md:text-[10px] uppercase tracking-wider`} style={{ color: isDarkMode ? '#666' : '#999' }}>
-                        Total
-                      </span>
-                    </td>
-                    <td className="py-2.5 md:py-3 font-mono text-xs md:text-sm font-bold" style={{
-                      color: (() => {
-                        const total = filteredTrades.reduce((s, t) => s + t.netPnl, 0);
-                        return total > 0 ? '#10b981' : total < 0 ? '#f43f5e' : isDarkMode ? '#ccc' : '#333';
-                      })(),
-                    }}>
-                      {(() => {
-                        const total = filteredTrades.reduce((s, t) => s + t.netPnl, 0);
-                        return total >= 0 ? `+$${total.toFixed(0)}` : `-$${Math.abs(total).toFixed(0)}`;
-                      })()}
-                    </td>
-                    <td className="pr-3"></td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
+              </table>
+            </div>
+          )
         )}
       </div>
+
+      {/* Portfolio Performance Card Modal */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto select-none">
+          <div className="flex flex-col items-center gap-6 my-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center w-full max-w-sm px-2">
+              <span className="text-white font-mono text-xs uppercase tracking-widest font-bold">Generate Performance Card</span>
+              <button 
+                onClick={() => setIsShareModalOpen(false)}
+                className="text-gray-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* The Sharable Card Container */}
+            <div 
+              id="journalist-portfolio-card"
+              className="w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0"
+            >
+              {/* Rotating Logo Watermark */}
+              <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
+                <LogoIcon className="w-full h-full text-white" isDark={true} />
+              </div>
+
+              {/* User Profile Header */}
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase">
+                  {user?.username?.slice(0, 2) || 'TR'}
+                </div>
+                <div>
+                  <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
+                  <div className="text-gray-500 text-[9px] font-mono mt-0.5">
+                    Portfolio &bull; {activeAccountName}
+                  </div>
+                </div>
+              </div>
+
+              {/* Core Account Performance Stats */}
+              <div className="my-auto relative z-10 py-2">
+                <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold leading-none">Net cumulative profit</div>
+                
+                {/* Huge PNL display with selective Glow themes */}
+                <div className={`mt-1 font-display text-4.5xl font-black tracking-tight leading-none ${
+                  computedStats.totalPnl >= 0 
+                    ? glowTheme === 'emerald' 
+                      ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.2)]'
+                      : glowTheme === 'indigo'
+                        ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                        : 'text-emerald-400 drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]'
+                    : 'text-rose-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.15)]'
+                }`}>
+                  {computedStats.totalPnl >= 0 ? '+' : ''}${computedStats.totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+
+                {/* Sub-KPI Grid */}
+                <div className="mt-8 grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+                  <div>
+                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Win Rate</div>
+                    <div className="text-white text-sm font-bold font-mono mt-1.5">{winRate}%</div>
+                  </div>
+                  <div>
+                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Profit Factor</div>
+                    <div className="text-white text-sm font-bold font-mono mt-1.5">{computedStats.profitFactor}x</div>
+                  </div>
+                  <div>
+                    <div className="text-[8px] uppercase tracking-wider text-gray-500 font-bold font-mono leading-none">Journal Score</div>
+                    <div className="text-indigo-400 text-sm font-bold font-mono mt-1.5">{scoreObj.score}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lower detailed metadata */}
+              <div className="border-t border-white/5 pt-4 grid grid-cols-2 gap-4 relative z-10 font-mono">
+                <div>
+                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Total Trades</div>
+                  <div className="text-white text-xs font-semibold mt-0.5">{activeTrades.length} documented</div>
+                </div>
+                <div>
+                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold">Journalist Level</div>
+                  <div className="text-indigo-400 text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight">
+                    {scoreObj.levelLabel}
+                  </div>
+                </div>
+              </div>
+
+              {/* Branding Footer */}
+              <div className="border-t border-white/5 pt-4 mt-4 flex items-center justify-between relative z-10 select-none">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
+                    <LogoIcon className="w-3.5 h-3.5" isDark={false} />
+                  </div>
+                  <div>
+                    <div className="text-white text-[10px] font-extrabold font-display tracking-tight leading-none">JOURNALIST</div>
+                    <div className="text-gray-500 text-[7px] font-mono mt-0.5 leading-none">Systematic Portfolio Core</div>
+                  </div>
+                </div>
+
+                {/* Vector QR Code mock */}
+                <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
+                    <rect x="1" y="1" width="7" height="7" />
+                    <rect x="16" y="1" width="7" height="7" />
+                    <rect x="16" y="16" width="7" height="7" />
+                    <rect x="1" y="16" width="7" height="7" />
+                    <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
+                    <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
+                    <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
+                    <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Control Panel */}
+            <div className="space-y-4 font-mono text-xs w-full max-w-sm px-2">
+              {/* Theme selection */}
+              <div>
+                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Select Glow Theme</label>
+                <div className="flex gap-2">
+                  {(['slate', 'emerald', 'indigo'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setGlowTheme(t)}
+                      className={`px-3 py-1 border text-[10px] font-bold rounded-lg uppercase transition cursor-pointer ${
+                        glowTheme === t
+                          ? 'bg-white text-black border-white'
+                          : `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500`
+                      }`}
+                    >
+                      {t} Glow
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Download CTA */}
+              <button
+                onClick={exportPortfolioCard}
+                disabled={isExporting}
+                className="w-full py-3 mt-2 rounded-xl text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer bg-white text-black hover:bg-gray-200"
+              >
+                {isExporting ? (
+                  <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> EXPORTING...</>
+                ) : (
+                  <><Download className="w-3.5 h-3.5" /> DOWNLOAD ACCOUNT CARD</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

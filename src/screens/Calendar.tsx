@@ -169,8 +169,8 @@ export default function Calendar() {
           </p>
         </div>
 
-        {/* Aggregated Quick-Stats bar (Grid-cols-3 on mobile to remain side-by-side) */}
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-3 w-full md:w-auto md:flex md:items-center">
+        {/* Aggregated Quick-Stats bar (Grid-cols-3 to maintain identical uniform widths across both mobile and desktop) */}
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-3 w-full md:w-[420px] shrink-0">
           <div className={`px-2 py-1.5 sm:px-4 sm:py-2.5 border rounded-xl flex items-center gap-1.5 sm:gap-3 transition-colors duration-200 bg-white/40 dark:bg-white/[0.02] ${themeClasses.border} w-full justify-center sm:justify-start`}>
             <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${monthlyPnl >= 0 ? 'bg-brand-emerald animate-pulse' : 'bg-brand-rose'} shrink-0`} />
             <div>

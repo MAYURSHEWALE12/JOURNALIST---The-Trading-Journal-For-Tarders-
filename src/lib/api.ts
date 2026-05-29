@@ -24,10 +24,8 @@ function isSupabaseSession(): boolean {
 }
 
 async function supabaseFetch(path: string, options: RequestInit = {}): Promise<Response> {
-  // Get token directly from our stored value (set by onAuthStateChange)
   const token = getAccessToken();
   const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1${path}`;
-  console.log(`supabaseFetch ${path}: token=${token ? token.slice(0, 20) + '...' : 'NONE'}`);
   const res = await fetch(url, {
     ...options,
     headers: {
@@ -37,10 +35,6 @@ async function supabaseFetch(path: string, options: RequestInit = {}): Promise<R
       ...(options.headers || {}),
     },
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    console.log(`supabaseFetch ${path} ERROR ${res.status}: ${body.slice(0, 200)}`);
-  }
   return res;
 }
 

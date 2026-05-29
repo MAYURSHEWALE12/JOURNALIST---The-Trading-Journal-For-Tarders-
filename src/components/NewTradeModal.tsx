@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, X, Brain } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
 import { EMOTIONAL_STATES } from '../types';
@@ -198,8 +198,8 @@ export default function NewTradeModal() {
                     const isSelected = newTradeData.emotions.includes(em);
                     return (
                       <button type="button" key={em} onClick={() => toggleEmotion(em)}
-                        className={`py-1.5 border rounded text-[10px] font-mono tracking-tight font-semibold cursor-pointer transition ${isSelected ? 'bg-white text-black border-white' : `bg-bg-hover text-gray-400 hover:text-white ${themeClasses.border}`}`}>
-                        🎭 {em}
+                        className={`flex items-center justify-center gap-1.5 py-1.5 border rounded text-[10px] font-mono tracking-tight font-semibold cursor-pointer transition ${isSelected ? 'bg-white text-black border-white' : `bg-bg-hover text-gray-400 hover:text-white ${themeClasses.border}`}`}>
+                        <Brain className="w-3 h-3" /> {em}
                       </button>
                     );
                   })}

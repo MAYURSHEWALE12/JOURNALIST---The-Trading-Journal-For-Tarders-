@@ -65,6 +65,10 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  avatarUrl?: string;
+  tradingBio?: string;
+  twitterHandle?: string;
+  telegramHandle?: string;
 }
 
 export interface NewAccountData {

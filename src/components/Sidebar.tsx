@@ -1,7 +1,6 @@
-import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Search, User, Link, KeyRound } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Search, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { authLinkGoogle, authSetPassword } from '../lib/api';
 import LogoIcon from './LogoIcon';
 
 const NAV_ITEMS = [
@@ -17,7 +16,7 @@ export default function Sidebar() {
     themeClasses, isDarkMode, sidebarCollapsed, setSidebarCollapsed,
     mobileMenuOpen, setMobileMenuOpen,
     activeAccountId, setActiveAccountId, accounts, setIsAddAccountOpen,
-    user, handleLogOut, setIsCommandOpen,
+    user, handleLogOut, setIsCommandOpen, setIsSettingsOpen,
   } = useApp();
 
   return (
@@ -87,44 +86,33 @@ export default function Sidebar() {
         </div>
 
         <div className={`p-3 border-t ${themeClasses.border}`}>
-          {!sidebarCollapsed && (
-            <div className="space-y-1.5 mb-3">
-              <button onClick={async () => {
-                try {
-                  const pwd = prompt('Enter a new password (min 6 chars):');
-                  if (pwd && pwd.length >= 6) {
-                    await authSetPassword(pwd);
-                    alert('Password set! You can now sign in with email + password too.');
-                  }
-                } catch (err) { alert('Failed: ' + (err as Error).message); }
-              }}
-                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded text-[10px] transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textSub}`}>
-                <KeyRound className="w-3 h-3" /> Set Password
-              </button>
-              <button onClick={async () => {
-                try {
-                  await authLinkGoogle();
-                } catch (err) { alert('Failed: ' + (err as Error).message); }
-              }}
-                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded text-[10px] transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textSub}`}>
-                <Link className="w-3 h-3" /> Link Google Account
-              </button>
-            </div>
-          )}
-          <div className="flex items-center space-x-3 overflow-hidden">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${themeClasses.bgCard}`}>
-              <User className={`w-4 h-4 ${isDarkMode ? 'text-white' : 'text-black'}`} />
+          {/* Interactive, hoverable user block that opens Settings Modal */}
+          <button 
+            onClick={() => { setIsSettingsOpen(true); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center space-x-3 p-1.5 rounded-xl transition text-left cursor-pointer ${themeClasses.bgHover}`}
+          >
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden relative ${themeClasses.bgCard} border border-white/[0.08]`}>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <User className={`w-4 h-4 ${isDarkMode ? 'text-white' : 'text-black'}`} />
+              )}
             </div>
             {!sidebarCollapsed && (
-              <div className="flex flex-col text-left overflow-hidden">
-                <span className={`text-xs font-semibold truncate ${themeClasses.textMain}`}>{user ? (user.username || user.email.split('@')[0]) : 'Guest User'}</span>
-                <span className="text-[10px] text-gray-400 truncate">{user ? user.email : 'Offline Mode'}</span>
+              <div className="flex-1 flex flex-col text-left overflow-hidden">
+                <span className={`text-xs font-semibold truncate ${themeClasses.textMain}`}>
+                  {user ? (user.username || user.email.split('@')[0]) : 'Guest User'}
+                </span>
+                <span className="text-[9px] text-gray-500 truncate font-mono">
+                  {user?.tradingBio || (user ? user.email : 'Offline Mode')}
+                </span>
               </div>
             )}
-          </div>
+          </button>
+          
           {!sidebarCollapsed && (
             <button onClick={handleLogOut}
-              className={`w-full mt-4 py-1.5 border rounded text-[10px] transition cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textSub}`}>
+              className={`w-full mt-3 py-1.5 border rounded text-[10px] transition cursor-pointer ${themeClasses.border} ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textSub}`}>
               {user ? '⎋ Sign Out' : 'Exit guest mode'}
             </button>
           )}

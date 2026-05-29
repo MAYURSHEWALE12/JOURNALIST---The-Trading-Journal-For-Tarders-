@@ -12,6 +12,7 @@ import NewAccountModal from './components/NewAccountModal';
 import EditTradeModal from './components/EditTradeModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import ScreenshotModal from './components/ScreenshotModal';
+import SettingsModal from './components/SettingsModal';
 
 const AuthPage = lazy(() => import('./screens/AuthPage'));
 const ForgotPassword = lazy(() => import('./screens/ForgotPassword'));
@@ -39,6 +40,7 @@ function WorkspaceLayout({ children }: { children: React.ReactNode }) {
       <EditTradeModal />
       <DeleteConfirmModal />
       <ScreenshotModal />
+      <SettingsModal />
     </div>
   );
 }

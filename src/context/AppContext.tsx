@@ -173,6 +173,9 @@ interface AppContextValue {
   setCurrentMonth: React.Dispatch<React.SetStateAction<number>>;
   handlePrevMonth: () => void;
   handleNextMonth: () => void;
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  updateUserProfile: (updates: Partial<Omit<User, 'id' | 'email'>>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue>(null as unknown as AppContextValue);
@@ -320,6 +323,55 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setChangeLoading(false);
     }
   }, [changeOldPassword, changeNewPassword]);
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const updateUserProfile = useCallback(async (updates: Partial<Omit<User, 'id' | 'email'>>) => {
+    if (!user) return;
+    const updatedUser = { ...user, ...updates };
+    setUser(updatedUser);
+    localStorage.setItem('journalist_user', JSON.stringify(updatedUser));
+
+    if (isSupabaseConfigured()) {
+      try {
+        const { getSupabase } = await import('../lib/supabase');
+        const supabase = getSupabase();
+        
+        // Update Supabase Auth User Metadata
+        await supabase.auth.updateUser({
+          data: {
+            username: updates.username,
+            avatar_url: updates.avatarUrl,
+            trading_bio: updates.tradingBio,
+            twitter_handle: updates.twitterHandle,
+            telegram_handle: updates.telegramHandle,
+          }
+        });
+        
+        // Also update the public profiles table
+        const token = localStorage.getItem('journalist_jwt');
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}`;
+        await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            username: updates.username,
+            avatar_url: updates.avatarUrl,
+            trading_bio: updates.tradingBio,
+            twitter_handle: updates.twitterHandle,
+            telegram_handle: updates.telegramHandle,
+          })
+        });
+      } catch (err) {
+        console.error('Failed to sync profile to Supabase:', err);
+      }
+    }
+  }, [user]);
 
   const handleLogOut = useCallback(() => {
     setUser(null);
@@ -915,6 +967,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     handlePrevMonth, handleNextMonth,
     selectedDate, setSelectedDate,
     isCreatingTrade, isEditingTrade, isDeletingTrade, isCreatingAccount,
+    isSettingsOpen, setIsSettingsOpen, updateUserProfile,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -452,8 +452,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
 
       // Listen first so we never miss SIGNED_IN
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (cancelled) return;
+        if (session?.access_token) {
+          api.setAccessToken(session.access_token);
+        }
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           loadData();
         }

@@ -201,7 +201,7 @@ export default function Calendar() {
         </div>
 
         {/* Premium Grid of Day Cards (Separated by Gap, matching reference design) */}
-        <div className="grid grid-cols-7 gap-2 md:gap-3">
+        <div className="grid grid-cols-7 gap-1.5 md:gap-2">
           {cells.map((cell, index) => {
             const dayTrades = tradesByDate[cell.dateString] || [];
             const dayPnl = dayTrades.reduce((sum, t) => sum + t.netPnl, 0);
@@ -242,22 +242,22 @@ export default function Calendar() {
               <div 
                 key={`${cell.dateString}-${index}`}
                 onClick={() => hasTrades && setSelectedDayTrades({ day: cell.day, trades: dayTrades })}
-                className={`min-h-[85px] md:min-h-[110px] p-3 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${hasTrades ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
+                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${hasTrades ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
                 {/* Day label */}
-                <div className="flex justify-between items-start">
-                  <span className={`text-[11px] md:text-xs font-mono font-bold ${numberColor}`}>
+                <div className="flex justify-between items-start leading-none">
+                  <span className={`text-[10px] md:text-xs font-mono font-bold ${numberColor}`}>
                     {cell.day}
                   </span>
                   
                   {/* Subtle dots for notes / screenshots */}
                   {hasTrades && cell.isCurrentMonth && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
                       {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
+                        <span className="w-1 h-1 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
                       )}
                       {dayTrades.some(t => t.screenshotUrl) && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500/80 dark:bg-violet-400/80" title="Has Screenshots" />
+                        <span className="w-1 h-1 rounded-full bg-violet-500/80 dark:bg-violet-400/80" title="Has Screenshots" />
                       )}
                     </div>
                   )}
@@ -265,16 +265,16 @@ export default function Calendar() {
 
                 {/* Day aggregates (PNL & Trades Count) */}
                 {hasTrades && cell.isCurrentMonth ? (
-                  <div className="space-y-0.5 text-right mt-2">
-                    <p className={`text-xs md:text-sm font-mono font-extrabold ${pnlColor}`}>
+                  <div className="space-y-0 text-right mt-1 leading-none">
+                    <p className={`text-[10px] md:text-xs font-mono font-extrabold ${pnlColor}`}>
                       {dayPnl >= 0 ? '+' : ''}${Math.round(dayPnl).toLocaleString()}
                     </p>
-                    <p className={`text-[8px] md:text-[9px] uppercase font-mono tracking-widest ${themeClasses.textSub}`}>
-                      {dayTrades.length} {dayTrades.length === 1 ? 'trade' : 'trades'}
+                    <p className={`text-[7px] md:text-[8px] uppercase font-mono tracking-widest ${themeClasses.textSub}`}>
+                      {dayTrades.length} {dayTrades.length === 1 ? 'tr' : 'trs'}
                     </p>
                   </div>
                 ) : (
-                  <div className="h-6" /> // Placeholder layout balancer
+                  <div className="h-4" /> // Placeholder layout balancer
                 )}
               </div>
             );

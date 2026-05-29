@@ -164,7 +164,7 @@ export default function TradeDetail() {
               <span className="hidden xs:inline">|</span>
               <span>{trade.strategy}</span>
               <span>|</span>
-              <span className="text-xs">{formatTradeTime(trade.entryTime, trade.exitTime)}</span>
+              <span className="text-[11px] sm:text-xs whitespace-nowrap opacity-90">{formatTradeTime(trade.entryTime, trade.exitTime)}</span>
             </div>
           </div>
           <div className="text-right">

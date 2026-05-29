@@ -2,7 +2,6 @@ import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Search, User, 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { authLinkGoogle, authSetPassword } from '../lib/api';
-import { isSupabaseConfigured } from '../lib/supabase';
 import LogoIcon from './LogoIcon';
 
 const NAV_ITEMS = [

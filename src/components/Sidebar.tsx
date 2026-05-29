@@ -1,6 +1,8 @@
-import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Search, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Search, User, Link, KeyRound } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { authLinkGoogle, authSetPassword } from '../lib/api';
+import { isSupabaseConfigured } from '../lib/supabase';
 import LogoIcon from './LogoIcon';
 
 const NAV_ITEMS = [
@@ -75,7 +77,31 @@ export default function Sidebar() {
             <button onClick={() => { setIsCommandOpen(true); setMobileMenuOpen(false); }}
               className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded text-sm text-gray-400 transition-all cursor-pointer ${themeClasses.bgHover}`}>
               <Search className="w-4.5 h-4.5" />
-              {!sidebarCollapsed && (
+          {!sidebarCollapsed && (
+            <div className="space-y-1 mb-2">
+              <button onClick={async () => {
+                try {
+                  const pwd = prompt('Enter a new password (min 6 chars):');
+                  if (pwd && pwd.length >= 6) {
+                    await authSetPassword(pwd);
+                    alert('Password set! You can now sign in with email + password too.');
+                  }
+                } catch (err) { alert('Failed: ' + (err as Error).message); }
+              }}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded text-[10px] transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textSub}`}>
+                <KeyRound className="w-3 h-3" /> Set Password
+              </button>
+              <button onClick={async () => {
+                try {
+                  await authLinkGoogle();
+                } catch (err) { alert('Failed: ' + (err as Error).message); }
+              }}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded text-[10px] transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.bgHover} ${themeClasses.textSub}`}>
+                <Link className="w-3 h-3" /> Link Google Account
+              </button>
+            </div>
+          )}
+          {!sidebarCollapsed && (
                 <div className="flex-1 flex justify-between items-center">
                   <span>Command Bar</span>
                   <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">⌘K</kbd>

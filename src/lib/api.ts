@@ -219,6 +219,21 @@ export async function authSignInWithGoogle(): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function authLinkGoogle(): Promise<void> {
+  const { error } = await getSupabase().auth.linkIdentity({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/dashboard',
+    },
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function authSetPassword(password: string): Promise<void> {
+  const { error } = await getSupabase().auth.updateUser({ password });
+  if (error) throw new Error(error.message);
+}
+
 export async function authMe(): Promise<User> {
   if (isSupabaseSession()) {
     const { data, error } = await getSupabase().auth.getUser();

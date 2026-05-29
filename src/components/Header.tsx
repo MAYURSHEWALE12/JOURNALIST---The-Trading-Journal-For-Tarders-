@@ -1,5 +1,6 @@
 import { Sliders, Sun, Moon, Plus, Bell } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import LogoIcon from './LogoIcon';
 
 export default function Header() {
   const {
@@ -15,7 +16,12 @@ export default function Header() {
           <Sliders className="w-5 h-5 rotate-90" />
         </button>
         <div className={`text-sm md:text-base font-bold flex items-center gap-3 font-mono tracking-wide ${themeClasses.textMain}`}>
-          <span>JOURNALIST</span>
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${isDarkMode ? 'bg-white' : 'bg-black'}`}>
+              <LogoIcon className="w-3.5 h-3.5" isDark={isDarkMode} />
+            </div>
+            <span>JOURNALIST</span>
+          </div>
           <span className={`hidden sm:inline-block px-2.5 py-0.5 rounded text-[9px] md:text-[10px] font-mono font-bold tracking-wider ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
             {user ? 'DATABASE' : 'OFFLINE'}
           </span>

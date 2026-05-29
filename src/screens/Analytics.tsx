@@ -2,6 +2,7 @@ import { useApp } from '../context/AppContext';
 import { Cell, PieChart, Pie, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
+import { JournalistScore } from '../components/JournalistScore';
 
 export default function Analytics() {
   const { themeClasses, isDarkMode, activeTrades, computedStats, dataLoading, activeAccountId, accounts, user, calendarDays, setIsExportingPDF } = useApp();
@@ -59,7 +60,12 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <JournalistScore trades={activeTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} />
+        </div>
+        <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className={`border rounded p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>
           <span className={`text-xs font-semibold uppercase tracking-wider font-mono block mb-4 ${themeClasses.textMain}`}>Planned R-Ratio vs Realized R-Ratio Scatter</span>
           <div className="h-64">
@@ -109,6 +115,8 @@ export default function Analytics() {
             <span className="font-semibold">● Breakevens: {activeTrades.filter(t => t.status === 'BREAKEVEN').length}</span>
           </div>
         </div>
+      </div>
+      </div>
       </div>
 
       <div className={`border rounded p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>

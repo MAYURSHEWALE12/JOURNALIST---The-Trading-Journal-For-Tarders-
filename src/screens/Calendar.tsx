@@ -375,7 +375,7 @@ export default function Calendar() {
               </div>
               <button 
                 onClick={() => setSelectedDayTrades(null)}
-                className={`p-1.5 rounded-full border transition-all cursor-pointer ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textSub}`}
+                className={`p-1.5 rounded-full border transition-all cursor-pointer hidden sm:block ${themeClasses.border} ${themeClasses.bgHover} ${themeClasses.textSub}`}
               >
                 <X className="w-4 h-4" />
               </button>

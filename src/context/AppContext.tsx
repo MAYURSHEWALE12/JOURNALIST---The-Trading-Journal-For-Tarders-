@@ -444,10 +444,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!token && !isSupabaseConfigured()) return;
     try {
       const data = await api.fetchTrades();
-      if (data.length > 0) {
-        setTrades(data);
-        localStorage.setItem('journalist_sandbox_trades', JSON.stringify(data));
-      }
+      setTrades(data);
+      localStorage.setItem('journalist_sandbox_trades', JSON.stringify(data));
     } catch (err) {
       if ((err as Error).message === 'UNAUTHORIZED') { handleLogOut(); return; }
       const saved = localStorage.getItem('journalist_sandbox_trades');
@@ -823,7 +821,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await api.updateTrade(updated.id, updated);
       await loadTradesFromServer();
     } catch {
-      setTrades(prev => prev.map(t => t.id === updated.id ? updated : t));
+      setTrades(prev => {
+        const u = prev.map(t => t.id === updated.id ? updated : t);
+        localStorage.setItem('journalist_sandbox_trades', JSON.stringify(u));
+        return u;
+      });
     }
     setIsEditingTrade(false);
     setIsEditTradeOpen(false);
@@ -832,11 +834,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const handleDeleteTrade = async (tradeId: string) => {
     setIsDeletingTrade(true);
+    const updated = trades.filter(t => t.id !== tradeId);
     try {
       await api.deleteTrade(tradeId);
+      setTrades(updated);
+      localStorage.setItem('journalist_sandbox_trades', JSON.stringify(updated));
       await loadTradesFromServer();
     } catch {
-      setTrades(prev => prev.filter(t => t.id !== tradeId));
+      setTrades(updated);
+      localStorage.setItem('journalist_sandbox_trades', JSON.stringify(updated));
     }
     setIsDeletingTrade(false);
     setDeleteConfirmId(null);

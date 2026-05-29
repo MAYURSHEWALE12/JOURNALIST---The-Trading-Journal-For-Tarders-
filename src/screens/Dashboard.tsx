@@ -3,20 +3,17 @@ import {
   Search, Sparkles, BarChart3, LayoutGrid, List,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { DashboardSkeleton } from '../components/Skeleton';
-import { exportTradesToPDF } from '../lib/pdfExporter';
+import PremiumPnLChart from '../components/PremiumPnLChart';
 import { getWeekOfMonth, getShortTradeId } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const {
     themeClasses, isDarkMode,
-    computedStats, equityCurveData, calendarDays, assetSummary,
+    computedStats, calendarDays, assetSummary,
     filteredTrades, searchTerm, setSearchTerm, statusFilter, setStatusFilter,
     dashboardViewMode, setDashboardViewMode,
     trades, setSelectedScreenshot,
@@ -84,38 +81,9 @@ export default function Dashboard() {
       {/* GRAPHS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Equity Curve */}
-        <div className={`border rounded p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className="flex justify-between items-center mb-4">
-            <span className={`text-xs font-semibold uppercase tracking-wider font-mono ${themeClasses.textMain}`}>Account Balance Equity Curve</span>
-            <span className={`text-[10px] border px-2 py-0.5 rounded font-mono ${isDarkMode ? 'border-brand-blue/20 text-brand-blue' : 'border-black/20 text-black'}`}>PREMIUM GRAPHICS</span>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={equityCurveData}>
-                <defs>
-                  <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={isDarkMode ? '#3a86ff' : '#000000'} stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor={isDarkMode ? '#3a86ff' : '#000000'} stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                <XAxis dataKey="trial" stroke="rgba(128,128,128,0.5)" fontSize={10} />
-                <YAxis stroke="rgba(128,128,128,0.5)" fontSize={10} domain={['auto', 'auto']} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDarkMode ? '#000000' : '#ffffff',
-                    borderColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-                    borderRadius: 4,
-                    color: isDarkMode ? '#fff' : '#000'
-                  }}
-                  labelStyle={{ color: '#aaa', fontSize: 11 }}
-                  itemStyle={{ color: isDarkMode ? '#fff' : '#000', fontSize: 12 }}
-                />
-                <Area type="monotone" dataKey="balance" stroke={isDarkMode ? '#3a86ff' : '#000000'} strokeWidth={1.5} fillOpacity={1} fill="url(#colorBalance)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+        {/* Premium P&L Chart */}
+        <div className="lg:col-span-2">
+          <PremiumPnLChart trades={activeTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} />
         </div>
 
         {/* Calendar Heatmap */}

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Search, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Calendar, Search, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { path: '/dashboard', label: 'Overview Workspace', icon: Compass },
   { path: '/analytics', label: 'Advanced Analytics', icon: BarChart3 },
   { path: '/timeline', label: 'Journal Timeline', icon: BookOpen },
+  { path: '/calendar', label: 'Trading Calendar', icon: Calendar },
 ];
 
 export default function Sidebar() {

@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import('./screens/Dashboard'));
 const Analytics = lazy(() => import('./screens/Analytics'));
 const Timeline = lazy(() => import('./screens/Timeline'));
 const TradeDetail = lazy(() => import('./screens/TradeDetail'));
+const Calendar = lazy(() => import('./screens/Calendar'));
 
 function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const { themeClasses } = useApp();
@@ -91,6 +92,12 @@ function TradeDetailPage() {
   return <TradeDetail />;
 }
 
+function CalendarPage() {
+  const { accounts } = useApp();
+  if (accounts.length === 0) return <EmptyAccountsPage />;
+  return <Calendar />;
+}
+
 function ExportingOverlay() {
   const { isExportingPDF } = useApp();
   if (!isExportingPDF) return null;
@@ -130,6 +137,7 @@ export default function App() {
               <Route path="/dashboard" element={<WorkspaceLayout><DashboardPage /></WorkspaceLayout>} />
               <Route path="/analytics" element={<WorkspaceLayout><AnalyticsPage /></WorkspaceLayout>} />
               <Route path="/timeline" element={<WorkspaceLayout><TimelinePage /></WorkspaceLayout>} />
+              <Route path="/calendar" element={<WorkspaceLayout><CalendarPage /></WorkspaceLayout>} />
               <Route path="/trade/:tradeId" element={<WorkspaceLayout><TradeDetailPage /></WorkspaceLayout>} />
             </Routes>
             <CursorFollower />

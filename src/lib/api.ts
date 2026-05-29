@@ -181,7 +181,7 @@ export async function authLogin(body: { email: string; password: string }): Prom
       .from('profiles')
       .select('username, email')
       .eq('id', data.user.id)
-      .single() as unknown as { data: { username: string; email: string } | null; error: unknown };
+      .maybeSingle() as unknown as { data: { username: string; email: string } | null; error: unknown };
 
     const user: User = {
       id: data.user.id,
@@ -218,7 +218,7 @@ export async function authMe(): Promise<User> {
       .from('profiles')
       .select('username, email')
       .eq('id', data.user.id)
-      .single() as unknown as { data: { username: string; email: string } | null; error: unknown };
+      .maybeSingle() as unknown as { data: { username: string; email: string } | null; error: unknown };
 
     return {
       id: data.user.id,

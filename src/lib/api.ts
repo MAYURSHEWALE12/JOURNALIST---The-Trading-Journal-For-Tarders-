@@ -314,12 +314,6 @@ export async function authMe(): Promise<User> {
           telegramHandle,
         };
       }
-
-      // No profile yet — trigger may not have fired, try INSERT once (may fail RLS, that's ok)
-      await supabaseFetch('/profiles', {
-        method: 'POST',
-        body: JSON.stringify({ id: authUser.id, username: displayName, email }),
-      });
     } catch {
       // Fallback to metadata
     }

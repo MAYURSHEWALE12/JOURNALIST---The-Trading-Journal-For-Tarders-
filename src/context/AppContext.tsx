@@ -422,20 +422,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('journalist_jwt');
 
-    const checkSession = async () => {
-      if (!isSupabaseConfigured()) { setDataLoading(false); return; }
-      try {
-        const { data } = await (await import('../lib/supabase')).getSupabase().auth.getSession();
-        if (data.session) {
-          const su = await api.authMe();
-          setUser(su);
-          localStorage.setItem('journalist_user', JSON.stringify(su));
-          await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
-        }
-      } catch { /* no session */ }
-      setDataLoading(false);
-    };
-
     if (token && user) {
       api.authMe()
         .then(async () => {
@@ -443,9 +429,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(() => { handleLogOut(); })
         .finally(() => { setDataLoading(false); });
-    } else {
-      checkSession();
+      return;
     }
+
+    if (!isSupabaseConfigured()) { setDataLoading(false); return; }
+
+    let cancelled = false;
+
+    (async () => {
+      const { getSupabase } = await import('../lib/supabase');
+      const supabase = getSupabase();
+
+      const loadData = async () => {
+        try {
+          const su = await api.authMe();
+          if (cancelled) return;
+          setUser(su);
+          localStorage.setItem('journalist_user', JSON.stringify(su));
+          await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
+        } catch { /* failed */ }
+        if (!cancelled) setDataLoading(false);
+      };
+
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (data.session) {
+        await loadData();
+        return;
+      }
+
+      // No session yet — listen for OAuth redirect
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+        if (cancelled) return;
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await loadData();
+        }
+      });
+
+      // If still no session after 3s, stop loading
+      setTimeout(() => {
+        if (!cancelled) setDataLoading(false);
+        subscription?.unsubscribe();
+      }, 3000);
+    })();
+
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

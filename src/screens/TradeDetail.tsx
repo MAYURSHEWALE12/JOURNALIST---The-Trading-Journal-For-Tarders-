@@ -320,14 +320,14 @@ export default function TradeDetail() {
 
       {/* Share Card Modal Overlay */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto select-none">
-          <div className="flex flex-col items-center gap-6 my-auto">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto select-none">
+          <div className="flex flex-col items-center gap-5 my-auto w-full max-w-[340px] sm:max-w-sm py-4">
             {/* Modal Header */}
-            <div className="flex justify-between items-center w-full max-w-sm px-2">
-              <span className="text-white font-mono text-xs uppercase tracking-widest font-bold">Generate PNL Card</span>
+            <div className="flex justify-between items-center w-full px-1">
+              <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate PNL Card</span>
               <button 
                 onClick={() => setIsShareModalOpen(false)}
-                className="text-gray-400 hover:text-white transition cursor-pointer"
+                className="text-gray-400 hover:text-white transition cursor-pointer p-1 rounded-full hover:bg-white/5"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -336,7 +336,7 @@ export default function TradeDetail() {
             {/* The Sharable Card DOM Target */}
             <div 
               id="journalist-share-card"
-              className="w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0"
+              className="w-full max-w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0"
             >
               {/* Rotating Logo Watermark */}
               <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
@@ -355,15 +355,22 @@ export default function TradeDetail() {
                 <div>
                   <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
                   <div className="text-gray-500 text-[9px] font-mono mt-0.5">
-                    {user?.tradingBio || 'Systematic Trader'} &bull; {new Date(trade.entryTime).toISOString().slice(0, 10)}
+                    {user?.tradingBio || 'Systematic Trader'} &bull; {new Date(trade.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
               </div>
 
               {/* Trade Details Block */}
               <div className="my-auto relative z-10 py-4">
-                <div className="text-white font-display text-xl font-black uppercase tracking-tight">
-                  {trade.asset}
+                <div className="flex items-center gap-2">
+                  <div className="text-white font-display text-xl font-black uppercase tracking-tight">{trade.asset}</div>
+                  <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider border ${
+                    trade.status === 'WIN'
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      : trade.status === 'LOSS'
+                        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                        : 'bg-white/5 text-gray-400 border-white/10'
+                  }`}>{trade.status}</span>
                 </div>
                 
                 <div className="mt-1 flex items-center gap-1.5 font-mono">
@@ -474,19 +481,21 @@ export default function TradeDetail() {
             <div className="space-y-4 font-mono text-xs w-full max-w-sm px-2">
               {/* Type Select */}
               <div>
-                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Select Information</label>
-                <div className="flex gap-4">
+                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Show On Card</label>
+                <div className="flex gap-2">
                   {(['pnl', 'roi', 'both'] as const).map(t => (
-                    <label key={t} className="flex items-center gap-1.5 cursor-pointer text-gray-400 hover:text-white select-none">
-                      <input
-                        type="radio"
-                        name="shareType"
-                        checked={shareType === t}
-                        onChange={() => setShareType(t)}
-                        className="accent-indigo-500 cursor-pointer"
-                      />
-                      <span className="uppercase text-[9px] font-semibold">{t === 'both' ? 'PNL & ROI' : t}</span>
-                    </label>
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setShareType(t)}
+                      className={`flex-1 py-1.5 border rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition cursor-pointer ${
+                        shareType === t
+                          ? 'bg-white text-black border-white'
+                          : `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`
+                      }`}
+                    >
+                      {t === 'both' ? 'Both' : t.toUpperCase()}
+                    </button>
                   ))}
                 </div>
               </div>

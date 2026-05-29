@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Trade, Account, Stats, TickerPrices, User, NewAccountData, NewTradeData, EditTradeData, CalendarDay } from '../types';
 import { getShortTradeId } from '../types';
 import { INITIAL_TRADES } from '../data/mockTrades';
+import { isSupabaseConfigured } from '../lib/supabase';
 import * as api from '../lib/api';
 
 const generateId = (prefix: string = 'id') => `${prefix}-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -426,6 +427,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('journalist_jwt');
     const supabaseSession = localStorage.getItem('supabase_session');
+
+    // Check for Supabase session from email confirmation redirect
+    const checkSupabaseSession = async () => {
+      if (!isSupabaseConfigured()) return;
+      try {
+        const { data } = await (await import('../lib/supabase')).getSupabase().auth.getSession();
+        if (data.session) {
+          localStorage.setItem('supabase_session', 'true');
+          const su = await api.authMe();
+          setUser(su);
+          localStorage.setItem('journalist_user', JSON.stringify(su));
+          await Promise.all([loadAccountsFromServer(), loadTradesFromServer()]);
+        }
+      } catch { /* no session */ }
+    };
+
     if (token && user) {
       api.authMe()
         .then(async () => {
@@ -445,6 +462,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           handleLogOut();
         })
         .finally(() => { setDataLoading(false); });
+    } else {
+      checkSupabaseSession().finally(() => { setDataLoading(false); });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

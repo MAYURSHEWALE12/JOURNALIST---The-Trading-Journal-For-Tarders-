@@ -146,19 +146,20 @@ function ProgressRing({ value }: { value: number }) {
 }
 
 function KpiCard({
-  kpi, isDarkMode, themeClasses, icon, type = 'default',
+  kpi, isDarkMode, themeClasses, icon, type = 'default', className = '',
 }: {
   kpi: KpiMeta;
   isDarkMode: boolean;
   themeClasses: any;
   icon: React.ReactNode;
   type?: 'default' | 'winrate' | 'profitfactor';
+  className?: string;
 }) {
   const health = healthLabel(kpi.health);
   const isUp = kpi.change > 0;
   const isDown = kpi.change < 0;
   return (
-    <div className={`group relative border rounded-xl p-3 sm:p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800`}>
+    <div className={`group relative border rounded-xl p-3 sm:p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800 ${className}`}>
       {/* Tooltip on hover */}
       <div className="absolute top-4 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-help z-10 hidden sm:block">
         <div className="relative">
@@ -591,13 +592,14 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
 
       {/* Secondary KPIs Grid (2-column layout on mobile to maintain visual balance) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 md:gap-4">
-        {secondaryKpis.map((kpi) => (
+        {secondaryKpis.map((kpi, idx) => (
           <KpiCard
             key={kpi.label}
             kpi={kpi}
             isDarkMode={isDarkMode}
             themeClasses={themeClasses}
             icon={<Zap className="w-3.5 h-3.5 text-gray-400" />}
+            className={idx === 4 ? 'col-span-2 md:col-span-1' : ''}
           />
         ))}
       </div>

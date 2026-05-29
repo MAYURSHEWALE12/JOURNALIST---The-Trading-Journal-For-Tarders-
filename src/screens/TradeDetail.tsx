@@ -8,6 +8,24 @@ import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
 import html2canvas from 'html2canvas-pro';
 
+const formatTradeTime = (entryStr: string, exitStr: string | null) => {
+  const entryDate = new Date(entryStr);
+  const entryFormatted = entryDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + 
+    ', ' + entryDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    
+  if (!exitStr) return `${entryFormatted} (${getWeekOfMonth(entryStr)})`;
+  
+  const exitDate = new Date(exitStr);
+  const isSameDay = entryDate.toDateString() === exitDate.toDateString();
+  
+  const exitFormatted = isSameDay 
+    ? exitDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+    : exitDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + 
+      ', ' + exitDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      
+  return `${entryFormatted} (${getWeekOfMonth(entryStr)}) ➔ ${exitFormatted}`;
+};
+
 export default function TradeDetail() {
   const { tradeId } = useParams();
   const navigate = useNavigate();
@@ -88,30 +106,40 @@ export default function TradeDetail() {
         path={`/trade/${tradeId}`} 
       />
       {/* Top Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
           onClick={() => navigate('/dashboard')}
-          className={`flex items-center gap-2 text-xs font-mono uppercase tracking-widest transition-colors cursor-pointer ${themeClasses.textSub} hover:text-white`}
+          className={`flex items-center gap-2 text-xs font-mono uppercase tracking-widest transition-colors cursor-pointer ${themeClasses.textSub} hover:text-white self-start`}
         >
           <ChevronLeft className="w-4 h-4" /> Back to Logs
         </button>
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setIsShareModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-mono uppercase tracking-widest transition cursor-pointer border-indigo-800/40 bg-indigo-900/10 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20"
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer ${
+              isDarkMode 
+                ? 'border-indigo-800/40 bg-indigo-900/10 text-indigo-400 hover:border-indigo-500 hover:bg-indigo-900/20' 
+                : 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-100'
+            }`}
           >
             <Share2 className="w-3.5 h-3.5" /> Share Card
           </button>
           <button
             onClick={() => handleOpenEditTrade(trade)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-mono uppercase tracking-widest transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-white hover:text-white`}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} ${
+              isDarkMode ? 'hover:border-white hover:text-white' : 'hover:border-gray-500 hover:text-gray-900'
+            }`}
           >
             ✏️ Edit Trade
           </button>
           <button
             onClick={() => setDeleteConfirmId(trade.id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-mono uppercase tracking-widest transition cursor-pointer border-rose-800/40 bg-rose-900/10 text-rose-400 hover:border-rose-500 hover:bg-rose-900/20"
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 border rounded-lg text-[10px] sm:text-xs font-mono uppercase tracking-widest transition cursor-pointer ${
+              isDarkMode 
+                ? 'border-rose-800/40 bg-rose-900/10 text-rose-400 hover:border-rose-500 hover:bg-rose-900/20' 
+                : 'border-rose-200 bg-rose-50 text-rose-600 hover:border-rose-400 hover:bg-rose-100'
+            }`}
           >
             🗑️ Delete
           </button>
@@ -119,7 +147,7 @@ export default function TradeDetail() {
       </div>
 
       {/* Header Card */}
-      <div className={`border rounded p-6 md:p-8 ${themeClasses.bgPanel} ${themeClasses.border}`}>
+      <div className={`border rounded-xl p-6 md:p-8 ${themeClasses.bgPanel} ${themeClasses.border}`}>
         <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6 mb-6 ${isDarkMode ? 'border-border-subtle' : 'border-gray-200'}`}>
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -128,15 +156,15 @@ export default function TradeDetail() {
                 {trade.status}
               </span>
             </div>
-            <div className={`text-sm font-mono flex flex-wrap items-center gap-x-4 gap-y-1 ${themeClasses.textSub}`}>
+            <div className={`text-sm font-mono flex flex-wrap items-center gap-x-4 gap-y-1.5 ${themeClasses.textSub}`}>
               <span className="flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${trade.direction === 'LONG' ? 'bg-brand-emerald' : 'bg-brand-rose'}`} />
                 {trade.direction}
               </span>
-              <span>|</span>
+              <span className="hidden xs:inline">|</span>
               <span>{trade.strategy}</span>
               <span>|</span>
-              <span>{new Date(trade.entryTime).toLocaleString()} ({getWeekOfMonth(trade.entryTime)}){trade.exitTime ? ` - ${new Date(trade.exitTime).toLocaleString()}` : ''}</span>
+              <span className="text-xs">{formatTradeTime(trade.entryTime, trade.exitTime)}</span>
             </div>
           </div>
           <div className="text-right">

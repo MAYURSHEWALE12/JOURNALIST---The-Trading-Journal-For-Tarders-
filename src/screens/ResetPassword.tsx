@@ -39,7 +39,9 @@ export default function ResetPassword() {
     e.preventDefault();
     if (isSupabase && supabaseRecovery) {
       // For Supabase, token/email params are unused – session is already set from hash
-      handleResetPassword('', '', resetPassword);
+      // handleResetPassword reads resetPassword from state internally
+      handleResetPassword('', '');
+      return;
     }
   };
 

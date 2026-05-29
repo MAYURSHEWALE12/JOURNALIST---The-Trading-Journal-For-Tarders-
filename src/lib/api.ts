@@ -147,7 +147,7 @@ export async function authRegister(body: { username: string; email: string; pass
       id: data.user.id,
       username: body.username,
       email: body.email,
-    });
+    } as never);
 
     const user: User = { id: data.user.id, username: body.username, email: body.email };
     return { token: data.session?.access_token || '', user };
@@ -175,7 +175,7 @@ export async function authLogin(body: { email: string; password: string }): Prom
       .from('profiles')
       .select('username, email')
       .eq('id', data.user.id)
-      .single();
+      .single() as unknown as { data: { username: string; email: string } | null; error: unknown };
 
     const user: User = {
       id: data.user.id,
@@ -212,7 +212,7 @@ export async function authMe(): Promise<User> {
       .from('profiles')
       .select('username, email')
       .eq('id', data.user.id)
-      .single();
+      .single() as unknown as { data: { username: string; email: string } | null; error: unknown };
 
     return {
       id: data.user.id,

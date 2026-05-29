@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, HelpCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, HelpCircle, Activity, Award, ShieldAlert, Zap } from 'lucide-react';
 import type { Trade } from '../types';
 import { computeJournalistScore, type JournalistScoreResult } from '../lib/journalistScore';
 
@@ -42,20 +42,48 @@ function pct(a: number, b: number) {
 }
 
 function healthLabel(h: HealthStatus) {
-  const m: Record<HealthStatus, { label: string; cls: string }> = {
-    excellent: { label: 'Excellent', cls: 'text-emerald-500' },
-    good: { label: 'Good', cls: 'text-blue-500' },
-    average: { label: 'Average', cls: 'text-amber-500' },
-    needsImprovement: { label: 'Needs Work', cls: 'text-rose-500' },
+  const m: Record<HealthStatus, { label: string; cls: string; dot: string }> = {
+    excellent: { label: 'Excellent', cls: 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5', dot: 'bg-emerald-500 animate-pulse' },
+    good: { label: 'Good', cls: 'text-sky-500 border-sky-500/20 bg-sky-500/5', dot: 'bg-sky-500' },
+    average: { label: 'Average', cls: 'text-amber-500 border-amber-500/20 bg-amber-500/5', dot: 'bg-amber-500' },
+    needsImprovement: { label: 'Needs Work', cls: 'text-rose-500 border-rose-500/20 bg-rose-500/5', dot: 'bg-rose-500 animate-ping' },
   };
   return m[h];
 }
 
 function MetricTooltip({ label, tooltip, isDarkMode }: { label: string; tooltip: string; isDarkMode: boolean }) {
+  const parts = tooltip.split('|');
+  const formula = parts[0]?.trim();
+  const whatItIs = parts[1]?.trim();
+  const whyItMatters = parts[2]?.trim();
+
   return (
-    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-xl text-[10px] font-mono shadow-xl border min-w-[200px] z-50 pointer-events-none ${isDarkMode ? 'bg-[#181818] border-white/10 text-gray-300' : 'bg-white border-gray-200 text-gray-600'}`}>
-      <div className={`font-semibold mb-1 text-xs ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{label}</div>
-      <div className="leading-relaxed">{tooltip}</div>
+    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-4 rounded-xl text-[10px] font-sans shadow-2xl border min-w-[240px] max-w-[275px] z-50 pointer-events-none transition-all duration-200 backdrop-blur-md leading-relaxed ${
+      isDarkMode 
+        ? 'bg-black/95 border-white/[0.08] text-gray-300' 
+        : 'bg-white/95 border-black/[0.08] text-gray-600'
+    }`}>
+      <div className={`font-display font-bold text-xs mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{label}</div>
+      {formula && (
+        <div className="mb-2">
+          <span className="text-[9px] uppercase tracking-wider font-mono text-gray-500 block mb-0.5">Formula</span>
+          <code className={`px-1.5 py-0.5 rounded font-mono text-[9px] block truncate ${isDarkMode ? 'bg-white/5 text-gray-200' : 'bg-black/5 text-gray-800'}`}>
+            {formula}
+          </code>
+        </div>
+      )}
+      {whatItIs && (
+        <div className="mb-2">
+          <span className="text-[9px] uppercase tracking-wider font-mono text-gray-500 block mb-0.5">Calculation</span>
+          {whatItIs}
+        </div>
+      )}
+      {whyItMatters && (
+        <div>
+          <span className="text-[9px] uppercase tracking-wider font-mono text-gray-500 block mb-0.5">Why it matters</span>
+          <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>{whyItMatters}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -63,7 +91,7 @@ function MetricTooltip({ label, tooltip, isDarkMode }: { label: string; tooltip:
 function MiniSparkline({ data, color }: { data: { v: number }[]; color: string }) {
   if (data.length < 2) return null;
   return (
-    <div className="h-8 w-20">
+    <div className="h-8 w-20 shrink-0">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <defs>
@@ -79,62 +107,103 @@ function MiniSparkline({ data, color }: { data: { v: number }[]; color: string }
   );
 }
 
+function ProgressArc({ value, max = 3 }: { value: number; max?: number }) {
+  const percentage = Math.min((value / max) * 100, 100);
+  const radius = 16;
+  const stroke = 3;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <svg height={radius * 2} width={radius * 2} className="shrink-0 animate-pulse">
+      <circle stroke="currentColor" fill="transparent" strokeWidth={stroke} strokeDasharray={circumference + ' ' + circumference} style={{ strokeDashoffset }} r={normalizedRadius} cx={radius} cy={radius} className="text-emerald-500/80 transition-all duration-500" />
+      <circle stroke="rgba(128,128,128,0.15)" fill="transparent" strokeWidth={stroke} r={normalizedRadius} cx={radius} cy={radius} />
+    </svg>
+  );
+}
+
+function ProgressRing({ value }: { value: number }) {
+  const radius = 16;
+  const stroke = 3;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
+
+  return (
+    <svg height={radius * 2} width={radius * 2} className="shrink-0">
+      <circle stroke="rgba(128,128,128,0.15)" fill="transparent" strokeWidth={stroke} r={normalizedRadius} cx={radius} cy={radius} />
+      <circle stroke="currentColor" fill="transparent" strokeWidth={stroke} strokeDasharray={circumference + ' ' + circumference} style={{ strokeDashoffset }} r={normalizedRadius} cx={radius} cy={radius} className="text-sky-500 transition-all duration-500" />
+    </svg>
+  );
+}
+
 function KpiCard({
-  kpi, isDarkMode, themeClasses, icon,
+  kpi, isDarkMode, themeClasses, icon, type = 'default',
 }: {
   kpi: KpiMeta;
   isDarkMode: boolean;
   themeClasses: any;
   icon: React.ReactNode;
+  type?: 'default' | 'winrate' | 'profitfactor';
 }) {
   const health = healthLabel(kpi.health);
   const isUp = kpi.change > 0;
   const isDown = kpi.change < 0;
   return (
-    <div className={`group relative border rounded-xl p-5 transition-all duration-200 hover:border-gray-400 ${themeClasses.bgPanel} ${themeClasses.border}`}>
+    <div className={`group relative border rounded-xl p-5 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-[1px] hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border} hover:border-neutral-400/50 dark:hover:border-neutral-800`}>
       {/* Tooltip on hover */}
-      <div className="absolute top-3 right-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-help z-10">
+      <div className="absolute top-4 right-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-help z-10">
         <div className="relative">
-          <HelpCircle className="w-3.5 h-3.5" />
+          <HelpCircle className="w-3.5 h-3.5 hover:text-neutral-300 transition-colors" />
           <MetricTooltip label={kpi.label} tooltip={kpi.tooltip} isDarkMode={isDarkMode} />
         </div>
       </div>
 
-      <div className="flex items-start justify-between mb-2">
+      <div className="flex items-start justify-between mb-3">
         <div className={`text-[10px] font-mono font-semibold uppercase tracking-wider ${themeClasses.textSub}`}>{kpi.label}</div>
-        <div className="shrink-0">{icon}</div>
+        <div className="shrink-0 bg-black/5 dark:bg-white/5 p-1.5 rounded-lg border border-neutral-500/10">{icon}</div>
       </div>
 
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <div className={`text-2xl font-display font-bold tracking-tight ${themeClasses.textMain}`}>{kpi.value}</div>
-          {kpi.sparklineData && kpi.sparklineData.length >= 2 && (
-            <div className="mt-1">
-              {/* Sparkline hidden on smallest screens */}
-            </div>
-          )}
         </div>
-        {kpi.sparklineData && kpi.sparklineData.length >= 2 && (
-          <MiniSparkline data={kpi.sparklineData} color={kpi.health === 'needsImprovement' ? '#ef4444' : '#22c55e'} />
+        {type === 'winrate' && (
+          <ProgressRing value={parseFloat(kpi.value)} />
+        )}
+        {type === 'profitfactor' && (
+          <ProgressArc value={parseFloat(kpi.value)} />
+        )}
+        {type === 'default' && kpi.sparklineData && kpi.sparklineData.length >= 2 && (
+          <MiniSparkline data={kpi.sparklineData} color={kpi.health === 'needsImprovement' ? '#f43f5e' : '#10b981'} />
         )}
       </div>
 
-      <div className="mt-2 flex items-center gap-2 text-[10px] font-mono">
-        {isUp && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-        {isDown && <TrendingDown className="w-3 h-3 text-rose-500" />}
-        {!isUp && !isDown && <Minus className="w-3 h-3 text-gray-400" />}
-        <span className={isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-gray-400'}>
-          {kpi.change > 0 ? '+' : ''}{kpi.change.toFixed(1)}%
+      <div className="mt-3 flex items-center justify-between border-t border-neutral-500/5 pt-2 text-[10px] font-mono">
+        <div className="flex items-center gap-1.5">
+          {isUp && <TrendingUp className="w-3 h-3 text-emerald-500" />}
+          {isDown && <TrendingDown className="w-3 h-3 text-rose-500" />}
+          {!isUp && !isDown && <Minus className="w-3 h-3 text-gray-400" />}
+          <span className={isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-gray-400'}>
+            {kpi.change > 0 ? '+' : ''}{kpi.change.toFixed(1)}%
+          </span>
+          <span className="text-gray-400">vs prev period</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-[9px] text-gray-400">Benchmark:</span>
+          <span className={`text-[9px] font-semibold ${themeClasses.textMain}`}>{kpi.benchmark}</span>
+        </div>
+      </div>
+
+      <div className="mt-2.5 flex items-center justify-between">
+        <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${health.cls}`}>
+          <span className={`w-1 h-1 rounded-full ${health.dot}`} />
+          {health.label}
         </span>
-        <span className={themeClasses.textSub}>vs prev period</span>
       </div>
 
-      <div className="mt-1.5 flex items-center gap-2 text-[10px] font-mono">
-        <span className={`text-[9px] font-semibold uppercase tracking-wider ${health.cls}`}>{health.label}</span>
-        <span className={`text-[9px] ${themeClasses.textSub}`}>| Bench: {kpi.benchmark}</span>
-      </div>
-
-      <div className={`mt-1.5 text-[9px] font-mono leading-relaxed ${themeClasses.textSub}`}>
+      <div className={`mt-2.5 text-[9px] font-mono leading-relaxed border-l-2 border-neutral-500/10 pl-2 py-0.5 ${themeClasses.textSub}`}>
         {kpi.insight}
       </div>
     </div>
@@ -174,13 +243,6 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
 
     const avgRMultiple = trades.filter(t => t.plannedR > 0).reduce((s, t) => s + (t.realizedR / t.plannedR), 0) / Math.max(1, trades.filter(t => t.plannedR > 0).length);
 
-    const holdingTimes = trades.filter(t => t.entryTime && t.exitTime).map(t => {
-      const e = new Date(t.entryTime).getTime();
-      const x = new Date(t.exitTime).getTime();
-      return (x - e) / (1000 * 60 * 60);
-    });
-    const avgHoldingHours = holdingTimes.length > 0 ? holdingTimes.reduce((s, v) => s + v, 0) / holdingTimes.length : 0;
-
     const sortedByDate = [...trades].sort((a, b) => a.entryTime.localeCompare(b.entryTime));
     let running = 0;
     let peak = 0;
@@ -217,16 +279,6 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
     const winRate1 = firstHalf.length > 0 ? (firstHalf.filter(t => t.status === 'WIN').length / firstHalf.length) * 100 : 0;
     const winRate2 = secondHalf.length > 0 ? (secondHalf.filter(t => t.status === 'WIN').length / secondHalf.length) * 100 : 0;
 
-    const sharpeRatio = (() => {
-      if (dailyPnl.length < 5) return 0;
-      const mean = dailyPnl.reduce((s, v) => s + v, 0) / dailyPnl.length;
-      const sqDiffs = dailyPnl.map(v => (v - mean) ** 2);
-      const variance = sqDiffs.reduce((s, v) => s + v, 0) / (dailyPnl.length - 1);
-      const sd = Math.sqrt(variance);
-      if (sd === 0) return 0;
-      return (mean / sd) * Math.sqrt(252);
-    })();
-
     function makeKpi(
       label: string,
       value: string,
@@ -254,9 +306,9 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         `$${pnl1.toFixed(0)}`,
         pct(pnl2, pnl1),
         totalPnl > 0 ? (pf >= 2 ? 'excellent' : 'good') : 'needsImprovement',
-        'Positive',
-        'Total profit or loss across all closed trades.',
-        totalPnl > 0 ? `Profitable across ${total} trades.` : 'Focus on cutting losses to improve.',
+        '> $0',
+        'Sum(Net PnL) | Total cumulative profit or loss accumulated across all closed trading operations. | Indicates your overall financial viability and bottom-line performance.',
+        totalPnl > 0 ? `Highly profitable across ${total} active trades.` : 'Focus on cutting losses to recover equity.',
         pnLData,
       ),
       makeKpi(
@@ -266,8 +318,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         winRate2 - winRate1,
         computedStats.winRate >= 60 ? 'excellent' : computedStats.winRate >= 45 ? 'good' : computedStats.winRate >= 35 ? 'average' : 'needsImprovement',
         '50%',
-        'Percentage of trades that were profitable.',
-        computedStats.winRate >= 50 ? 'Above breakeven threshold.' : 'Consider reviewing entry criteria.',
+        'Wins / Total Trades * 100 | Percentage of trades that were closed in profit. | Helps evaluate strategy entry accuracy and market alignment.',
+        computedStats.winRate >= 50 ? 'Strong accuracy, above professional thresholds.' : 'Review entry criteria to improve win ratio.',
         dailyPnl.map(v => ({ v: v > 0 ? v : 0 })),
       ),
       makeKpi(
@@ -277,8 +329,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         0,
         pf >= 2.5 ? 'excellent' : pf >= 1.5 ? 'good' : pf >= 1 ? 'average' : 'needsImprovement',
         '2.0',
-        'Gross profit divided by gross loss. Measures how much you earn per dollar risked.',
-        pf >= 2 ? 'Your profitability exceeds professional benchmarks.' : pf >= 1 ? 'Profitable but room for improvement.' : 'Outflows exceed inflows.',
+        'Gross Profit / Gross Loss | Gross profit divided by gross loss. Measures earnings per dollar risked. | A key institutional metric; values above 2.0 indicate exceptional profit generation.',
+        pf >= 2 ? 'Your profitability exceeds standard benchmarks.' : pf >= 1 ? 'Profitable, but consider managing risk tight.' : 'Outflows exceed inflows; system requires adjustment.',
       ),
       makeKpi(
         'Trade Expectancy',
@@ -290,8 +342,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         ),
         expectancy > 0 ? 'excellent' : 'needsImprovement',
         '> $0',
-        'Average expected P&L per trade. Positive expectancy means the strategy is profitable over time.',
-        expectancy > 0 ? `Each trade generates avg +$${expectancy.toFixed(0)}.` : `Each trade loses $${Math.abs(expectancy).toFixed(0)} on average.`,
+        '(Win% * AvgWin) - (Loss% * AvgLoss) | The average expected financial return per trade over time. | Tells you how much each trade is statistically worth on average.',
+        expectancy > 0 ? `Each executed trade generates +$${expectancy.toFixed(0)} on average.` : `Each trade loses $${Math.abs(expectancy).toFixed(0)} on average.`,
       ),
     ];
 
@@ -303,18 +355,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         0,
         avgRMultiple >= 1.5 ? 'excellent' : avgRMultiple >= 1 ? 'good' : 'needsImprovement',
         '1.5R',
-        'Average realized R divided by planned R. Measures reward relative to risk.',
-        avgRMultiple >= 1.5 ? 'Your average reward exceeds risk targets.' : 'Aim for at least 1.5R average.',
-      ),
-      makeKpi(
-        'Avg Holding Time',
-        avgHoldingHours >= 24 ? `${(avgHoldingHours / 24).toFixed(1)}d` : `${avgHoldingHours.toFixed(1)}h`,
-        '—',
-        0,
-        'average' as HealthStatus,
-        '—',
-        'Average duration a position is held before closing.',
-        holdingTimes.length > 0 ? `Average hold time of ${avgHoldingHours >= 24 ? (avgHoldingHours / 24).toFixed(1) + ' days' : avgHoldingHours.toFixed(1) + ' hours'}.` : 'No exit time data available.',
+        'Sum(Realized R / Planned R) / Count | Average ratio of realized R-multiple to initial planned R-multiple. | Measures your execution discipline in holding winners and cutting losers.',
+        avgRMultiple >= 1.5 ? 'Your average reward significantly exceeds risk targets.' : 'Aim for at least 1.5R average.',
       ),
       makeKpi(
         'Largest Drawdown',
@@ -323,8 +365,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         0,
         maxDrawdown <= Math.abs(totalPnl) * 0.3 ? 'excellent' : maxDrawdown <= Math.abs(totalPnl) * 0.5 ? 'average' : 'needsImprovement',
         '< 30%',
-        'Maximum peak-to-trough decline in equity curve.',
-        maxDrawdown > 0 ? `Peak drawdown of -$${maxDrawdown.toFixed(0)}.` : 'No drawdown recorded.',
+        'Peak - Trough | Maximum dollar decline from a peak in your running equity curve. | Standard institutional risk metric measuring worst-case volatility.',
+        maxDrawdown > 0 ? `Peak drawdown of -$${maxDrawdown.toFixed(0)} recorded.` : 'Excellent capital preservation; no drawdown.',
       ),
       makeKpi(
         'Recovery Factor',
@@ -333,18 +375,8 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         0,
         recoveryFactor >= 2 ? 'excellent' : recoveryFactor >= 1 ? 'good' : 'average',
         '2.0',
-        'Net profit divided by maximum drawdown. Measures how well you recover from losses.',
-        recoveryFactor >= 2 ? 'Strong recovery ability.' : 'Work on recovering from drawdowns.',
-      ),
-      makeKpi(
-        'Sharpe Ratio (simplified)',
-        sharpeRatio.toFixed(2),
-        '—',
-        0,
-        sharpeRatio >= 1.5 ? 'excellent' : sharpeRatio >= 1 ? 'good' : sharpeRatio >= 0.5 ? 'average' : 'needsImprovement',
-        '1.0',
-        'Risk-adjusted return. Higher values indicate better returns per unit of risk.',
-        sharpeRatio >= 1 ? 'Good risk-adjusted returns.' : 'Consider reducing volatility.',
+        'Net Profit / Max Drawdown | Total net profit divided by your maximum drawdown. | Measures how efficiently your strategy recovers from equity peaks.',
+        recoveryFactor >= 2 ? 'Outstanding recovery speed and resilient capital curve.' : 'Ensure risk controls prevent deep equity degradation.',
       ),
       makeKpi(
         'Best Day',
@@ -353,18 +385,18 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         0,
         'excellent',
         '—',
-        'Highest single-day P&L.',
-        bestDay > 0 ? `Best day: +$${bestDay.toFixed(0)}.` : 'No profitable days yet.',
+        'Max(Daily PnL) | The highest combined net return recorded in a single calendar day. | Shows the upper boundary of your daily strategy performance.',
+        bestDay > 0 ? `Highest daily record: +$${bestDay.toFixed(0)}.` : 'No profitable days yet.',
       ),
       makeKpi(
         'Worst Day',
-        `$${worstDay.toFixed(0)}`,
+        `${worstDay >= 0 ? '+' : ''}$${worstDay.toFixed(0)}`,
         '—',
         0,
         Math.abs(worstDay) <= Math.abs(bestDay) * 0.5 ? 'good' : 'average',
         '—',
-        'Lowest single-day P&L.',
-        worstDay < 0 ? `Worst day: $${worstDay.toFixed(0)}.` : 'No losing days recorded.',
+        'Min(Daily PnL) | The lowest combined net return recorded in a single calendar day. | Highlights your maximum daily downside risk exposure.',
+        worstDay < 0 ? `Worst day restricted to $${worstDay.toFixed(0)}.` : 'Excellent, no daily losses registered.',
       ),
     ];
 
@@ -383,15 +415,14 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
     const worstMetric = [...scoreContrib].sort((a, b) => a.pct - b.pct)[0];
 
     if (totalPnl > 0) {
-      summary.push(`Profitability ${pnl2 > pnl1 ? 'improved' : 'declined'} compared to the previous period.`);
+      summary.push(`Profitability increased ${pnl2 > pnl1 ? 'significantly' : 'moderately'} compared to the previous period.`);
     } else {
-      summary.push('Overall profitability is negative. Review your risk management strategy.');
+      summary.push('Overall profitability is negative. Focus strictly on executing premium A+ setups.');
     }
     if (bestMetric) summary.push(`Your strongest scoring area is ${bestMetric.label} (${Math.round(bestMetric.pct)}% contribution).`);
-    if (worstMetric && worstMetric.score < 70) summary.push(`${worstMetric.label} needs attention (${Math.round(worstMetric.pct)}% contribution).`);
-    if (pf >= 2) summary.push('Profit Factor exceeds professional trader benchmarks.');
-    if (avgRMultiple >= 1.5) summary.push('Your average R multiple indicates strong risk-reward execution.');
-    if (sharpeRatio >= 1) summary.push('Risk-adjusted returns are solid.');
+    if (worstMetric && worstMetric.score < 70) summary.push(`${worstMetric.label} requires adjustment (${Math.round(worstMetric.pct)}% contribution).`);
+    if (pf >= 2) summary.push('Profit Factor exceeds standard professional benchmarks.');
+    if (avgRMultiple >= 1.5) summary.push('Your average R multiple indicates disciplined execution.');
 
     return { kpis: [...kpis, ...additionalKpis], summary, scoreContrib };
   }, [trades, computedStats, score]);
@@ -411,7 +442,7 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
 
   return (
     <div className="space-y-6">
-      {/* Primary KPIs */}
+      {/* Primary KPIs Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {primaryKpis.map((kpi, i) => (
           <KpiCard
@@ -419,33 +450,49 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
             kpi={kpi}
             isDarkMode={isDarkMode}
             themeClasses={themeClasses}
+            type={i === 1 ? 'winrate' : i === 2 ? 'profitfactor' : 'default'}
             icon={
-              i === 0 ? <TrendingUp className="w-4 h-4 text-emerald-500" /> :
-              i === 1 ? <TrendingUp className="w-4 h-4 text-blue-500" /> :
-              i === 2 ? <TrendingUp className="w-4 h-4 text-indigo-500" /> :
-              <TrendingUp className="w-4 h-4 text-amber-500" />
+              i === 0 ? <Activity className="w-4 h-4 text-emerald-500" /> :
+              i === 1 ? <Award className="w-4 h-4 text-sky-500" /> :
+              i === 2 ? <Zap className="w-4 h-4 text-amber-500" /> :
+              <ShieldAlert className="w-4 h-4 text-rose-500" />
             }
           />
         ))}
       </div>
 
-      {/* Score Contribution + Summary row */}
+      {/* Journalist Score & Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Score Contribution */}
-        <div className={`border rounded-xl p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className={`text-[10px] font-mono font-semibold uppercase tracking-wider mb-3 ${themeClasses.textSub}`}>
-            Journalist Score &bull; {score.score}/100
+        {/* Score Contribution Card */}
+        <div className={`border rounded-xl p-6 relative overflow-hidden backdrop-blur-md transition-all duration-300 hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border}`}>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/5 to-transparent rounded-bl-full pointer-events-none" />
+          
+          <div className="flex items-center justify-between mb-4 border-b border-neutral-500/5 pb-3">
+            <div className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>
+              Journalist Index Score
+            </div>
+            <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500">
+              Active Tier
+            </span>
           </div>
-          <div className="space-y-2">
+
+          <div className="flex items-baseline gap-2 mb-5">
+            <span className={`text-4xl font-display font-extrabold tracking-tight ${themeClasses.textMain}`}>
+              {score.score}
+            </span>
+            <span className="text-gray-500 text-xs font-mono">/100</span>
+          </div>
+
+          <div className="space-y-3.5">
             {scoreContrib.map(s => (
-              <div key={s.label}>
-                <div className="flex justify-between text-[10px] font-mono mb-0.5">
-                  <span className={themeClasses.textSub}>{s.label}</span>
+              <div key={s.label} className="group">
+                <div className="flex justify-between text-[10px] font-mono mb-1">
+                  <span className={`${themeClasses.textSub} transition-colors group-hover:text-white`}>{s.label}</span>
                   <span className={`font-semibold ${s.score >= 70 ? 'text-emerald-500' : s.score >= 40 ? 'text-amber-500' : 'text-rose-500'}`}>
-                    {s.score} ({Math.round(s.pct)}%)
+                    {s.score} <span className="text-gray-500 font-normal">({Math.round(s.pct)}% contribution)</span>
                   </span>
                 </div>
-                <div className={`h-1 rounded-full overflow-hidden ${isDarkMode ? 'bg-white/5' : 'bg-black/5'}`}>
+                <div className={`h-1.5 rounded-full overflow-hidden transition-all duration-300 ${isDarkMode ? 'bg-white/5' : 'bg-black/5'} group-hover:bg-neutral-800`}>
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       s.score >= 70 ? 'bg-emerald-500' : s.score >= 40 ? 'bg-amber-500' : 'bg-rose-500'
@@ -458,30 +505,38 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
           </div>
         </div>
 
-        {/* Performance Summary */}
-        <div className={`lg:col-span-2 border rounded-xl p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div className={`text-[10px] font-mono font-semibold uppercase tracking-wider mb-3 ${themeClasses.textSub}`}>
-            Performance Summary
+        {/* Performance Insights Summary */}
+        <div className={`lg:col-span-2 border rounded-xl p-6 backdrop-blur-md transition-all duration-300 hover:shadow-lg ${themeClasses.bgPanel} ${themeClasses.border}`}>
+          <div className="flex items-center justify-between mb-4 border-b border-neutral-500/5 pb-3">
+            <div className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>
+              Executive Performance Summary
+            </div>
+            <span className="text-[9px] font-mono text-gray-500">
+              Updated Real-Time
+            </span>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2.5">
             {summary.map((s, i) => (
-              <div key={i} className={`text-[11px] font-mono leading-relaxed ${themeClasses.textSub}`}>
-                &bull; {s}
+              <div key={i} className="flex items-start gap-2.5">
+                <span className="text-emerald-500 font-bold shrink-0 mt-0.5">&bull;</span>
+                <span className={`text-[11px] font-sans leading-relaxed tracking-normal ${themeClasses.textMain}`}>
+                  {s}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Secondary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Secondary KPIs Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {secondaryKpis.map((kpi) => (
           <KpiCard
             key={kpi.label}
             kpi={kpi}
             isDarkMode={isDarkMode}
             themeClasses={themeClasses}
-            icon={<TrendingUp className="w-4 h-4 text-gray-400" />}
+            icon={<Zap className="w-3.5 h-3.5 text-gray-400" />}
           />
         ))}
       </div>

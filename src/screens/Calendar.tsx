@@ -248,7 +248,7 @@ export default function Calendar() {
             const hasTrades = dayTrades.length > 0;
             
             // Premium background and border computations (soft glassmorphism)
-            let cellBg = isDarkMode ? 'bg-white/[0.01] border-white/[0.04]' : 'bg-black/[0.02] border-black/[0.03]';
+            let cellBg = 'bg-transparent border-transparent';
             let cellHover = 'hover:border-neutral-400 dark:hover:border-neutral-700';
             let pnlColor = 'text-gray-500';
             let numberColor = cell.isCurrentMonth ? themeClasses.textMain : 'text-gray-400 dark:text-gray-600';
@@ -271,10 +271,16 @@ export default function Calendar() {
                   cellBg = isDarkMode ? 'bg-neutral-800/10 border-neutral-700/15' : 'bg-gray-100 border-gray-300/60';
                   pnlColor = themeClasses.textSub;
                 }
+              } else {
+                // Empty days inside the active month - solid clean grey boxes!
+                cellBg = isDarkMode 
+                  ? 'bg-neutral-900/40 border-white/[0.04]' 
+                  : 'bg-gray-100/90 border-black/[0.04]';
+                cellHover = ''; // Disable hover scale for untraded days
               }
             } else {
-              // Outside month padding cells
-              cellBg = isDarkMode ? 'bg-transparent border-transparent' : 'bg-transparent border-transparent';
+              // Outside month padding cells (fully transparent/invisible)
+              cellBg = 'bg-transparent border-transparent';
               cellHover = 'pointer-events-none opacity-20';
             }
 

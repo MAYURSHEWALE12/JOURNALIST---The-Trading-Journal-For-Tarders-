@@ -675,8 +675,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const dateStr = newTradeData.tradeDate || new Date().toISOString().slice(0, 10);
     const entryTimeStr = newTradeData.entryTime || '12:00';
     const exitTimeStr = newTradeData.exitTime || '12:00';
-    const entryDateTime = new Date(`${dateStr}T${entryTimeStr}:00.000Z`).toISOString();
-    const exitDateTime = new Date(`${dateStr}T${exitTimeStr}:00.000Z`).toISOString();
+    const tz = (d: Date) => { const o = -d.getTimezoneOffset(); const p = (n: number) => String(Math.abs(n)).padStart(2, '0'); return `${o >= 0 ? '+' : '-'}${p(Math.floor(o / 60))}:${p(o % 60)}`; };
+    const entryDateTime = new Date(`${dateStr}T${entryTimeStr}:00${tz(new Date())}`).toISOString();
+    const exitDateTime = new Date(`${dateStr}T${exitTimeStr}:00${tz(new Date())}`).toISOString();
     const newTrade: Trade = {
       id: generateId('TRD'),
       asset: newTradeData.asset.toUpperCase(),
@@ -761,8 +762,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const dateStr = editTradeData.tradeDate || new Date().toISOString().slice(0, 10);
     const entryTimeStr = editTradeData.entryTime || '12:00';
     const exitTimeStr = editTradeData.exitTime || '12:00';
-    const entryDateTime = new Date(`${dateStr}T${entryTimeStr}:00.000Z`).toISOString();
-    const exitDateTime = new Date(`${dateStr}T${exitTimeStr}:00.000Z`).toISOString();
+    const tz = (d: Date) => { const o = -d.getTimezoneOffset(); const p = (n: number) => String(Math.abs(n)).padStart(2, '0'); return `${o >= 0 ? '+' : '-'}${p(Math.floor(o / 60))}:${p(o % 60)}`; };
+    const entryDateTime = new Date(`${dateStr}T${entryTimeStr}:00${tz(new Date())}`).toISOString();
+    const exitDateTime = new Date(`${dateStr}T${exitTimeStr}:00${tz(new Date())}`).toISOString();
     const updated: Trade = {
       id: editTradeData.id, asset: editTradeData.asset.toUpperCase(),
       direction: editTradeData.direction, status: autoStatus,

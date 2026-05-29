@@ -350,6 +350,8 @@ export default function Dashboard() {
                   day: 'numeric',
                   year: 'numeric'
                 });
+                const entryTime = t.entryTime ? new Date(t.entryTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+                const exitTime = t.exitTime ? new Date(t.exitTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
 
                 const screenshots = t.screenshotUrls && t.screenshotUrls.length > 0
                   ? t.screenshotUrls
@@ -396,7 +398,7 @@ export default function Dashboard() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className={`text-sm font-bold tracking-tight ${themeClasses.textMain}`}>{t.asset}</h4>
-                            <span className="text-[9px] font-mono text-gray-500">{entryDate} • {getWeekOfMonth(t.entryTime)}</span>
+                            <span className="text-[9px] font-mono text-gray-500">{entryDate} • {getWeekOfMonth(t.entryTime)} • {entryTime}{exitTime ? ` - ${exitTime}` : ''}</span>
                           </div>
                           <span className={`font-mono text-xs font-bold ${t.netPnl >= 0 ? 'text-brand-emerald' : 'text-brand-rose'}`}>
                             {t.netPnl >= 0 ? `+$${t.netPnl.toFixed(2)}` : `-$${Math.abs(t.netPnl).toFixed(2)}`}

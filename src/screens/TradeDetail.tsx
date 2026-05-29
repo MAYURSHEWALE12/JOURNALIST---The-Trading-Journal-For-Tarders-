@@ -85,7 +85,7 @@ export default function TradeDetail() {
               <span>|</span>
               <span>{trade.strategy}</span>
               <span>|</span>
-              <span>{new Date(trade.entryTime).toLocaleString()} ({getWeekOfMonth(trade.entryTime)})</span>
+              <span>{new Date(trade.entryTime).toLocaleString()} ({getWeekOfMonth(trade.entryTime)}){trade.exitTime ? ` - ${new Date(trade.exitTime).toLocaleString()}` : ''}</span>
             </div>
           </div>
           <div className="text-right">

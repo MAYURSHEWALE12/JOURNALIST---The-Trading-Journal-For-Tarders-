@@ -34,7 +34,9 @@ export default function Timeline() {
                     {t.direction}
                   </span>
                   <span className="text-[10px] font-mono text-gray-500 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded border border-gray-500/10">
-                    {new Date(t.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} • {getWeekOfMonth(t.entryTime)}
+                    {new Date(t.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} • {getWeekOfMonth(t.entryTime)}{' '}
+                    {new Date(t.entryTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}
+                    {t.exitTime ? ` - ${new Date(t.exitTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}` : ''}
                   </span>
                 </div>
                 <span className={`text-[11px] font-bold font-mono ${themeClasses.textMain}`}>

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area,
@@ -147,7 +147,7 @@ function computeEquityData(trades: PremiumPnLChartProps['trades']) {
 const toShortDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
-function CustomTooltip({ active, payload, label, isDarkMode }: any) {
+const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDarkMode }: any) {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d || d.balance !== undefined) {
@@ -192,7 +192,7 @@ function CustomTooltip({ active, payload, label, isDarkMode }: any) {
       </div>
     </div>
   );
-}
+});
 
 const modes: { key: ChartMode; label: string; icon: typeof BarChart3 }[] = [
   { key: 'daily', label: 'Daily', icon: Calendar },
@@ -201,7 +201,31 @@ const modes: { key: ChartMode; label: string; icon: typeof BarChart3 }[] = [
   { key: 'equity', label: 'Equity', icon: LineChart },
 ];
 
-export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartProps) {
+const tickFormatter = (v: number) => `$${v.toFixed(0)}`;
+
+const BarShape = memo(function BarShape({ x, y, width, height, payload, isDarkMode }: any) {
+  const isPositive = payload.pnl >= 0;
+  const barColor = isPositive
+    ? (isDarkMode ? '#22c55e' : '#16a34a')
+    : (isDarkMode ? '#ef4444' : '#dc2626');
+  const radius = isPositive ? 3 : 0;
+  const baseY = isPositive ? y + height : y;
+  const barH = Math.max(Math.abs(height), 2);
+  return (
+    <rect
+      x={x + width * 0.15}
+      y={baseY}
+      width={width * 0.7}
+      height={barH}
+      fill={barColor}
+      rx={radius}
+      ry={radius}
+      className="transition-opacity duration-200 hover:opacity-80"
+    />
+  );
+});
+
+function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartProps) {
   const [mode, setMode] = useState<ChartMode>('daily');
 
   const dayData = useMemo(() => computeDayData(trades), [trades]);
@@ -209,16 +233,27 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
   const monthData = useMemo(() => computeMonthlyData(trades), [trades]);
   const equityData = useMemo(() => computeEquityData(trades), [trades]);
 
-  const chartData = mode === 'weekly' ? weekData : mode === 'monthly' ? monthData : dayData;
+  const chartData = useMemo(
+    () => mode === 'weekly' ? weekData : mode === 'monthly' ? monthData : dayData,
+    [mode, weekData, monthData, dayData]
+  );
 
-  const visibleData = mode === 'equity' ? equityData : chartData;
+  const visibleData = useMemo(
+    () => mode === 'equity' ? equityData : chartData,
+    [mode, equityData, chartData]
+  );
 
   const totalPnl = useMemo(() => trades.reduce((s, t) => s + t.netPnl, 0), [trades]);
-  const winningDays = dayData.filter(d => d.pnl > 0).length;
-  const losingDays = dayData.filter(d => d.pnl < 0).length;
-  const tradingDays = dayData.length;
+
+  const dayStats = useMemo(() => {
+    const winning = dayData.filter(d => d.pnl > 0).length;
+    const losing = dayData.filter(d => d.pnl < 0).length;
+    const total = dayData.length;
+    return { winningDays: winning, losingDays: losing, tradingDays: total };
+  }, [dayData]);
 
   const stats = useMemo(() => {
+    const { tradingDays } = dayStats;
     const adp = tradingDays > 0 ? totalPnl / tradingDays : 0;
     const best = dayData.length > 0 ? Math.max(...dayData.map(d => d.pnl)) : 0;
     const worst = dayData.length > 0 ? Math.min(...dayData.map(d => d.pnl)) : 0;
@@ -226,7 +261,7 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
     const grossLosses = Math.abs(trades.filter(t => t.netPnl < 0).reduce((s, t) => s + t.netPnl, 0));
     const pf = grossLosses > 0 ? grossWins / grossLosses : grossWins > 0 ? 9.99 : 0;
     return { adp, bestDay: best, worstDay: worst, profitFactor: pf };
-  }, [trades, dayData, tradingDays, totalPnl]);
+  }, [trades, dayData, dayStats, totalPnl]);
 
   const handleModeChange = useCallback((m: ChartMode) => setMode(m), []);
 
@@ -244,7 +279,6 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
 
   return (
     <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border}`}>
-      {/* Header */}
       <div className="px-6 pt-5 pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -258,10 +292,9 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
               {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)} this period
             </div>
             <div className={`text-[10px] font-mono mt-0.5 ${themeClasses.textSub}`}>
-              {winningDays} Winning Days • {losingDays} Losing Days • {tradingDays} Total Days
+              {dayStats.winningDays} Winning Days &bull; {dayStats.losingDays} Losing Days &bull; {dayStats.tradingDays} Total Days
             </div>
           </div>
-          {/* Mode switcher */}
           <div className={`inline-flex rounded-lg p-0.5 border self-start ${isDarkMode ? 'bg-black/30 border-white/5' : 'bg-gray-100 border-gray-200'}`}>
             {modes.map(m => (
               <button
@@ -281,7 +314,6 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
         </div>
       </div>
 
-      {/* KPI badges */}
       <div className="px-6 pb-3 flex flex-wrap gap-2">
         <div className={`px-2.5 py-1 rounded-lg text-[10px] font-mono border ${isDarkMode ? 'bg-white/[0.03] border-white/5 text-gray-400' : 'bg-gray-50 border-gray-200 text-gray-500'}`}>
           Avg Day <span className={stats.adp >= 0 ? 'text-emerald-500 font-semibold' : 'text-rose-500 font-semibold'}>{stats.adp >= 0 ? '+' : ''}${stats.adp.toFixed(2)}</span>
@@ -297,12 +329,11 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
         </div>
       </div>
 
-      {/* Chart */}
       <div className="px-2 pb-4">
         <div className="h-64 md:h-72">
           <ResponsiveContainer width="100%" height="100%">
             {mode === 'equity' ? (
-              <AreaChart data={equityData} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
+              <AreaChart data={visibleData as any} margin={{ top: 8, right: 12, bottom: 0, left: -16 }}>
                 <defs>
                   <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={isDarkMode ? '#6366f1' : '#4f46e5'} stopOpacity={0.12} />
@@ -325,7 +356,7 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)', fontSize: 10, fontFamily: 'ui-monospace, monospace' }}
-                  tickFormatter={(v: number) => `$${v.toFixed(0)}`}
+                  tickFormatter={tickFormatter}
                   width={52}
                 />
                 <Tooltip
@@ -359,7 +390,7 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)', fontSize: 10, fontFamily: 'ui-monospace, monospace' }}
-                  tickFormatter={(v: number) => `$${v.toFixed(0)}`}
+                  tickFormatter={tickFormatter}
                   width={52}
                 />
                 <Tooltip
@@ -371,28 +402,7 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
                   radius={[3, 3, 0, 0]}
                   animationDuration={350}
                   animationEasing="ease-out"
-                  shape={(props: any) => {
-                    const { x, y, width, height, payload } = props;
-                    const isPositive = payload.pnl >= 0;
-                    const barColor = isPositive
-                      ? (isDarkMode ? '#22c55e' : '#16a34a')
-                      : (isDarkMode ? '#ef4444' : '#dc2626');
-                    const radius = isPositive ? 3 : 0;
-                    const baseY = isPositive ? y + height : y;
-                    const barH = Math.max(Math.abs(height), 2);
-                    return (
-                      <rect
-                        x={x + width * 0.15}
-                        y={baseY}
-                        width={width * 0.7}
-                        height={barH}
-                        fill={barColor}
-                        rx={radius}
-                        ry={radius}
-                        className="transition-opacity duration-200 hover:opacity-80"
-                      />
-                    );
-                  }}
+                  shape={<BarShape isDarkMode={isDarkMode} />}
                 />
               </BarChart>
             )}
@@ -402,3 +412,5 @@ export default function PremiumPnLChart({ trades, themeClasses, isDarkMode }: Pr
     </div>
   );
 }
+
+export default memo(PremiumPnLChart);

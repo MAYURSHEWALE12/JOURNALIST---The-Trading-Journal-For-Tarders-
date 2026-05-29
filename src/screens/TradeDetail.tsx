@@ -59,8 +59,13 @@ export default function TradeDetail() {
       await new Promise(resolve => setTimeout(resolve, 150));
       const canvas = await html2canvas(cardElement, {
         useCORS: true,
+        allowTaint: true,
         backgroundColor: null,
         scale: 3, // Ultra-high resolution 3x scale for professional social posts
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
         logging: false,
       });
       const dataUrl = canvas.toDataURL('image/png');

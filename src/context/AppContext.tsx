@@ -451,26 +451,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) setDataLoading(false);
       };
 
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      if (data.session) {
-        await loadData();
-        return;
-      }
-
-      // No session yet — listen for OAuth redirect
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      // Listen first so we never miss SIGNED_IN
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
         if (cancelled) return;
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          await loadData();
+          loadData();
         }
       });
 
-      // If still no session after 3s, stop loading
-      setTimeout(() => {
-        if (!cancelled) setDataLoading(false);
-        subscription?.unsubscribe();
-      }, 3000);
+      // Then try to get existing session
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+
+      if (!data.session) {
+        // No session and no SIGNED_IN in 4s → stop loading
+        setTimeout(() => {
+          if (!cancelled) { setDataLoading(false); subscription?.unsubscribe(); }
+        }, 4000);
+      }
     })();
 
     return () => { cancelled = true; };

@@ -278,7 +278,7 @@ export async function authMe(): Promise<User> {
       || 'Trader';
     const email = authUser.email || '';
 
-    // Try to get or create profile, but don't fail if RLS blocks
+    // Get or create profile — insert is handled by DB trigger
     try {
       const profileRes = await supabaseFetch(`/profiles?select=username,email&id=eq.${authUser.id}`);
       const profiles = await profileRes.json() as Array<{ username: string; email: string }>;
@@ -288,13 +288,13 @@ export async function authMe(): Promise<User> {
         return { id: authUser.id, username: profile.username, email: profile.email };
       }
 
-      // Auto-create profile
+      // No profile yet — trigger may not have fired, try INSERT once (may fail RLS, that's ok)
       await supabaseFetch('/profiles', {
         method: 'POST',
         body: JSON.stringify({ id: authUser.id, username: displayName, email }),
       });
     } catch {
-      // RLS may block on first sign-in before profile exists — use metadata
+      // Fallback to metadata
     }
 
     return { id: authUser.id, username: displayName, email };

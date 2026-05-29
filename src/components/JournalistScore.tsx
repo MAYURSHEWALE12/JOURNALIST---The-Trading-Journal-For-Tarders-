@@ -10,6 +10,7 @@ interface JournalistScoreProps {
     textMain: string; textSub: string; navActive: string;
   };
   isDarkMode: boolean;
+  className?: string;
 }
 
 const radarMetrics = [
@@ -150,7 +151,7 @@ function SvgRadarChart({ data, isDarkMode }: { data: { metric: string; value: nu
   );
 }
 
-function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScoreProps) {
+function JournalistScore({ trades, themeClasses, isDarkMode, className = '' }: JournalistScoreProps) {
   const score = useMemo(() => computeJournalistScore(trades), [trades]);
 
   const radarData = useMemo(() => [
@@ -163,7 +164,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
 
   if (trades.length < 2) {
     return (
-      <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
+      <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden ${className}`}>
         <div className="px-4 md:px-6 pt-5 pb-4">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-medium bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
@@ -181,7 +182,7 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
   }
 
   return (
-    <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden`}>
+    <div className={`border rounded-xl ${themeClasses.bgPanel} ${themeClasses.border} overflow-hidden flex flex-col justify-between ${className}`}>
       <div className="px-4 md:px-6 pt-5 pb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-medium bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
@@ -228,12 +229,13 @@ function JournalistScore({ trades, themeClasses, isDarkMode }: JournalistScorePr
 
       {/* Insights */}
       {score.insights.length > 0 && (
-        <div className={`px-4 md:px-6 py-3 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-          <div className={`text-[9px] font-mono font-semibold uppercase tracking-wider mb-2 ${themeClasses.textSub}`}>Insights</div>
-          <div className="space-y-1">
+        <div className={`px-4 md:px-6 py-3.5 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+          <div className={`text-[9px] font-mono font-semibold uppercase tracking-wider mb-2.5 ${themeClasses.textSub}`}>Insights</div>
+          <div className="space-y-2">
             {score.insights.map((insight, i) => (
-              <div key={i} className={`text-[10px] font-mono ${themeClasses.textSub}`}>
-                &bull; {insight}
+              <div key={i} className="flex items-start gap-2 text-[10px] font-mono leading-relaxed">
+                <span className="text-emerald-500 font-bold shrink-0 mt-0.5">&bull;</span>
+                <span className={themeClasses.textSub}>{insight}</span>
               </div>
             ))}
           </div>

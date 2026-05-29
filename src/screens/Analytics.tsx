@@ -4,6 +4,61 @@ import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
 import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
+import { memo } from 'react';
+
+const CustomScatterTooltip = memo(function CustomScatterTooltip({ active, payload, isDarkMode }: any) {
+  if (!active || !payload?.length) return null;
+  const data = payload[0]?.payload;
+  if (!data) return null;
+  const isLoss = data.status === 'LOSS';
+  const isWin = data.status === 'WIN';
+  const colorClass = isWin ? 'text-emerald-500' : (isLoss ? 'text-rose-500' : 'text-gray-400');
+  
+  return (
+    <div className={`px-3 py-2.5 rounded-xl text-xs font-mono shadow-xl border min-w-[180px] ${isDarkMode ? 'bg-[#181818] border-white/10' : 'bg-white border-gray-200'}`}>
+      <div className={`font-semibold mb-1 flex justify-between items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <span>{data.asset}</span>
+        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${data.direction === 'LONG' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+          {data.direction}
+        </span>
+      </div>
+      <div className="space-y-1 text-gray-400">
+        <div className="flex justify-between gap-4">
+          <span>Status</span>
+          <span className={`font-semibold ${colorClass}`}>{data.status}</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span>Planned R</span>
+          <span className="font-semibold text-white">{data.plannedR}R</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span>Realized R</span>
+          <span className={`font-semibold ${colorClass}`}>{data.realizedR}R</span>
+        </div>
+        <div className="flex justify-between gap-4 border-t border-white/5 pt-1 mt-1">
+          <span>Net P&L</span>
+          <span className={`font-semibold ${data.netPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            {data.netPnl >= 0 ? '+' : ''}${data.netPnl.toFixed(2)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const CustomDonutTooltip = memo(function CustomDonutTooltip({ active, payload, isDarkMode }: any) {
+  if (!active || !payload?.length) return null;
+  const data = payload[0];
+  if (!data) return null;
+  
+  return (
+    <div className={`px-2.5 py-1.5 rounded-lg text-xs font-mono shadow-md border ${isDarkMode ? 'bg-[#181818] border-white/10 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
+      <span className="font-semibold" style={{ color: data.payload.color }}>
+        {data.name}: {data.value}
+      </span>
+    </div>
+  );
+});
 
 export default function Analytics() {
   const { themeClasses, isDarkMode, activeTrades, computedStats, dataLoading, activeAccountId, accounts, user, calendarDays, setIsExportingPDF } = useApp();
@@ -36,6 +91,7 @@ export default function Analytics() {
   ];
 
   const uniqueTags = Array.from(new Set(activeTrades.flatMap(t => t.tags || [])));
+  const winRate = activeTrades.length > 0 ? Math.round((computedStats.wins / activeTrades.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -63,63 +119,72 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         <div className="lg:col-span-1">
-          <JournalistScore trades={activeTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} />
+          <JournalistScore trades={activeTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} className="h-full" />
         </div>
         <div className="lg:col-span-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className={`border rounded p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <span className={`text-xs font-semibold uppercase tracking-wider font-mono block mb-4 ${themeClasses.textMain}`}>Planned R-Ratio vs Realized R-Ratio Scatter</span>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-                <XAxis type="number" dataKey="plannedR" name="Planned R" stroke="rgba(128,128,128,0.5)" fontSize={10} unit="R" />
-                <YAxis type="number" dataKey="realizedR" name="Realized R" stroke="rgba(128,128,128,0.5)" fontSize={10} unit="R" />
-                <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                <Scatter name="Trades Performance" data={activeTrades}>
-                  {activeTrades.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.status === 'WIN' ? '#10b981' : '#f43f5e'} />
-                  ))}
-                </Scatter>
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-stretch">
+            <div className={`border rounded p-5 ${themeClasses.bgPanel} ${themeClasses.border} min-w-0 flex flex-col justify-between h-full`}>
+              <div>
+                <span className={`text-xs font-semibold uppercase tracking-wider font-mono block mb-4 ${themeClasses.textMain}`}>Planned R-Ratio vs Realized R-Ratio Scatter</span>
+              </div>
+              <div className="flex-1 min-h-[240px] md:min-h-[280px]">
+                <ResponsiveContainer width="99%" height="100%">
+                  <ScatterChart margin={{ top: 10, right: 10, bottom: 10, left: -10 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.04)"} />
+                    <XAxis type="number" dataKey="plannedR" name="Planned R" stroke="rgba(128,128,128,0.5)" fontSize={10} unit="R" domain={[0, (dataMax: number) => Math.max(3, dataMax + 0.5)]} />
+                    <YAxis type="number" dataKey="realizedR" name="Realized R" stroke="rgba(128,128,128,0.5)" fontSize={10} unit="R" domain={[(dataMin: number) => Math.min(-1, dataMin - 0.5), (dataMax: number) => Math.max(2, dataMax + 0.5)]} />
+                    <Tooltip content={<CustomScatterTooltip isDarkMode={isDarkMode} />} cursor={{ strokeDasharray: '3 3' }} />
+                    <Scatter name="Trades Performance" data={activeTrades}>
+                      {activeTrades.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.status === 'WIN' ? '#10b981' : (entry.status === 'BREAKEVEN' ? '#9ca3af' : '#f43f5e')} />
+                      ))}
+                    </Scatter>
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-        <div className={`border rounded p-5 flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border}`}>
-          <div>
-            <span className={`text-xs font-semibold uppercase tracking-wider font-mono block mb-4 ${themeClasses.textMain}`}>Outcome Distribution Donut</span>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={outcomesData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {outcomesData.map((entry, index) => (
-                      <Cell key={`donut-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+            <div className={`border rounded p-5 flex flex-col justify-between ${themeClasses.bgPanel} ${themeClasses.border} min-w-0 h-full`}>
+              <div className="flex-grow flex flex-col justify-between h-full">
+                <div>
+                  <span className={`text-xs font-semibold uppercase tracking-wider font-mono block mb-4 ${themeClasses.textMain}`}>Outcome Distribution Donut</span>
+                </div>
+                <div className="flex-1 min-h-[200px] md:min-h-[240px] relative flex items-center justify-center my-auto">
+                  <ResponsiveContainer width="99%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={outcomesData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={75}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {outcomesData.map((entry, index) => (
+                          <Cell key={`donut-${index}`} fill={entry.color} stroke={isDarkMode ? '#0c0c0e' : '#ffffff'} strokeWidth={2} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomDonutTooltip isDarkMode={isDarkMode} />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute flex flex-col items-center justify-center font-mono select-none pointer-events-none">
+                    <span className={`text-2xl font-bold ${themeClasses.textMain}`}>{winRate}%</span>
+                    <span className="text-[9px] uppercase tracking-wider text-gray-500 font-semibold">Win Rate</span>
+                  </div>
+                </div>
+
+                <div className={`flex justify-around items-center text-xs border-t pt-3 font-mono ${themeClasses.border} ${themeClasses.textSub} mt-4`}>
+                  <span className="font-semibold text-emerald-500">● Wins: {computedStats.wins}</span>
+                  <span className="font-semibold text-rose-500">● Losses: {computedStats.losses}</span>
+                  <span className="font-semibold text-gray-400">● Breakevens: {activeTrades.filter(t => t.status === 'BREAKEVEN').length}</span>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className={`flex justify-around items-center text-xs border-t pt-3 font-mono ${themeClasses.border} ${themeClasses.textSub}`}>
-            <span className="font-semibold">● Wins: {computedStats.wins}</span>
-            <span className="font-semibold">● Losses: {computedStats.losses}</span>
-            <span className="font-semibold">● Breakevens: {activeTrades.filter(t => t.status === 'BREAKEVEN').length}</span>
-          </div>
         </div>
-      </div>
-      </div>
       </div>
 
       <div className={`border rounded p-5 ${themeClasses.bgPanel} ${themeClasses.border}`}>

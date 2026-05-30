@@ -74,12 +74,13 @@ export default function ResetPassword() {
 
   return (
     <div className={`min-h-screen flex flex-col justify-center items-center select-none px-6 ${themeClasses.bgBase}`}>
-      <div className={`absolute top-4 left-6 flex items-center space-x-3 cursor-pointer`} onClick={() => navigate('/')}>
+      <div className={`relative mt-6 mb-2 sm:absolute sm:top-4 sm:left-6 sm:my-0 flex items-center space-x-3 cursor-pointer self-start sm:self-auto`} onClick={() => navigate('/')}>
         <div className={`w-7 h-7 rounded flex items-center justify-center ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
           <LogoIcon className="w-4 h-4" isDark={isDarkMode} />
         </div>
         <span className={`font-display font-bold text-base tracking-tight ${themeClasses.textMain}`}>Journalist</span>
       </div>
+
 
       <div className={`w-full max-w-sm border rounded-xl p-8 space-y-6 shadow-xl ${themeClasses.bgPanel} ${themeClasses.border}`}>
         <div className="text-center space-y-2">
@@ -116,7 +117,8 @@ export default function ResetPassword() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-all duration-300 active:scale-75 cursor-pointer flex items-center justify-center"
                 >
-                  <div className={`transform transition-all duration-300 ${showPassword ? 'rotate-180 scale-110 text-indigo-400' : 'rotate-0 scale-95 text-gray-500'}`}>
+                  <div className={`transform transition-all duration-300 ${showPassword ? 'rotate-180 scale-110 text-gray-500 dark:text-gray-400' : 'rotate-0 scale-95 text-gray-500 dark:text-gray-400'}`}>
+
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </div>
                 </button>

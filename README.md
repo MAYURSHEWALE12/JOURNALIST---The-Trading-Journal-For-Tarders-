@@ -1,284 +1,172 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-/master/public/logo-dark.png">
-    <img src="https://raw.githubusercontent.com/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-/master/public/logo-light.png" alt="Journalist Logo" width="120" />
+    <img src="https://raw.githubusercontent.com/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-/master/public/logo-light.png" alt="Journalist Logo" width="130" />
   </picture>
 </p>
 
-<h1 align="center">Journalist — Trading Journal</h1>
-
+<h1 align="center">JOURNALIST</h1>
 <p align="center">
-  <b>A premium full-stack trading journal</b> for tracking trades across Crypto, Futures, Forex, Equities, and Indices.
-  <br/>
-  Analytics dashboards · Multi-account management · Polished dark-mode UI
+  <a href="https://tradejournalist.pages.dev"><b>tradejournalist.pages.dev</b></a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React 19" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5" />
-  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
-  <img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express 5" />
-  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  <b>A premium, high-performance trading journal</b> meticulously engineered for tracking, analyzing, and optimizing trades across Crypto, Futures, Forex, Equities, and Indices.
+  <br/>
+  <i>Elevate your edge with multi-account control, dynamic analytics, and a state-of-the-art dark-mode interface.</i>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript_5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5" />
+  <img src="https://img.shields.io/badge/Vite_8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
   <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-?style=flat-square&color=blue" alt="License" />
-  <img src="https://img.shields.io/github/last-commit/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-?style=flat-square&color=purple" alt="Last Commit" />
-  <img src="https://img.shields.io/github/repo-size/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-?style=flat-square&color=orange" alt="Repo Size" />
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome" />
+  <img src="https://img.shields.io/github/license/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-?style=flat-square&logo=github&color=38bdf8" alt="License" />
+  <img src="https://img.shields.io/github/last-commit/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-?style=flat-square&logo=git&color=c084fc" alt="Last Commit" />
+  <img src="https://img.shields.io/github/repo-size/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-?style=flat-square&logo=files&color=fb923c" alt="Repo Size" />
+  <img src="https://img.shields.io/badge/PRs-welcome-34d399?style=flat-square&logo=gitkraken" alt="PRs Welcome" />
 </p>
 
 ---
 
-## Tech Stack
+## ⚡ Key Architectural Highlights
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | ![React 19](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript_5-3178C6?logo=typescript&logoColor=white) ![Vite 8](https://img.shields.io/badge/Vite_8-646CFF?logo=vite&logoColor=white) ![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?logo=tailwindcss&logoColor=white) ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?logo=recharts&logoColor=white) |
-| **Backend** | ![Express 5](https://img.shields.io/badge/Express_5-000000?logo=express&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white) ![Bcrypt](https://img.shields.io/badge/Bcrypt-003A70?logo=lock&logoColor=white) |
-| **Database** | ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white) / ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white) |
-| **Tools** | ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white) ![npm](https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white)
+> [!TIP]
+> **Double Database Synchronization Architecture**
+> Journalist operates on a dual-engine database structure. By default, it operates completely offline via a local high-performance SQLite engine. Plugging in your Supabase keys instantly and seamlessly upgrades the application to a fully cloud-synchronized architecture with Row Level Security (RLS) policies.
 
 ---
 
-## Features
+## 🛠️ The Tech Stack
 
-### Trade Management
-| Feature | Description |
-|---------|-------------|
-| **Multi-account** | Track separate accounts (cash, margin, futures) with independent metrics |
-| **3-step logging** | Wizard-style modal: metrics → strategy → psychology |
-| **Edit & Delete** | Full CRUD with confirmation dialogs; bulk delete on Timeline |
-| **Tag system** | Custom tags for categorization, filtering, and performance breakdown |
-| **Screenshots** | Attach setup screenshots to every trade |
+### 💻 Frontend Core
+* **React 19 & TypeScript 5** — The gold standard for modern, robust SPA building.
+* **Vite 8** — Next-generation frontend tooling providing ultra-fast HMR and building.
+* **Tailwind CSS v4** — High-fidelity utilities coupled with CSS-variable configuration.
+* **Recharts** — Dynamic, interactive, and beautifully responsive SVG charting.
+* **html2canvas-pro** — Allows traders to download gorgeous high-definition PnL cards natively.
 
-### Analytics & Insights
-| Feature | Description |
-|---------|-------------|
-| **R-Ratio scatter** | Planned vs realized R visualization |
-| **Win/Loss donut** | Outcome distribution with win rate overlay |
-| **Tag matrix** | Win rate breakdown by custom tag |
-| **Calendar heatmap** | Color-coded daily PnL with monthly aggregates |
-| **Equity curves** | Cumulative PnL timeline |
-| **KPI dashboard** | Win rate, profit factor, avg PnL, best/worst assets |
-| **Date range** | Filter analytics by custom date range |
-
-### Journaling
-| Feature | Description |
-|---------|-------------|
-| **Day notes** | Add notes to any calendar day — even non-trading days — to log market observations or explain why you sat out |
-| **Timeline feed** | Chronological scrollable view with notes, tags, screenshots, and emotional state |
-| **Mindset tracking** | Log emotional state at time of trade |
-
-### User Experience
-| Feature | Description |
-|---------|-------------|
-| **Dark / Light mode** | Persistent theme with system preference detection |
-| **Command palette** | `Ctrl+K` quick navigation and actions |
-| **Guest mode** | Sandbox with mock trades, no login required |
-| **Responsive** | Mobile-optimized with iOS-style bottom sheets |
-| **Export** | Colored Excel (.xls) with green/red rows and summary header |
-
-### Authentication
-| Feature | Description |
-|---------|-------------|
-| **Register / Login** | Email-based auth with JWT |
-| **Password recovery** | OTP-based reset via email (Nodemailer) |
-| **Profile management** | Update username, avatar, bio, social handles |
+### ⚙️ Backend & Infrastructure
+* **Express 5** — High-throughput REST API backend handling routes and service synchronization.
+* **SQLite / Supabase** — Modular database layer catering to both isolated local use and real-time cloud backup.
+* **JSON Web Tokens (JWT)** — Secure, stateless, and encrypted session management.
+* **Nodemailer** — Production-ready SMTP integrations for secure password recovery.
 
 ---
 
-## Getting Started
+## 💎 Features at a Glance
 
-### Prerequisites
+### 📊 Trade & Portfolio Management
+* 💼 **Multi-Account Engine** — Maintain completely independent metrics, histories, and settings for Cash, Margin, and Futures accounts.
+* 🧙‍♂️ **3-Step Logging Wizard** — Document setups instantly inside a wizard-style modal matching raw quantitative metrics, visual strategies, and trader psychology.
+* ✏️ **Full CRUD & Bulk Timeline Control** — Seamlessly edit, delete, or bulk-remove logs straight from an interactive chronological timeline feed.
+* 🏷️ **Dynamic Multi-Tagging** — Categorize entries by setup style, session, or mistake to generate multi-dimensional edge matrices.
 
-| Requirement | Version |
-|------------|---------|
-| **Node.js** | `>= 18` |
-| **npm** | `>= 9` |
+### 📈 Deep Analytics & Intelligence
+* 🎯 **R-Ratio Planned vs. Realized Scatter** — Scatter charts showing the mathematical difference between your projected risk reward and actual execution.
+* 🍩 **Outcome Distribution Wheel** — Donut visualization showcasing win/loss ratios overlaid with win-rate percentages.
+* 🗺️ **Setup & Tag Win-Rate Matrix** — Spot your strongest and weakest setups instantly through high-impact, segmented matrices.
+* 📅 **Monthly PnL Heatmap Calendar** — A color-coded calendar showcasing daily profit/loss aggregates alongside custom non-trading day logs.
+* 📈 **Equity & Cumulative PnL Curves** — Premium charts tracking portfolio growth dynamically across customizable date ranges.
 
-### Installation
+### 🔒 Security & User Experience
+* 🌓 **Fluid Dark & Light Modes** — Responsive theme customization featuring persistent local styling and browser preference detection.
+* ⌨️ **Universal Command Palette** — Jump anywhere or execute quick actions in milliseconds using the **`Ctrl + K`** modal.
+* ✈️ **Sleek Shareable PnL Cards** — Generate gorgeous, customized quantitative cards for Telegram, Twitter, or Discord with one click.
+* 📥 **Color-Coded Excel Exports** — Export trade sheets dynamically formatted with green/red margins and portfolio summary headers.
 
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+Ensure you have the following baseline environments installed:
+* **Node.js** `>= 18.0.0`
+* **npm** `>= 9.0.0`
+
+### 2. Installation
 ```bash
-# Clone the repo
+# Clone the repository
 git clone https://github.com/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-.git
 
-# Install dependencies
+# Navigate to the workspace
 cd trading-journal
+
+# Install package dependencies
 npm install
 ```
 
-### Environment
-
-Create a `.env` file in the project root:
-
+### 3. Environment Configuration
+Create a `.env` file in the root directory:
 ```env
-JWT_SECRET=your_secret_key_here
+JWT_SECRET=your_ultra_secure_secret_key_here
 JWT_EXPIRES_IN=30d
+
+# SMTP Configuration (Nodemailer)
 SMTP_USER=your_email@gmail.com
 SMTP_PASS=your_gmail_app_password
+
+# Client Base URL
 APP_URL=http://localhost:5173
 ```
 
-### Development
-
-Starts both Vite frontend and Express backend concurrently:
-
+### 4. Development Run
+Fire up the Vite development server and the backend Express daemon concurrently with a single command:
 ```bash
 npm run dev
 ```
-
-| Service | URL |
-|---------|-----|
-| **Frontend** | `http://localhost:5173` |
-| **Backend** | `http://localhost:3001` |
-
-### Build
-
-```bash
-npm run build
-```
-
-### Lint
-
-```bash
-npm run lint
-```
+* **Frontend Dashboard:** `http://localhost:5173`
+* **Backend REST Server:** `http://localhost:3001`
 
 ---
 
-## Project Structure
+## 🗂️ Project Workspace Map
 
 ```
-trading-journal
+trading-journal/
 ├── src/
-│   ├── context/                  # React context providers
-│   │   ├── AppContext.tsx         # Composite provider (all sub-contexts)
-│   │   ├── UIContext.tsx          # Theme, sidebar, command palette, calendar nav
-│   │   ├── AuthContext.tsx        # User, login/register, profile, password reset
-│   │   ├── AccountContext.tsx     # Accounts CRUD, active account management
-│   │   ├── TradeContext.tsx       # Trades CRUD, filters, tags, modal state
-│   │   └── AnalyticsContext.tsx   # Computed stats, equity curve, calendar days
-│   ├── components/                # Reusable UI components
-│   │   ├── Sidebar.tsx            # Collapsible navigation
-│   │   ├── Header.tsx             # Top bar with actions
-│   │   ├── CommandPalette.tsx     # Ctrl+K command search
-│   │   ├── NewTradeModal.tsx      # 3-step trade creation wizard
-│   │   ├── EditTradeModal.tsx     # Edit trade form
-│   │   ├── DeleteConfirmModal.tsx # Delete confirmation dialog
-│   │   ├── NewAccountModal.tsx    # Create new account
-│   │   ├── ScreenshotModal.tsx    # Fullscreen image lightbox
-│   │   ├── CursorFollower.tsx     # Decorative cursor animation
-│   │   ├── LogoIcon.tsx           # Theme-aware logo
-│   │   ├── KpiDashboard.tsx       # Key performance indicators
-│   │   ├── PremiumPnLChart.tsx    # Equity curve chart
-│   │   ├── JournalistScore.tsx    # Journalist scoring component
-│   │   └── Skeleton.tsx           # Loading skeletons
-│   ├── screens/                   # Page-level components
-│   │   ├── LandingPage.tsx        # Marketing / landing page
-│   │   ├── AuthPage.tsx           # Login / Register
-│   │   ├── ForgotPassword.tsx     # Email → OTP → new password
-│   │   ├── ResetPassword.tsx      # Token-based password reset
-│   │   ├── Dashboard.tsx          # Stats, equity curve, calendar, trade cards
-│   │   ├── Analytics.tsx          # Scatter, donut, tag matrix, date range
-│   │   ├── Calendar.tsx           # Monthly heatmap with day notes
-│   │   ├── Timeline.tsx           # Chronological trade feed with bulk delete
-│   │   └── TradeDetail.tsx        # Single trade detail view
-│   ├── lib/
-│   │   ├── api.ts                 # API client (Express + Supabase)
-│   │   ├── supabase.ts            # Supabase client init
-│   │   ├── pdfExporter.ts         # PDF report generation (jsPDF)
-│   │   ├── excelExporter.ts       # Colored Excel export (SpreadsheetML)
-│   │   └── journalistScore.ts     # Scoring algorithm
-│   ├── data/
-│   │   └── mockTrades.ts          # Seed data for guest mode
-│   └── types.ts                   # Shared TypeScript types
-
+│   ├── context/          # React Global State Layer (Auth, Accounts, Trades, UI)
+│   ├── components/       # Collapsible Sidebar, CmdPalette, PnLCard, KPI Dashboards
+│   ├── screens/          # Dashboard, Analytics, Heatmap Calendar, Auth, Trade Details
+│   ├── lib/              # Supabase Client, Excel/PDF Generators, Scoring Logic
+│   ├── data/             # Quantitative Mock Seed Data
+│   └── types.ts          # Centralized Shared TypeScript Interfaces
 ├── server/
-│   └── index.js                   # Express server, SQLite, JWT, email
-
-├── .env                           # Environment variables
-├── package.json                   # Dependencies & scripts
-├── vite.config.ts                 # Vite configuration
-└── tsconfig.json                  # TypeScript configuration
+│   └── index.js          # REST Backend (SQLite, Nodemailer, Auth Engines)
 ```
 
 ---
 
-## API Endpoints
+## 🔐 Security Standards
 
-### Auth
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| `POST` | `/api/auth/register` | No | Register new user |
-| `POST` | `/api/auth/login` | No | Login, returns JWT |
-| `GET` | `/api/auth/me` | Yes | Verify token & get profile |
-| `POST` | `/api/auth/forgot-password` | No | Request OTP via email |
-| `POST` | `/api/auth/reset-password` | No | Reset password with OTP |
-| `POST` | `/api/auth/change-password` | Yes | Change password |
-
-### Accounts
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| `GET` | `/api/accounts` | Yes | List all accounts |
-| `POST` | `/api/accounts` | Yes | Create new account |
-| `DELETE` | `/api/accounts/:id` | Yes | Delete account |
-
-### Trades
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| `GET` | `/api/trades` | Yes | List all trades |
-| `POST` | `/api/trades` | Yes | Create new trade |
-| `PUT` | `/api/trades/:id` | Yes | Update trade |
-| `DELETE` | `/api/trades/:id` | Yes | Delete trade |
-
-### Day Notes
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| `GET` | `/api/day-notes?month=YYYY-MM` | Yes | Get notes for a month |
-| `PUT` | `/api/day-notes/:date` | Yes | Create / update / delete a note |
-
-### Utilities
-| Method | Endpoint | Auth | Description |
-|--------|----------|:----:|-------------|
-| `GET` | `/api/screenshot?url=` | No | Puppeteer webpage screenshot |
+* **Bcryptjs (12 Rounds)** — Multi-layer encryption of all user passwords prior to database insertion.
+* **Stateless JWT Authorization** — Expiring bearer tokens passed via headers to protect API endpoints.
+* **Supabase RLS Policies** — Robust Row-Level Security ensuring user accounts remain strictly isolated and inaccessible to others.
 
 ---
 
-## Security
+## ⚡ Deployment & Pipelines
 
-| Measure | Detail |
-|---------|--------|
-| **Passwords** | Hashed with bcryptjs (12 rounds) |
-| **Authentication** | JWT-based with configurable expiry |
-| **Database** | SQLite excluded from version control |
-| **RLS** | Row Level Security required for Supabase deployment |
+### 🌍 Cloudflare Pages
+This project is configured with a fully automated **GitHub Actions** CI/CD pipeline (`.github/workflows/deploy.yml`). Pushing changes directly to `master` builds the project and deploys it to your live domain instantly.
 
----
-
-## Deployment
-
-### Cloudflare Pages
-
-The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) for automatic deployment to Cloudflare Pages on push to `master`.
-
-### Supabase (Optional)
-
-For cloud database, configure these in `.env.local`:
-
+### 🛢️ Supabase Integration (Optional)
+To activate real-time cloud database backup, add these environment variables to your `.env.local`:
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
-
-**Required Supabase tables:** `profiles`, `accounts`, `trades`, `day_notes` — each with RLS policies using `auth.uid()`.
+> [!NOTE]
+> Database migration scripts are located in `supabase-migration.sql` and `migrate-sqlite-to-supabase.sql`. Paste them into your Supabase SQL editor to initialize tables with full RLS support in under 2 minutes!
 
 ---
 
 <p align="center">
-  <b>Built by <a href="https://github.com/MAYURSHEWALE12">MAYURSHEWALE12</a></b>
+  <b>Meticulously Crafted by <a href="https://github.com/MAYURSHEWALE12">MAYURSHEWALE12</a></b>
   <br/>
-  <sub>Made for traders who take their journaling seriously.</sub>
+  <sub>Because serious traders deserve serious tools.</sub>
 </p>

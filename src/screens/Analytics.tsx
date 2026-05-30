@@ -150,13 +150,13 @@ export default function Analytics() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => exportTradesToExcel(dateFilteredTrades)}
-            className={`px-3.5 py-1.5 text-[10px] font-mono border rounded transition cursor-pointer font-bold ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'}`}
+            className={`px-3.5 py-2 text-xs border rounded transition cursor-pointer font-bold ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'}`}
           >
             Export Excel
           </button>
           <button
             onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(dateFilteredTrades, localStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
-            className={`px-3.5 py-1.5 border text-xs rounded transition cursor-pointer font-bold ${
+            className={`px-3.5 py-2 border text-xs rounded transition cursor-pointer font-bold ${
               isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
             }`}
           >

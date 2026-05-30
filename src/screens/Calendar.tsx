@@ -6,7 +6,7 @@ import {
   ChevronRight, 
   BookOpen, 
   TrendingUp, 
-  StickyNote,
+  NotebookPen,
   X
 } from 'lucide-react';
 import { getDirectImageUrl, getShortTradeId, type Trade } from '../types';
@@ -355,7 +355,7 @@ export default function Calendar() {
                   {/* Note icon with hover tooltip */}
                   {dayNotes[cell.dateString] && cell.isCurrentMonth && (
                     <div className="relative group">
-                      <StickyNote className="w-3 h-3 text-amber-500/80 hover:text-amber-400 transition-colors" />
+                      <NotebookPen className="w-3 h-3 text-amber-500/80 hover:text-amber-400 transition-colors" />
                       <div className="absolute right-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
                         {dayNotes[cell.dateString]}
                       </div>
@@ -387,7 +387,7 @@ export default function Calendar() {
                 ) : dayNotes[cell.dateString] && cell.isCurrentMonth ? (
                   <div className="flex justify-end mt-1">
                     <div className="relative group">
-                      <StickyNote className="w-3.5 h-3.5 text-amber-500/60 hover:text-amber-400 transition-colors" />
+                      <NotebookPen className="w-3.5 h-3.5 text-amber-500/60 hover:text-amber-400 transition-colors" />
                       <div className="absolute right-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
                         {dayNotes[cell.dateString]}
                       </div>
@@ -467,7 +467,7 @@ export default function Calendar() {
               <div className={`border-b px-5 py-4 ${themeClasses.border}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
-                    <StickyNote className="w-3.5 h-3.5 text-amber-500" />
+                    <NotebookPen className="w-3.5 h-3.5 text-amber-500" />
                     <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>Day Note</span>
                   </div>
                   <div className="flex items-center gap-2">

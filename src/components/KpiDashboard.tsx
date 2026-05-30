@@ -620,7 +620,7 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
             isDarkMode={isDarkMode}
             themeClasses={themeClasses}
             icon={<Zap className="w-3.5 h-3.5 text-gray-400" />}
-            className={idx === 4 ? 'col-span-2 md:col-span-1' : ''}
+            className={idx === 0 ? 'col-span-2 md:col-span-1' : ''}
           />
         ))}
       </div>

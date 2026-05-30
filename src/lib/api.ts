@@ -1,4 +1,4 @@
-import type { Trade, Account, User } from '../types';
+import type { Trade, Account, User, DayNote } from '../types';
 import { isSupabaseConfigured, getSupabase } from './supabase';
 
 // ─── Helpers ───────────────────────────────────────────────────
@@ -90,6 +90,37 @@ export async function deleteAccount(id: string): Promise<void> {
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error('Failed to delete account.');
+}
+
+// ─── Day Notes ────────────────────────────────────────────────
+
+export async function fetchMonthNotes(month: string): Promise<DayNote[]> {
+  if (isSupabaseSession()) {
+    const res = await supabaseFetch(`/day_notes?select=*&date=like=${month}%`);
+    if (!res.ok) throw new Error('Failed to fetch day notes.');
+    return res.json() as unknown as DayNote[];
+  }
+  const res = await fetch(`/api/day-notes?month=${encodeURIComponent(month)}`, { headers: authHeaders() });
+  if (res.status === 401 || res.status === 403) throw new Error('UNAUTHORIZED');
+  if (!res.ok) throw new Error('API server offline.');
+  return res.json();
+}
+
+export async function upsertDayNote(date: string, content: string): Promise<void> {
+  if (isSupabaseSession()) {
+    const res = await supabaseFetch(`/day_notes?date=eq.${encodeURIComponent(date)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ date, content }),
+    });
+    if (!res.ok) throw new Error('Failed to save day note.');
+    return;
+  }
+  const res = await fetch(`/api/day-notes/${encodeURIComponent(date)}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok) throw new Error('Failed to save day note.');
 }
 
 // ─── Trades ─────────────────────────────────────────────────────

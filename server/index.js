@@ -139,6 +139,19 @@ async function initializeDatabase() {
     `);
     console.log('Trades table verified.');
 
+    // 4. Create day_notes table
+    await runQuery(`
+      CREATE TABLE IF NOT EXISTS day_notes (
+        id TEXT PRIMARY KEY,
+        date TEXT NOT NULL,
+        content TEXT NOT NULL,
+        userId TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        createdAt TEXT DEFAULT (datetime('now')),
+        updatedAt TEXT DEFAULT (datetime('now'))
+      )
+    `);
+    console.log('Day notes table verified.');
+
     // Safe migrations for existing databases (may already have columns)
     const migrations = [
       'ALTER TABLE accounts ADD COLUMN accountSize REAL DEFAULT 0.0',
@@ -776,6 +789,86 @@ app.delete('/api/trades/:id', verifyToken, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Trade deleted.' });
   });
+});
+
+// ==========================================
+// DAY NOTES
+// ==========================================
+
+// GET /api/day-notes?month=YYYY-MM — get all day notes for a month
+app.get('/api/day-notes', verifyToken, (req, res) => {
+  const { month } = req.query;
+  if (!month || typeof month !== 'string') {
+    return res.status(400).json({ error: 'Missing ?month=YYYY-MM parameter' });
+  }
+
+  db.all(
+    `SELECT * FROM day_notes WHERE userId = ? AND date LIKE ? ORDER BY date ASC`,
+    [req.userId, `${month}%`],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    }
+  );
+});
+
+// PUT /api/day-notes/:date — upsert a day note
+app.put('/api/day-notes/:date', verifyToken, (req, res) => {
+  const { date } = req.params;
+  const { content } = req.body;
+
+  if (!date || content === undefined) {
+    return res.status(400).json({ error: 'Date and content are required.' });
+  }
+
+  // Check if note already exists for this date+user
+  db.get(
+    'SELECT id FROM day_notes WHERE date = ? AND userId = ?',
+    [date, req.userId],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      const now = new Date().toISOString();
+
+      if (row) {
+        // Update existing
+        if (content.trim() === '') {
+          // Delete if content is empty
+          db.run(
+            'DELETE FROM day_notes WHERE id = ? AND userId = ?',
+            [row.id, req.userId],
+            function (err) {
+              if (err) return res.status(500).json({ error: err.message });
+              res.json({ message: 'Note deleted.', deleted: true });
+            }
+          );
+        } else {
+          db.run(
+            'UPDATE day_notes SET content = ?, updatedAt = ? WHERE id = ? AND userId = ?',
+            [content.trim(), now, row.id, req.userId],
+            function (err) {
+              if (err) return res.status(500).json({ error: err.message });
+              res.json({ message: 'Note updated.', id: row.id });
+            }
+          );
+        }
+      } else {
+        if (content.trim() === '') {
+          return res.json({ message: 'Nothing to save.', deleted: true });
+        }
+        // Insert new
+        const id = `note-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+        db.run(
+          'INSERT INTO day_notes (id, date, content, userId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)',
+          [id, date, content.trim(), req.userId, now, now],
+          function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.status(201).json({ message: 'Note created.', id });
+          }
+        );
+      }
+    }
+  );
 });
 
 // ==========================================

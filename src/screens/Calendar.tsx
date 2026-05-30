@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { fetchMonthNotes, upsertDayNote } from '../lib/api';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -25,19 +26,34 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[]; date: string } | null>(null);
   const [dayNote, setDayNote] = useState('');
+  const [dayNotes, setDayNotes] = useState<Record<string, string>>({});
 
-  const getDayNotes = (): Record<string, string> => {
-    try { return JSON.parse(localStorage.getItem('calendar_notes') || '{}'); } catch { return {}; }
-  };
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
 
-  const saveDayNote = (date: string, content: string) => {
-    const notes = getDayNotes();
-    if (content.trim()) {
-      notes[date] = content.trim();
-    } else {
-      delete notes[date];
-    }
-    localStorage.setItem('calendar_notes', JSON.stringify(notes));
+  const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+  useEffect(() => {
+    fetchMonthNotes(monthKey).then(notes => {
+      const map: Record<string, string> = {};
+      for (const n of notes) {
+        map[n.date] = n.content;
+      }
+      setDayNotes(map);
+    }).catch(() => {});
+  }, [monthKey]);
+
+  const handleSaveDayNote = async (date: string, content: string) => {
+    await upsertDayNote(date, content);
+    setDayNotes(prev => {
+      const next = { ...prev };
+      if (content.trim()) {
+        next[date] = content.trim();
+      } else {
+        delete next[date];
+      }
+      return next;
+    });
   };
 
   // iOS Drag-to-Dismiss Gesture States
@@ -70,9 +86,6 @@ export default function Calendar() {
     }
     setTranslateY(0);
   };
-
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth(); // 0-indexed
 
   // Navigation handlers
   const todayDate = new Date();
@@ -310,11 +323,11 @@ export default function Calendar() {
               <div 
                 key={`${cell.dateString}-${index}`}
                 onClick={() => {
-                  if (!hasTrades && !getDayNotes()[cell.dateString]) return;
+                  if (!hasTrades && !dayNotes[cell.dateString]) return;
                   setSelectedDayTrades({ day: cell.day, trades: dayTrades, date: cell.dateString });
-                  setDayNote(getDayNotes()[cell.dateString] || '');
+                  setDayNote(dayNotes[cell.dateString] || '');
                 }}
-                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${(hasTrades || getDayNotes()[cell.dateString]) ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
+                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${(hasTrades || dayNotes[cell.dateString]) ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
                 {/* Day label */}
                 <div className="flex justify-between items-start leading-none">
@@ -323,9 +336,9 @@ export default function Calendar() {
                   </span>
                   
                   {/* Subtle dots for notes / screenshots */}
-                  {(hasTrades || getDayNotes()[cell.dateString]) && cell.isCurrentMonth && (
+                  {(hasTrades || dayNotes[cell.dateString]) && cell.isCurrentMonth && (
                     <div className="flex items-center gap-0.5">
-                      {getDayNotes()[cell.dateString] && (
+                      {dayNotes[cell.dateString] && (
                         <span className="w-1 h-1 rounded-full bg-amber-500/80 dark:bg-amber-400/80" title="Day Note" />
                       )}
                       {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
@@ -427,7 +440,7 @@ export default function Calendar() {
                 <textarea
                   value={dayNote}
                   onChange={e => setDayNote(e.target.value)}
-                  onBlur={() => saveDayNote(selectedDayTrades.date, dayNote)}
+                  onBlur={() => handleSaveDayNote(selectedDayTrades.date, dayNote)}
                   placeholder="Write a note for this day..."
                   rows={3}
                   className={`w-full border rounded-lg p-2.5 text-xs font-mono resize-none focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} placeholder:text-gray-500`}

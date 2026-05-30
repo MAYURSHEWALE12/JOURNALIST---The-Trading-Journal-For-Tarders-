@@ -127,6 +127,15 @@ export interface CalendarDay {
   pnl: number;
 }
 
+export interface DayNote {
+  id: string;
+  date: string;
+  content: string;
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export function getWeekOfMonth(dateString: string): string {
   const day = new Date(dateString).getDate();
   if (day <= 7) return 'Week 1';

@@ -104,7 +104,7 @@ export default function Sidebar() {
                             {acc.name} <span className="text-[10px] text-gray-500 ml-1 font-mono font-normal">({acc.type})</span>
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
-                            {isActive && <span className="text-[10px] text-gray-400 group-hover:hidden">✦</span>}
+                            {isActive && <span className="text-[10px] text-gray-400 md:group-hover:hidden">✦</span>}
                             <button
                               type="button"
                               title="Delete Account"
@@ -114,7 +114,7 @@ export default function Sidebar() {
                                   handleDeleteAccount(acc.id);
                                 }
                               }}
-                              className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-0.5 rounded transition cursor-pointer text-gray-500 flex items-center justify-center"
+                              className="opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-red-400 p-0.5 rounded transition cursor-pointer text-gray-500 flex items-center justify-center"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

@@ -5,6 +5,7 @@ import {
   ChevronRight, 
   BookOpen, 
   TrendingUp, 
+  StickyNote,
   X
 } from 'lucide-react';
 import { getDirectImageUrl, getShortTradeId, type Trade } from '../types';
@@ -22,7 +23,22 @@ export default function Calendar() {
   const { themeClasses, isDarkMode, activeTrades } = useApp();
   
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[] } | null>(null);
+  const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[]; date: string } | null>(null);
+  const [dayNote, setDayNote] = useState('');
+
+  const getDayNotes = (): Record<string, string> => {
+    try { return JSON.parse(localStorage.getItem('calendar_notes') || '{}'); } catch { return {}; }
+  };
+
+  const saveDayNote = (date: string, content: string) => {
+    const notes = getDayNotes();
+    if (content.trim()) {
+      notes[date] = content.trim();
+    } else {
+      delete notes[date];
+    }
+    localStorage.setItem('calendar_notes', JSON.stringify(notes));
+  };
 
   // iOS Drag-to-Dismiss Gesture States
   const [translateY, setTranslateY] = useState(0);
@@ -293,8 +309,12 @@ export default function Calendar() {
             return (
               <div 
                 key={`${cell.dateString}-${index}`}
-                onClick={() => hasTrades && setSelectedDayTrades({ day: cell.day, trades: dayTrades })}
-                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${hasTrades ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
+                onClick={() => {
+                  if (!hasTrades && !getDayNotes()[cell.dateString]) return;
+                  setSelectedDayTrades({ day: cell.day, trades: dayTrades, date: cell.dateString });
+                  setDayNote(getDayNotes()[cell.dateString] || '');
+                }}
+                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${(hasTrades || getDayNotes()[cell.dateString]) ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
                 {/* Day label */}
                 <div className="flex justify-between items-start leading-none">
@@ -303,8 +323,11 @@ export default function Calendar() {
                   </span>
                   
                   {/* Subtle dots for notes / screenshots */}
-                  {hasTrades && cell.isCurrentMonth && (
+                  {(hasTrades || getDayNotes()[cell.dateString]) && cell.isCurrentMonth && (
                     <div className="flex items-center gap-0.5">
+                      {getDayNotes()[cell.dateString] && (
+                        <span className="w-1 h-1 rounded-full bg-amber-500/80 dark:bg-amber-400/80" title="Day Note" />
+                      )}
                       {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
                         <span className="w-1 h-1 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
                       )}
@@ -394,9 +417,31 @@ export default function Calendar() {
               </button>
             </div>
 
+            {/* Day Note Section */}
+            {selectedDayTrades && (
+              <div className={`border-b px-5 py-4 ${themeClasses.border}`}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <StickyNote className="w-3.5 h-3.5 text-amber-500" />
+                  <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>Day Note</span>
+                </div>
+                <textarea
+                  value={dayNote}
+                  onChange={e => setDayNote(e.target.value)}
+                  onBlur={() => saveDayNote(selectedDayTrades.date, dayNote)}
+                  placeholder="Write a note for this day..."
+                  rows={3}
+                  className={`w-full border rounded-lg p-2.5 text-xs font-mono resize-none focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} placeholder:text-gray-500`}
+                />
+              </div>
+            )}
+
             {/* Drawer Content */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              {selectedDayTrades.trades.map(t => {
+              {selectedDayTrades.trades.length === 0 ? (
+                <div className={`text-center py-8 ${themeClasses.textSub}`}>
+                  <p className="text-xs font-mono">No trades logged for this day.</p>
+                </div>
+              ) : selectedDayTrades.trades.map(t => {
                 return (
                   <div 
                     key={t.id}

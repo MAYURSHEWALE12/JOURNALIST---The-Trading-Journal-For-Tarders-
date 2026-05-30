@@ -1,24 +1,53 @@
 # Journalist — Trading Journal
 
-A full-stack trading journal for tracking trades across Crypto, Futures, Forex, Equities, and Indices. Features analytics dashboards, equity curves, risk metrics, and OTP-based password recovery.
+A premium full-stack trading journal for tracking trades across Crypto, Futures, Forex, Equities, and Indices. Features a suite of analytical tools, multi-account management, and a polished dark-mode UI.
+
+---
 
 ## Tech Stack
 
-**Frontend:** React 19, TypeScript, Vite 8, Tailwind CSS v4, Recharts, Lucide React  
+**Frontend:** React 19, TypeScript, Vite 8, Tailwind CSS v4, Recharts, Lucide React, React Router v7  
 **Backend:** Express 5, SQLite3, JWT, BcryptJS, Nodemailer  
-**Runtime:** Node.js
+**Database:** SQLite (local) / Supabase (cloud)
+
+---
 
 ## Features
 
-- **Multi-account support** — Track separate trading accounts with distinct metrics
-- **Trade logging** — 3-step modal: metrics, strategy, psychology with emotional state tracking
-- **Analytics dashboards** — R-Ratio scatter plots, win/loss breakdowns, tag performance matrix
-- **Equity curves** — Cumulative PnL chart and calendar heatmap
-- **Timeline view** — Chronological trade feed with notes, tags, screenshots
+### Trade Management
+- **Multi-account support** — Track separate trading accounts (cash, margin, futures) with independent metrics
+- **3-step trade logging** — Wizard-style modal: metrics → strategy → psychology
+- **Edit & delete** — Full CRUD with confirmation and bulk delete on Timeline
+- **Tag system** — Custom tags for trade categorization and filtering
+- **Screenshot attachments** — Upload setup screenshots per trade
+
+### Analytics & Insights
+- **R-Ratio scatter plot** — Planned vs realized R visualization
+- **Win/Loss donut chart** — Outcome distribution with win rate overlay
+- **Tag performance matrix** — Win rate breakdown by tag
+- **Daily calendar heatmap** — Color-coded PnL per day with month aggregates
+- **Equity curves** — Cumulative PnL timeline
+- **KPI dashboard** — Win rate, profit factor, average PnL, best/worst assets
+- **Date range filtering** — Filter analytics by custom date range
+
+### Journaling
+- **Day notes** — Add notes to any calendar day (even non-trading days) to log market observations or explain why you avoided trades
+- **Timeline feed** — Chronological scrollable view with notes, tags, screenshots, and emotional state
+- **Emotional state tracking** — Log mindset at time of trade
+
+### User Experience
+- **Dark/Light mode** — Persistent theme with system preference detection
 - **Command palette** — `Ctrl+K` quick navigation and actions
-- **Dark/light mode** — Persistent theme toggle
-- **Password recovery** — OTP-based reset via email (Nodemailer)
 - **Guest mode** — Sandbox with mock trades, no login required
+- **Responsive design** — Mobile-optimized with iOS-style bottom sheets
+- **Export** — Colored Excel (.xls) with green/red rows and summary header
+
+### Authentication
+- **Register / Login** — Email-based auth with JWT
+- **Password recovery** — OTP-based reset via email (Nodemailer)
+- **Profile management** — Update username, avatar, bio, social handles
+
+---
 
 ## Getting Started
 
@@ -68,61 +97,119 @@ npm run build
 npm run lint
 ```
 
+---
+
 ## Project Structure
 
 ```
 src/
-├── context/AppContext.tsx    # Global state (auth, trades, accounts, theme, modals)
-├── components/               # Reusable UI components
-│   ├── Sidebar.tsx           # Collapsible navigation
-│   ├── Header.tsx            # Top bar with actions
-│   ├── CommandPalette.tsx    # ⌘K command search
-│   ├── NewTradeModal.tsx     # 3-step trade creation wizard
-│   ├── EditTradeModal.tsx    # Edit trade form
-│   ├── DeleteConfirmModal.tsx
-│   ├── NewAccountModal.tsx   # Create new account
-│   ├── ScreenshotModal.tsx   # Fullscreen image lightbox
-│   ├── CursorFollower.tsx    # Decorative cursor animation
-│   ├── LogoIcon.tsx          # Theme-aware logo
-│   └── Skeleton.tsx          # Loading skeleton
-├── screens/
-│   ├── LandingPage.tsx       # Marketing page
-│   ├── AuthPage.tsx          # Login / Register
-│   ├── ForgotPassword.tsx    # Email → OTP → new password
-│   ├── ResetPassword.tsx     # Token-based reset
-│   ├── Dashboard.tsx         # Stats, equity curve, calendar, trades
-│   ├── Analytics.tsx         # Scatter, donut, tag matrix
-│   ├── Timeline.tsx          # Chronological trade feed
-│   └── TradeDetail.tsx       # Single trade detail view
-├── lib/api.ts                # API client (fetch-based)
-├── data/mockTrades.ts        # Seed data for guest mode
-└── types.ts                  # Shared TypeScript types
+├── context/                    # React context providers
+│   ├── AppContext.tsx           # Composite provider (all sub-contexts)
+│   ├── UIContext.tsx            # Theme, sidebar, command palette, calendar nav
+│   ├── AuthContext.tsx          # User, login/register, profile, password reset
+│   ├── AccountContext.tsx       # Accounts CRUD, active account management
+│   ├── TradeContext.tsx         # Trades CRUD, filters, tags, modal state
+│   └── AnalyticsContext.tsx     # Computed stats, equity curve, calendar days
+├── components/                  # Reusable UI components
+│   ├── Sidebar.tsx              # Collapsible navigation
+│   ├── Header.tsx               # Top bar with actions
+│   ├── CommandPalette.tsx       # Ctrl+K command search
+│   ├── NewTradeModal.tsx        # 3-step trade creation wizard
+│   ├── EditTradeModal.tsx       # Edit trade form
+│   ├── DeleteConfirmModal.tsx   # Delete confirmation dialog
+│   ├── NewAccountModal.tsx      # Create new account
+│   ├── ScreenshotModal.tsx      # Fullscreen image lightbox
+│   ├── CursorFollower.tsx       # Decorative cursor animation
+│   ├── LogoIcon.tsx             # Theme-aware logo
+│   ├── KpiDashboard.tsx         # Key performance indicators
+│   ├── PremiumPnLChart.tsx      # Equity curve chart
+│   ├── JournalistScore.tsx      # Journalist scoring component
+│   └── Skeleton.tsx             # Loading skeletons
+├── screens/                     # Page-level components
+│   ├── LandingPage.tsx          # Marketing / landing page
+│   ├── AuthPage.tsx             # Login / Register
+│   ├── ForgotPassword.tsx       # Email → OTP → new password
+│   ├── ResetPassword.tsx        # Token-based password reset
+│   ├── Dashboard.tsx            # Stats, equity curve, calendar, trade cards
+│   ├── Analytics.tsx            # Scatter, donut, tag matrix, date range
+│   ├── Calendar.tsx             # Monthly heatmap with day notes
+│   ├── Timeline.tsx             # Chronological trade feed with bulk delete
+│   └── TradeDetail.tsx          # Single trade detail view
+├── lib/
+│   ├── api.ts                   # API client (Express + Supabase)
+│   ├── supabase.ts              # Supabase client init
+│   ├── pdfExporter.ts           # PDF report generation (jsPDF)
+│   ├── excelExporter.ts         # Colored Excel export (SpreadsheetML)
+│   └── journalistScore.ts       # Scoring algorithm
+├── data/mockTrades.ts           # Seed data for guest mode
+└── types.ts                     # Shared TypeScript types
 
 server/
-└── index.js                  # Express server, SQLite, JWT auth, email
+└── index.js                     # Express server, SQLite, JWT, email
 ```
 
+---
+
 ## API Endpoints
+
+### Auth
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/api/auth/register` | No | Register new user |
 | POST | `/api/auth/login` | No | Login, returns JWT |
-| GET | `/api/auth/me` | Yes | Verify token |
-| POST | `/api/auth/forgot-password` | No | Request OTP |
-| POST | `/api/auth/reset-password` | No | Reset with OTP |
+| GET | `/api/auth/me` | Yes | Verify token & get profile |
+| POST | `/api/auth/forgot-password` | No | Request OTP via email |
+| POST | `/api/auth/reset-password` | No | Reset password with OTP |
 | POST | `/api/auth/change-password` | Yes | Change password |
-| GET | `/api/accounts` | Yes | List accounts |
-| POST | `/api/accounts` | Yes | Create account |
+
+### Accounts
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/accounts` | Yes | List all accounts |
+| POST | `/api/accounts` | Yes | Create new account |
 | DELETE | `/api/accounts/:id` | Yes | Delete account |
-| GET | `/api/trades` | Yes | List trades |
-| POST | `/api/trades` | Yes | Create trade |
+
+### Trades
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/trades` | Yes | List all trades |
+| POST | `/api/trades` | Yes | Create new trade |
 | PUT | `/api/trades/:id` | Yes | Update trade |
 | DELETE | `/api/trades/:id` | Yes | Delete trade |
+
+### Day Notes
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/day-notes?month=YYYY-MM` | Yes | Get notes for a month |
+| PUT | `/api/day-notes/:date` | Yes | Create / update / delete a note |
+
+### Utilities
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/screenshot?url=` | No | Puppeteer webpage screenshot |
+
+---
 
 ## Security
 
 - Passwords hashed with bcryptjs (12 rounds)
 - JWT-based authentication with configurable expiry
-- `.env` and `database.sqlite` excluded from version control via `.gitignore`
-- No secrets in source code
+- SQLite database excluded from version control
+- RLS policies required for Supabase deployment
+
+---
+
+## Deployment
+
+### Cloudflare Pages
+
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) for automatic deployment to Cloudflare Pages on push to `master`.
+
+### Supabase (Optional)
+
+For cloud database, configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`. Required Supabase tables: `profiles`, `accounts`, `trades`, `day_notes` — each with RLS policies using `auth.uid()`.

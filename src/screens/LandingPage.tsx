@@ -158,12 +158,12 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full text-left">
           <div className="lg:col-span-7 flex flex-col justify-center items-start">
             <h1 className={`font-display font-extrabold text-4xl sm:text-6xl md:text-7xl tracking-tight leading-[1.08] max-w-xl ${themeClasses.textMain}`}>
-              Every trade leaves a trace.<br />
-              <span className={`border-b-2 ${isDarkMode ? 'border-white text-white' : 'border-black text-black'}`}>Journal it cleanly.</span>
+              Refine your edge.<br />
+              <span className={`border-b-2 ${isDarkMode ? 'border-white text-white' : 'border-black text-black'}`}>Master execution.</span>
             </h1>
 
             <p className={`${themeClasses.textSub} text-base md:text-lg max-w-xl mt-6 leading-relaxed`}>
-              A premium full-stack Trading Journal workspace combining clean black/white typography, high-density charts, and macOS-inspired fluid keyboard-first operations.
+              An institutional-grade portfolio journal designed for professional traders. Track performance across multiple asset classes, analyze structural metrics, and systematically optimize your edge.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:w-auto">

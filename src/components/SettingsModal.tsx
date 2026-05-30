@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, User, Image, KeyRound, Link, ShieldAlert, CheckCircle } from 'lucide-react';
+import { X, User, Image, KeyRound, Link, ShieldAlert, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { authLinkGoogle, authSetPassword } from '../lib/api';
 
@@ -22,6 +22,7 @@ export default function SettingsModal() {
   
   // Security States
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState({ text: '', type: 'success' });
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -374,15 +375,24 @@ export default function SettingsModal() {
                   <div>
                     <label className="block text-[9px] uppercase font-bold text-gray-500 mb-1">Set Password credential</label>
                     <p className="text-[9px] text-gray-500 mb-2 leading-tight">If you originally logged in via OAuth, you can define a password to log in directly with your email too.</p>
-                    <input
-                      type="password"
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3 py-2 bg-black/40 border rounded-lg focus:outline-none focus:border-indigo-500/60 text-white"
-                      style={{ borderColor: isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.12)' }}
-                      placeholder="Define minimum 6 characters..."
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full pl-3 pr-10 py-2 bg-black/40 border rounded-lg focus:outline-none focus:border-indigo-500/60 text-white"
+                        style={{ borderColor: isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.12)' }}
+                        placeholder="Define minimum 6 characters..."
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition cursor-pointer flex items-center justify-center"
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
                   <button
                     type="submit"

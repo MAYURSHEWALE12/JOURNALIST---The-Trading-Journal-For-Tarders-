@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ShieldCheck, KeyRound } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -7,6 +7,7 @@ import LogoIcon from '../components/LogoIcon';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   
   // 6 separate boxes for OTP (only used when Supabase NOT configured)
   const [otpArray, setOtpArray] = useState<string[]>(['', '', '', '', '', '']);
@@ -176,14 +177,23 @@ export default function ForgotPassword() {
               {/* New Password input */}
               <div className="space-y-2">
                 <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1.5">New Password <span className="text-gray-600">(min. 6 chars)</span></label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={resetPassword}
-                  onChange={(e) => setResetPassword(e.target.value)}
-                  className={`w-full border rounded px-3 py-2.5 text-xs focus:outline-none focus:border-gray-400 transition-all ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    value={resetPassword}
+                    onChange={(e) => setResetPassword(e.target.value)}
+                    className={`w-full border rounded pl-3 pr-10 py-2.5 text-xs focus:outline-none focus:border-gray-400 transition-all ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition cursor-pointer flex items-center justify-center"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <button

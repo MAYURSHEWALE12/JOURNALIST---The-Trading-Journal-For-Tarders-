@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { isSupabaseConfigured, getSupabase } from '../lib/supabase';
@@ -8,6 +8,7 @@ import LogoIcon from '../components/LogoIcon';
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [supabaseRecovery, setSupabaseRecovery] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     themeClasses, isDarkMode,
@@ -99,14 +100,23 @@ export default function ResetPassword() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
               <label className="block text-[10px] uppercase font-mono text-gray-500 mb-1.5">New Password <span className="text-gray-600">(min. 6 chars)</span></label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={resetPassword}
-                onChange={(e) => setResetPassword(e.target.value)}
-                className={`w-full border rounded px-3 py-2.5 text-xs focus:outline-none focus:border-gray-400 transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  className={`w-full border rounded pl-3 pr-10 py-2.5 text-xs focus:outline-none focus:border-gray-400 transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition cursor-pointer flex items-center justify-center"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <button
               type="submit"

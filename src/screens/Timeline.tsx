@@ -6,7 +6,7 @@ import { getWeekOfMonth, getShortTradeId, getDirectImageUrl } from '../types';
 import Seo from '../components/Seo';
 
 export default function Timeline() {
-  const { themeClasses, isDarkMode, activeTrades, setSelectedScreenshot, deleteTrade, dataLoading } = useApp();
+  const { themeClasses, isDarkMode, activeTrades, setSelectedScreenshot, handleBulkDeleteTrades, dataLoading } = useApp();
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -44,9 +44,7 @@ export default function Timeline() {
             <button
               onClick={async () => {
                 if (!window.confirm(`Delete ${selectedIds.size} selected trade${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return;
-                for (const id of selectedIds) {
-                  await deleteTrade(id);
-                }
+                await handleBulkDeleteTrades(Array.from(selectedIds));
                 setSelectedIds(new Set());
                 setSelectMode(false);
               }}

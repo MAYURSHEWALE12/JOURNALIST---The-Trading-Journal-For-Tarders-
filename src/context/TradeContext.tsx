@@ -43,6 +43,7 @@ export interface TradeContextValue {
   handleOpenEditTrade: (t: Trade) => void;
   handleEditTradeSubmit: (e: FormEvent) => Promise<void>;
   handleDeleteTrade: (id: string) => Promise<void>;
+  handleBulkDeleteTrades: (ids: string[]) => Promise<void>;
   handleCommandAction: (action: () => void) => void;
   isCreatingTrade: boolean;
   isEditingTrade: boolean;
@@ -307,6 +308,22 @@ export function TradeProvider({ children }: { children: ReactNode }) {
     navigate('/timeline');
   };
 
+  const handleBulkDeleteTrades = async (ids: string[]) => {
+    setIsDeletingTrade(true);
+    const idsSet = new Set(ids);
+    const updated = trades.filter(t => !idsSet.has(t.id));
+    try {
+      await Promise.all(ids.map(id => api.deleteTrade(id)));
+      setTrades(updated);
+      localStorage.setItem('journalist_sandbox_trades', JSON.stringify(updated));
+      await loadTradesFromServer();
+    } catch {
+      setTrades(updated);
+      localStorage.setItem('journalist_sandbox_trades', JSON.stringify(updated));
+    }
+    setIsDeletingTrade(false);
+  };
+
   const handleCommandAction = (action: () => void) => {
     action();
     setIsNewTradeOpen(false);
@@ -318,7 +335,7 @@ export function TradeProvider({ children }: { children: ReactNode }) {
     isNewTradeOpen, setIsNewTradeOpen, newTradeStep, setNewTradeStep, newTradeData, setNewTradeData,
     isEditTradeOpen, setIsEditTradeOpen, editTradeData, setEditTradeData,
     deleteConfirmId, setDeleteConfirmId, selectedScreenshot, setSelectedScreenshot,
-    handleAddNewTrade, handleOpenNewTradeModal, handleOpenEditTrade, handleEditTradeSubmit, handleDeleteTrade, handleCommandAction,
+    handleAddNewTrade, handleOpenNewTradeModal, handleOpenEditTrade, handleEditTradeSubmit, handleDeleteTrade, handleBulkDeleteTrades, handleCommandAction,
     isCreatingTrade, isEditingTrade, isDeletingTrade, loadTradesFromServer,
   };
 

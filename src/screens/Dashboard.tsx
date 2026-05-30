@@ -213,7 +213,7 @@ export default function Dashboard() {
             </select>
             <button
               onClick={() => exportTradesToExcel(activeTrades)}
-              className={`px-3.5 py-2 border text-xs rounded transition cursor-pointer font-bold shrink-0 ${
+              className={`w-24 sm:w-28 h-10 text-xs border rounded transition cursor-pointer font-bold shrink-0 flex items-center justify-center text-center ${
                 isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
               }`}
             >
@@ -221,7 +221,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(activeTrades, computedStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
-              className={`px-3.5 py-2 border text-xs rounded transition font-bold flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              className={`w-24 sm:w-28 h-10 border text-xs rounded transition font-bold flex items-center justify-center text-center gap-1.5 cursor-pointer shrink-0 ${
                 isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
               }`}
             >

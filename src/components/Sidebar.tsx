@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, Compass, BarChart3, BookOpen, Calendar, Search, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -20,6 +21,19 @@ export default function Sidebar() {
     user, handleLogOut, setIsCommandOpen, setIsSettingsOpen,
   } = useApp();
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <>
       {mobileMenuOpen && (
@@ -28,7 +42,7 @@ export default function Sidebar() {
       <aside className={`fixed md:relative top-0 left-0 h-full z-40 border-r flex flex-col justify-between transition-all duration-300 ${themeClasses.bgPanel} ${themeClasses.border} ${sidebarCollapsed ? 'w-16 md:w-16 hidden md:flex' : 'w-64 md:w-60'} ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div>
           <div className={`p-4 border-b flex items-center justify-between ${themeClasses.border}`}>
-            <div className="flex items-center space-x-3 overflow-hidden">
+            <div className="flex items-center space-x-3 overflow-hidden cursor-pointer" onClick={() => navigate('/')}>
               <div className={`w-8 h-8 rounded flex items-center justify-center inner-stroke shrink-0 ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
                 <LogoIcon className="w-4.5 h-4.5" isDark={isDarkMode} />
               </div>
@@ -51,17 +65,50 @@ export default function Sidebar() {
                 <button onClick={() => setIsAddAccountOpen(true)}
                   className={`text-[10px] font-bold underline cursor-pointer ${isDarkMode ? 'text-white' : 'text-black'}`}>＋ Add</button>
               </div>
-              <div className="relative flex items-center">
-                <select value={activeAccountId}
-                  onChange={(e) => { setActiveAccountId(e.target.value); setMobileMenuOpen(false); }}
-                  className={`w-full text-xs font-medium bg-transparent border-0 outline-none p-0 pr-6 cursor-pointer appearance-none ${themeClasses.textMain}`}>
-                  {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id} className={isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}>
-                      {acc.name} ({acc.type})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-0 pointer-events-none" />
+              <div className="relative" ref={selectRef}>
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(prev => !prev)}
+                  className={`w-full text-xs font-semibold bg-transparent border-0 outline-none p-0 pr-6 cursor-pointer flex items-center justify-between text-left ${themeClasses.textMain}`}
+                >
+                  <span className="truncate">
+                    {accounts.find(a => a.id === activeAccountId)?.name || 'Select Account'} 
+                    <span className="text-[10px] text-gray-500 ml-1.5 font-mono font-normal">
+                      ({accounts.find(a => a.id === activeAccountId)?.type || 'N/A'})
+                    </span>
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-gray-500 absolute right-0 transition-transform duration-200 pointer-events-none ${dropdownOpen ? 'rotate-180' : 'rotate-0'}`} />
+                </button>
+
+                {dropdownOpen && (
+                  <div className={`absolute top-full left-0 right-0 mt-2.5 rounded-lg border shadow-2xl p-1 z-50 transition-all duration-200 ${
+                    isDarkMode ? 'bg-[#121212] border-white/[0.08] text-white' : 'bg-white border-gray-200 text-black'
+                  }`}>
+                    {accounts.map(acc => {
+                      const isActive = acc.id === activeAccountId;
+                      return (
+                        <div
+                          key={acc.id}
+                          onClick={() => {
+                            setActiveAccountId(acc.id);
+                            setDropdownOpen(false);
+                            setMobileMenuOpen(false);
+                          }}
+                          className={`w-full text-left px-2.5 py-2.5 rounded text-xs transition duration-150 cursor-pointer flex justify-between items-center ${
+                            isActive
+                              ? (isDarkMode ? 'bg-white/10 text-white font-semibold' : 'bg-black/5 text-black font-semibold')
+                              : (isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/[0.04]' : 'text-gray-600 hover:text-black hover:bg-black/[0.03]')
+                          }`}
+                        >
+                          <span className="truncate">
+                            {acc.name} <span className="text-[10px] text-gray-500 ml-1 font-mono font-normal">({acc.type})</span>
+                          </span>
+                          {isActive && <span className="text-[10px] text-gray-400">✦</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}

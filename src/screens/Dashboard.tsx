@@ -213,7 +213,9 @@ export default function Dashboard() {
             </select>
             <button
               onClick={() => exportTradesToExcel(activeTrades)}
-              className={`px-3.5 py-2 text-xs border rounded transition cursor-pointer font-bold shrink-0 ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'}`}
+              className={`px-3.5 py-2 border text-xs rounded transition cursor-pointer font-bold shrink-0 ${
+                isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
+              }`}
             >
               Export Excel
             </button>

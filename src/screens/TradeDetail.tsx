@@ -121,7 +121,7 @@ export default function TradeDetail() {
       {/* Top Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate(-1)}
           className={`flex items-center gap-2 text-xs font-mono uppercase tracking-widest transition-colors cursor-pointer ${themeClasses.textSub} hover:text-white self-start`}
         >
           <ChevronLeft className="w-4 h-4" /> Back to Logs

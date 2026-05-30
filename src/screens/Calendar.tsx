@@ -353,12 +353,18 @@ export default function Calendar() {
                     {cell.day}
                   </span>
                   
-                  {/* Subtle dots for notes / screenshots */}
-                  {(hasTrades || dayNotes[cell.dateString]) && cell.isCurrentMonth && (
+                  {/* Note icon with hover tooltip */}
+                  {dayNotes[cell.dateString] && cell.isCurrentMonth && (
+                    <div className="relative group">
+                      <StickyNote className="w-3 h-3 text-amber-500/80 hover:text-amber-400 transition-colors" />
+                      <div className="absolute right-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
+                        {dayNotes[cell.dateString]}
+                      </div>
+                    </div>
+                  )}
+                  {/* Subtle dots for trade notes / screenshots */}
+                  {hasTrades && cell.isCurrentMonth && (
                     <div className="flex items-center gap-0.5">
-                      {dayNotes[cell.dateString] && (
-                        <span className="w-1 h-1 rounded-full bg-amber-500/80 dark:bg-amber-400/80" title="Day Note" />
-                      )}
                       {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
                         <span className="w-1 h-1 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
                       )}
@@ -369,7 +375,7 @@ export default function Calendar() {
                   )}
                 </div>
 
-                {/* Day aggregates (PNL & Trades Count) */}
+                {/* Day aggregates (PNL & Trades Count) or note-only icon */}
                 {hasTrades && cell.isCurrentMonth ? (
                   <div className="space-y-0 text-right mt-1 leading-none">
                     <p className={`text-[10px] md:text-xs font-mono font-extrabold ${pnlColor}`}>
@@ -378,6 +384,15 @@ export default function Calendar() {
                     <p className={`text-[7px] md:text-[8px] uppercase font-mono tracking-widest ${themeClasses.textSub}`}>
                       {dayTrades.length} {dayTrades.length === 1 ? 'tr' : 'trs'}
                     </p>
+                  </div>
+                ) : dayNotes[cell.dateString] && cell.isCurrentMonth ? (
+                  <div className="flex justify-end mt-1">
+                    <div className="relative group">
+                      <StickyNote className="w-3.5 h-3.5 text-amber-500/60 hover:text-amber-400 transition-colors" />
+                      <div className="absolute right-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
+                        {dayNotes[cell.dateString]}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="h-4" /> // Placeholder layout balancer

@@ -331,169 +331,176 @@ export default function TradeDetail() {
 
       {/* Share Card Modal Overlay */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 overflow-hidden select-none flex items-center justify-center p-3 sm:p-4">
-          <div className="w-full max-w-[340px] max-h-[96vh] overflow-y-auto flex flex-col items-center gap-4 py-2 scrollbar-none pointer-events-auto">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center w-full px-1">
-              <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate PNL Card</span>
-              <button 
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto select-none">
+          <div className="w-full max-w-[420px] sm:max-w-lg bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-2xl my-auto">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-white/[0.04]">
+              <span className="text-white/80 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold">
+                Generate PNL Card
+              </span>
+              <button
                 onClick={() => setIsShareModalOpen(false)}
-                className="text-gray-400 hover:text-white transition cursor-pointer p-1 rounded-full hover:bg-white/5"
+                className="text-gray-500 hover:text-white transition cursor-pointer p-1.5 rounded-full hover:bg-white/5"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* The Sharable Card DOM Target */}
-            <div 
-              id="journalist-share-card"
-              className="w-full max-w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300"
-              style={{ aspectRatio: '4/5' }}
-            >
-              {/* Rotating Logo Watermark */}
-              <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
-                <LogoIcon className="w-full h-full text-white" isDark={true} />
-              </div>
-
-              {/* Top User Profile block */}
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase overflow-hidden relative shrink-0">
-                  {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    user?.username?.slice(0, 2) || 'TR'
-                  )}
-                </div>
-                <div>
-                  <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
-                  <div className="text-gray-500 text-[9px] font-mono mt-0.5">
-                    {user?.tradingBio || 'Systematic Trader'} &bull; {new Date(trade.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+            {/* Card Preview */}
+            <div className="px-4 sm:px-6 pt-3 sm:pt-4">
+              <div className="flex justify-center">
+                <div
+                  id="journalist-share-card"
+                  className="w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[340px] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300"
+                  style={{ aspectRatio: '4/5' }}
+                >
+                  {/* Rotating Logo Watermark */}
+                  <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
+                    <LogoIcon className="w-full h-full text-white" isDark={true} />
                   </div>
-                </div>
-              </div>
 
-              {/* Trade Details Block */}
-              <div className="my-auto relative z-10 py-4">
-                <div className="flex items-center gap-2">
-                  <div className="text-white font-display text-xl font-black uppercase tracking-tight">{trade.asset}</div>
-                  <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider border ${
-                    trade.status === 'WIN'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      : trade.status === 'LOSS'
-                        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                        : 'bg-white/5 text-gray-400 border-white/10'
-                  }`}>{trade.status}</span>
-                </div>
-                
-                <div className="mt-1 flex items-center gap-1.5 font-mono">
-                  <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider ${
-                    trade.direction === 'LONG' 
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                      : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                  }`}>
-                    {trade.direction}
-                  </span>
-                  <span className="text-[9px] px-2 py-0.5 rounded font-black tracking-wider bg-white/5 text-gray-400 border border-white/5">
-                    {leverage}X Leverage
-                  </span>
-                </div>
-
-                {/* Big P&L / ROI numbers */}
-                <div className="mt-6 space-y-1">
-                  {(shareType === 'pnl' || shareType === 'both') && (
+                  {/* Top User Profile block */}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase overflow-hidden relative shrink-0">
+                      {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        user?.username?.slice(0, 2) || 'TR'
+                      )}
+                    </div>
                     <div>
-                      {shareType === 'both' && <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold">Realized profit</div>}
-                      <div className={`font-display text-4xl font-extrabold tracking-tighter ${
-                        trade.netPnl >= 0 
-                          ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.15)]' 
-                          : 'text-rose-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.15)]'
-                      }`}>
-                        {trade.netPnl >= 0 ? '+' : ''}${trade.netPnl.toFixed(2)}
+                      <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
+                      <div className="text-gray-500 text-[9px] font-mono mt-0.5">
+                        {user?.tradingBio || 'Systematic Trader'} &bull; {new Date(trade.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
                     </div>
-                  )}
+                  </div>
 
-                  {(shareType === 'roi' || shareType === 'both') && (
-                    <div className={shareType === 'both' ? 'pt-1.5' : ''}>
-                      {shareType === 'both' && <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold">Return on Investment</div>}
-                      <div className={`font-display font-extrabold tracking-tighter ${
-                        shareType === 'both' ? 'text-lg font-bold' : 'text-4xl'
-                      } ${
-                        trade.netPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                  {/* Trade Details Block */}
+                  <div className="my-auto relative z-10 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="text-white font-display text-xl font-black uppercase tracking-tight">{trade.asset}</div>
+                      <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider border ${
+                        trade.status === 'WIN'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : trade.status === 'LOSS'
+                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            : 'bg-white/5 text-gray-400 border-white/10'
+                      }`}>{trade.status}</span>
+                    </div>
+                    
+                    <div className="mt-1 flex items-center gap-1.5 font-mono">
+                      <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider ${
+                        trade.direction === 'LONG' 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                       }`}>
-                        {trade.netPnl >= 0 ? '+' : ''}{computedRoi.toFixed(2)}%
+                        {trade.direction}
+                      </span>
+                      <span className="text-[9px] px-2 py-0.5 rounded font-black tracking-wider bg-white/5 text-gray-400 border border-white/5">
+                        {leverage}X Leverage
+                      </span>
+                    </div>
+
+                    {/* Big P&L / ROI numbers */}
+                    <div className="mt-6 space-y-1">
+                      {(shareType === 'pnl' || shareType === 'both') && (
+                        <div>
+                          {shareType === 'both' && <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold">Realized profit</div>}
+                          <div className={`font-display text-4xl font-extrabold tracking-tighter ${
+                            trade.netPnl >= 0 
+                              ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.15)]' 
+                              : 'text-rose-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.15)]'
+                          }`}>
+                            {trade.netPnl >= 0 ? '+' : ''}${trade.netPnl.toFixed(2)}
+                          </div>
+                        </div>
+                      )}
+
+                      {(shareType === 'roi' || shareType === 'both') && (
+                        <div className={shareType === 'both' ? 'pt-1.5' : ''}>
+                          {shareType === 'both' && <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold">Return on Investment</div>}
+                          <div className={`font-display font-extrabold tracking-tighter ${
+                            shareType === 'both' ? 'text-lg font-bold' : 'text-4xl'
+                          } ${
+                            trade.netPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                          }`}>
+                            {trade.netPnl >= 0 ? '+' : ''}{computedRoi.toFixed(2)}%
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom Prices Row */}
+                  <div className="border-t border-white/5 pt-4 grid grid-cols-2 gap-4 relative z-10">
+                    <div>
+                      <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold font-mono">Entry Price</div>
+                      <div className="text-white text-xs font-bold font-mono mt-0.5">
+                        {Number(trade.entryPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                    <div>
+                      <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold font-mono">Exit Price</div>
+                      <div className="text-white text-xs font-bold font-mono mt-0.5">
+                        {trade.exitPrice 
+                          ? Number(trade.exitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 }) 
+                          : '-'}
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Bottom Prices Row */}
-              <div className="border-t border-white/5 pt-4 grid grid-cols-2 gap-4 relative z-10">
-                <div>
-                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold font-mono">Entry Price</div>
-                  <div className="text-white text-xs font-bold font-mono mt-0.5">
-                    {Number(trade.entryPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold font-mono">Exit Price</div>
-                  <div className="text-white text-xs font-bold font-mono mt-0.5">
-                    {trade.exitPrice 
-                      ? Number(trade.exitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 }) 
-                      : '-'}
-                  </div>
-                </div>
-              </div>
+                  {/* Branding Footer bar */}
+                  <div className="border-t border-white/5 pt-4 mt-4 flex items-center justify-between relative z-10 select-none">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
+                        <LogoIcon className="w-3.5 h-3.5" isDark={false} />
+                      </div>
+                      <div>
+                        <div className="text-white text-[10px] font-extrabold font-display tracking-tight leading-none">JOURNALIST</div>
+                        <div className="text-gray-500 text-[7px] font-mono mt-0.5 leading-none">Systematic Portfolio Core</div>
+                      </div>
+                    </div>
 
-              {/* Branding Footer bar */}
-              <div className="border-t border-white/5 pt-4 mt-4 flex items-center justify-between relative z-10 select-none">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
-                    <LogoIcon className="w-3.5 h-3.5" isDark={false} />
-                  </div>
-                  <div>
-                    <div className="text-white text-[10px] font-extrabold font-display tracking-tight leading-none">JOURNALIST</div>
-                    <div className="text-gray-500 text-[7px] font-mono mt-0.5 leading-none">Systematic Portfolio Core</div>
-                  </div>
-                </div>
-
-                {/* Dynamic Social Watermarks or QR Code */}
-                {user?.twitterHandle || user?.telegramHandle ? (
-                  <div className="text-right font-mono flex flex-col items-end justify-center">
-                    {user.twitterHandle && (
-                      <span className="text-[8px] font-bold text-gray-400" style={{ color: '#a3a3a3' }}>
-                        𝕏 {user.twitterHandle}
-                      </span>
+                    {/* Dynamic Social Watermarks or QR Code */}
+                    {user?.twitterHandle || user?.telegramHandle ? (
+                      <div className="text-right font-mono flex flex-col items-end justify-center">
+                        {user.twitterHandle && (
+                          <span className="text-[8px] font-bold text-gray-400" style={{ color: '#a3a3a3' }}>
+                            𝕏 {user.twitterHandle}
+                          </span>
+                        )}
+                        {user.telegramHandle && (
+                          <span className="text-[7px] text-gray-500 mt-0.5" style={{ color: '#737373' }}>
+                            ✈️ {user.telegramHandle}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
+                          <rect x="1" y="1" width="7" height="7" />
+                          <rect x="16" y="1" width="7" height="7" />
+                          <rect x="16" y="16" width="7" height="7" />
+                          <rect x="1" y="16" width="7" height="7" />
+                          <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
+                          <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
+                          <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
+                          <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
+                        </svg>
+                      </div>
                     )}
-                    {user.telegramHandle && (
-                      <span className="text-[7px] text-gray-500 mt-0.5" style={{ color: '#737373' }}>
-                        ✈️ {user.telegramHandle}
-                      </span>
-                    )}
                   </div>
-                ) : (
-                  <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
-                      <rect x="1" y="1" width="7" height="7" />
-                      <rect x="16" y="1" width="7" height="7" />
-                      <rect x="16" y="16" width="7" height="7" />
-                      <rect x="1" y="16" width="7" height="7" />
-                      <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
-                      <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
-                      <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
-                      <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
-                    </svg>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
 
-            {/* Control Panel inside Modal */}
-            <div className="space-y-3 font-mono text-xs w-full px-1">
+            {/* Controls */}
+            <div className="px-4 sm:px-6 pt-3 sm:pt-4 space-y-3 font-mono text-xs">
               {/* Type Select */}
               <div>
-                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Show On Card</label>
+                <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Show On Card</label>
                 <div className="flex gap-2">
                   {(['pnl', 'roi', 'both'] as const).map(t => (
                     <button
@@ -514,7 +521,7 @@ export default function TradeDetail() {
 
               {/* Leverage Selection */}
               <div>
-                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Leverage multiplier</label>
+                <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Leverage multiplier</label>
                 <div className="flex flex-wrap gap-1.5">
                   {[1, 3, 5, 10, 20, 50, 100].map(l => (
                     <button
@@ -532,15 +539,17 @@ export default function TradeDetail() {
                   ))}
                 </div>
               </div>
+            </div>
 
-              {/* Download CTA Button */}
+            {/* Action Bar */}
+            <div className="px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-white/[0.06] mt-3">
               <button
                 onClick={exportCardImage}
                 disabled={isExporting}
-                className="w-full py-3 mt-2 rounded-xl text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer bg-white text-black hover:bg-gray-200"
+                className="w-full py-2.5 sm:py-3 rounded-xl text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer bg-white text-black hover:bg-gray-200 disabled:opacity-50"
               >
                 {isExporting ? (
-                  <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> EXPORTING...</>
+                  <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> EXPORTING</>
                 ) : (
                   <><Download className="w-3.5 h-3.5" /> DOWNLOAD CARD IMAGE</>
                 )}

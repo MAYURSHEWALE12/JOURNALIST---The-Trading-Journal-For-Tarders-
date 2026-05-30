@@ -107,13 +107,21 @@ export default function LandingPage() {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`w-8 h-8 rounded border flex items-center justify-center transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.bgHover}`}
+              className={`w-8 h-8 rounded-lg border flex items-center justify-center transition cursor-pointer ${
+                isDarkMode 
+                  ? 'border-white/10 bg-white/5 text-white hover:bg-white/10' 
+                  : 'border-black/10 bg-black/5 text-black hover:bg-black/10'
+              }`}
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-black" />}
             </button>
             <button
               onClick={() => navigate(user ? '/dashboard' : '/auth')}
-              className={`px-4 py-2 text-sm font-medium border rounded transition duration-200 cursor-pointer hidden sm:block ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.bgHover}`}
+              className={`px-4 py-2 text-sm font-semibold border rounded-lg transition duration-200 cursor-pointer hidden sm:block ${
+                isDarkMode 
+                  ? 'border-white/10 bg-white/5 text-white hover:bg-white/10' 
+                  : 'border-black/15 bg-black/5 text-black hover:bg-black/10'
+              }`}
             >
               {user ? 'Enter Workspace' : 'Log In Account'}
             </button>
@@ -121,7 +129,11 @@ export default function LandingPage() {
             {/* Mobile hamburger menu toggle */}
             <button
               onClick={() => setLandingMobileMenuOpen(!landingMobileMenuOpen)}
-              className={`w-8 h-8 rounded border flex md:hidden items-center justify-center transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.bgHover}`}
+              className={`w-8 h-8 rounded-lg border flex md:hidden items-center justify-center transition cursor-pointer ${
+                isDarkMode 
+                  ? 'border-white/10 bg-white/5 text-white hover:bg-white/10' 
+                  : 'border-black/10 bg-black/5 text-black hover:bg-black/10'
+              }`}
             >
               <div className="space-y-1.5">
                 <span className={`block w-4 h-0.5 ${isDarkMode ? 'bg-white' : 'bg-black'}`} />
@@ -144,7 +156,11 @@ export default function LandingPage() {
                 setLandingMobileMenuOpen(false);
                 navigate(user ? '/dashboard' : '/auth');
               }}
-              className={`w-full py-2.5 mt-2 border rounded text-center text-sm font-medium ${themeClasses.bgCard} ${themeClasses.border}`}
+              className={`w-full py-2.5 mt-2 rounded-lg text-center text-sm font-semibold transition duration-200 cursor-pointer ${
+                isDarkMode 
+                  ? 'bg-white text-black hover:bg-gray-200' 
+                  : 'bg-black text-white hover:bg-gray-800'
+              }`}
             >
               {user ? 'Enter Workspace' : 'Log In Account'}
             </button>

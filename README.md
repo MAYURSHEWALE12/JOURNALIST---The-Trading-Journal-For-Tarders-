@@ -5,12 +5,12 @@
   </picture>
 </p>
 
-<h1 align="center">📓 Journalist — Trading Journal</h1>
+<h1 align="center">Journalist — Trading Journal</h1>
 
 <p align="center">
   <b>A premium full-stack trading journal</b> for tracking trades across Crypto, Futures, Forex, Equities, and Indices.
   <br/>
-  Analytics dashboards • Multi-account management • Polished dark-mode UI
+  Analytics dashboards · Multi-account management · Polished dark-mode UI
 </p>
 
 <p align="center">
@@ -32,7 +32,7 @@
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -43,54 +43,54 @@
 
 ---
 
-## ✨ Features
+## Features
 
-### 📊 Trade Management
+### Trade Management
 | Feature | Description |
 |---------|-------------|
-| 🔄 **Multi-account** | Track separate accounts (cash, margin, futures) with independent metrics |
-| 📝 **3-step logging** | Wizard-style modal: metrics → strategy → psychology |
-| ✏️ **Edit & Delete** | Full CRUD with confirmation dialogs; bulk delete on Timeline |
-| 🏷️ **Tag system** | Custom tags for categorization, filtering, and performance breakdown |
-| 🖼️ **Screenshots** | Attach setup screenshots to every trade |
+| **Multi-account** | Track separate accounts (cash, margin, futures) with independent metrics |
+| **3-step logging** | Wizard-style modal: metrics → strategy → psychology |
+| **Edit & Delete** | Full CRUD with confirmation dialogs; bulk delete on Timeline |
+| **Tag system** | Custom tags for categorization, filtering, and performance breakdown |
+| **Screenshots** | Attach setup screenshots to every trade |
 
-### 📈 Analytics & Insights
+### Analytics & Insights
 | Feature | Description |
 |---------|-------------|
-| 📉 **R-Ratio scatter** | Planned vs realized R visualization |
-| 🍩 **Win/Loss donut** | Outcome distribution with win rate overlay |
-| 📊 **Tag matrix** | Win rate breakdown by custom tag |
-| 🗓️ **Calendar heatmap** | Color-coded daily PnL with monthly aggregates |
-| 📈 **Equity curves** | Cumulative PnL timeline |
-| 🎯 **KPI dashboard** | Win rate, profit factor, avg PnL, best/worst assets |
-| 📅 **Date range** | Filter analytics by custom date range |
+| **R-Ratio scatter** | Planned vs realized R visualization |
+| **Win/Loss donut** | Outcome distribution with win rate overlay |
+| **Tag matrix** | Win rate breakdown by custom tag |
+| **Calendar heatmap** | Color-coded daily PnL with monthly aggregates |
+| **Equity curves** | Cumulative PnL timeline |
+| **KPI dashboard** | Win rate, profit factor, avg PnL, best/worst assets |
+| **Date range** | Filter analytics by custom date range |
 
-### 📓 Journaling
+### Journaling
 | Feature | Description |
 |---------|-------------|
-| 📝 **Day notes** | Add notes to any calendar day — even non-trading days — to log market observations or explain why you sat out |
-| ⏳ **Timeline feed** | Chronological scrollable view with notes, tags, screenshots, and emotional state |
-| 🧠 **Mindset tracking** | Log emotional state at time of trade |
+| **Day notes** | Add notes to any calendar day — even non-trading days — to log market observations or explain why you sat out |
+| **Timeline feed** | Chronological scrollable view with notes, tags, screenshots, and emotional state |
+| **Mindset tracking** | Log emotional state at time of trade |
 
-### 🎨 User Experience
+### User Experience
 | Feature | Description |
 |---------|-------------|
-| 🌙 **Dark / Light mode** | Persistent theme with system preference detection |
-| ⌨️ **Command palette** | `Ctrl+K` quick navigation and actions |
-| 👤 **Guest mode** | Sandbox with mock trades, no login required |
-| 📱 **Responsive** | Mobile-optimized with iOS-style bottom sheets |
-| 📤 **Export** | Colored Excel (.xls) with green/red rows and summary header |
+| **Dark / Light mode** | Persistent theme with system preference detection |
+| **Command palette** | `Ctrl+K` quick navigation and actions |
+| **Guest mode** | Sandbox with mock trades, no login required |
+| **Responsive** | Mobile-optimized with iOS-style bottom sheets |
+| **Export** | Colored Excel (.xls) with green/red rows and summary header |
 
-### 🔐 Authentication
+### Authentication
 | Feature | Description |
 |---------|-------------|
-| 🔑 **Register / Login** | Email-based auth with JWT |
-| 📧 **Password recovery** | OTP-based reset via email (Nodemailer) |
-| 👤 **Profile management** | Update username, avatar, bio, social handles |
+| **Register / Login** | Email-based auth with JWT |
+| **Password recovery** | OTP-based reset via email (Nodemailer) |
+| **Profile management** | Update username, avatar, bio, social handles |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -110,7 +110,7 @@ cd trading-journal
 npm install
 ```
 
-### ⚙️ Environment
+### Environment
 
 Create a `.env` file in the project root:
 
@@ -122,7 +122,7 @@ SMTP_PASS=your_gmail_app_password
 APP_URL=http://localhost:5173
 ```
 
-### 🧪 Development
+### Development
 
 Starts both Vite frontend and Express backend concurrently:
 
@@ -135,13 +135,13 @@ npm run dev
 | **Frontend** | `http://localhost:5173` |
 | **Backend** | `http://localhost:3001` |
 
-### 📦 Build
+### Build
 
 ```bash
 npm run build
 ```
 
-### 🔍 Lint
+### Lint
 
 ```bash
 npm run lint
@@ -149,122 +149,122 @@ npm run lint
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
-📦 trading-journal
-├── 📁 src/
-│   ├── 📁 context/                    # 🧩 React context providers
-│   │   ├── 📄 AppContext.tsx           # Composite provider (all sub-contexts)
-│   │   ├── 📄 UIContext.tsx            # Theme, sidebar, command palette, calendar nav
-│   │   ├── 📄 AuthContext.tsx          # User, login/register, profile, password reset
-│   │   ├── 📄 AccountContext.tsx       # Accounts CRUD, active account management
-│   │   ├── 📄 TradeContext.tsx         # Trades CRUD, filters, tags, modal state
-│   │   └── 📄 AnalyticsContext.tsx     # Computed stats, equity curve, calendar days
-│   ├── 📁 components/                  # 🧱 Reusable UI components
-│   │   ├── 📄 Sidebar.tsx              # Collapsible navigation
-│   │   ├── 📄 Header.tsx               # Top bar with actions
-│   │   ├── 📄 CommandPalette.tsx       # Ctrl+K command search
-│   │   ├── 📄 NewTradeModal.tsx        # 3-step trade creation wizard
-│   │   ├── 📄 EditTradeModal.tsx       # Edit trade form
-│   │   ├── 📄 DeleteConfirmModal.tsx   # Delete confirmation dialog
-│   │   ├── 📄 NewAccountModal.tsx      # Create new account
-│   │   ├── 📄 ScreenshotModal.tsx      # Fullscreen image lightbox
-│   │   ├── 📄 CursorFollower.tsx       # Decorative cursor animation
-│   │   ├── 📄 LogoIcon.tsx             # Theme-aware logo
-│   │   ├── 📄 KpiDashboard.tsx         # Key performance indicators
-│   │   ├── 📄 PremiumPnLChart.tsx      # Equity curve chart
-│   │   ├── 📄 JournalistScore.tsx      # Journalist scoring component
-│   │   └── 📄 Skeleton.tsx             # Loading skeletons
-│   ├── 📁 screens/                     # 📺 Page-level components
-│   │   ├── 📄 LandingPage.tsx          # Marketing / landing page
-│   │   ├── 📄 AuthPage.tsx             # Login / Register
-│   │   ├── 📄 ForgotPassword.tsx       # Email → OTP → new password
-│   │   ├── 📄 ResetPassword.tsx        # Token-based password reset
-│   │   ├── 📄 Dashboard.tsx            # Stats, equity curve, calendar, trade cards
-│   │   ├── 📄 Analytics.tsx            # Scatter, donut, tag matrix, date range
-│   │   ├── 📄 Calendar.tsx             # Monthly heatmap with day notes
-│   │   ├── 📄 Timeline.tsx             # Chronological trade feed with bulk delete
-│   │   └── 📄 TradeDetail.tsx          # Single trade detail view
-│   ├── 📁 lib/
-│   │   ├── 📄 api.ts                   # 🌐 API client (Express + Supabase)
-│   │   ├── 📄 supabase.ts              # Supabase client init
-│   │   ├── 📄 pdfExporter.ts           # 📄 PDF report generation (jsPDF)
-│   │   ├── 📄 excelExporter.ts         # 📊 Colored Excel export (SpreadsheetML)
-│   │   └── 📄 journalistScore.ts       # Scoring algorithm
-│   ├── 📁 data/
-│   │   └── 📄 mockTrades.ts            # Seed data for guest mode
-│   └── 📄 types.ts                     # Shared TypeScript types
-│
-├── 📁 server/
-│   └── 📄 index.js                     # 🖥 Express server, SQLite, JWT, email
-│
-├── 📄 .env                             # 🔒 Environment variables
-├── 📄 package.json                     # 📦 Dependencies & scripts
-├── 📄 vite.config.ts                   # ⚡ Vite configuration
-└── 📄 tsconfig.json                    # TypeScript configuration
+trading-journal
+├── src/
+│   ├── context/                  # React context providers
+│   │   ├── AppContext.tsx         # Composite provider (all sub-contexts)
+│   │   ├── UIContext.tsx          # Theme, sidebar, command palette, calendar nav
+│   │   ├── AuthContext.tsx        # User, login/register, profile, password reset
+│   │   ├── AccountContext.tsx     # Accounts CRUD, active account management
+│   │   ├── TradeContext.tsx       # Trades CRUD, filters, tags, modal state
+│   │   └── AnalyticsContext.tsx   # Computed stats, equity curve, calendar days
+│   ├── components/                # Reusable UI components
+│   │   ├── Sidebar.tsx            # Collapsible navigation
+│   │   ├── Header.tsx             # Top bar with actions
+│   │   ├── CommandPalette.tsx     # Ctrl+K command search
+│   │   ├── NewTradeModal.tsx      # 3-step trade creation wizard
+│   │   ├── EditTradeModal.tsx     # Edit trade form
+│   │   ├── DeleteConfirmModal.tsx # Delete confirmation dialog
+│   │   ├── NewAccountModal.tsx    # Create new account
+│   │   ├── ScreenshotModal.tsx    # Fullscreen image lightbox
+│   │   ├── CursorFollower.tsx     # Decorative cursor animation
+│   │   ├── LogoIcon.tsx           # Theme-aware logo
+│   │   ├── KpiDashboard.tsx       # Key performance indicators
+│   │   ├── PremiumPnLChart.tsx    # Equity curve chart
+│   │   ├── JournalistScore.tsx    # Journalist scoring component
+│   │   └── Skeleton.tsx           # Loading skeletons
+│   ├── screens/                   # Page-level components
+│   │   ├── LandingPage.tsx        # Marketing / landing page
+│   │   ├── AuthPage.tsx           # Login / Register
+│   │   ├── ForgotPassword.tsx     # Email → OTP → new password
+│   │   ├── ResetPassword.tsx      # Token-based password reset
+│   │   ├── Dashboard.tsx          # Stats, equity curve, calendar, trade cards
+│   │   ├── Analytics.tsx          # Scatter, donut, tag matrix, date range
+│   │   ├── Calendar.tsx           # Monthly heatmap with day notes
+│   │   ├── Timeline.tsx           # Chronological trade feed with bulk delete
+│   │   └── TradeDetail.tsx        # Single trade detail view
+│   ├── lib/
+│   │   ├── api.ts                 # API client (Express + Supabase)
+│   │   ├── supabase.ts            # Supabase client init
+│   │   ├── pdfExporter.ts         # PDF report generation (jsPDF)
+│   │   ├── excelExporter.ts       # Colored Excel export (SpreadsheetML)
+│   │   └── journalistScore.ts     # Scoring algorithm
+│   ├── data/
+│   │   └── mockTrades.ts          # Seed data for guest mode
+│   └── types.ts                   # Shared TypeScript types
+
+├── server/
+│   └── index.js                   # Express server, SQLite, JWT, email
+
+├── .env                           # Environment variables
+├── package.json                   # Dependencies & scripts
+├── vite.config.ts                 # Vite configuration
+└── tsconfig.json                  # TypeScript configuration
 ```
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
-### 🔐 Auth
-| Method | Endpoint | 🔒 | Description |
-|--------|----------|:--:|-------------|
-| `POST` | `/api/auth/register` | ❌ | Register new user |
-| `POST` | `/api/auth/login` | ❌ | Login, returns JWT |
-| `GET` | `/api/auth/me` | ✅ | Verify token & get profile |
-| `POST` | `/api/auth/forgot-password` | ❌ | Request OTP via email |
-| `POST` | `/api/auth/reset-password` | ❌ | Reset password with OTP |
-| `POST` | `/api/auth/change-password` | ✅ | Change password |
+### Auth
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `POST` | `/api/auth/register` | No | Register new user |
+| `POST` | `/api/auth/login` | No | Login, returns JWT |
+| `GET` | `/api/auth/me` | Yes | Verify token & get profile |
+| `POST` | `/api/auth/forgot-password` | No | Request OTP via email |
+| `POST` | `/api/auth/reset-password` | No | Reset password with OTP |
+| `POST` | `/api/auth/change-password` | Yes | Change password |
 
-### 💼 Accounts
-| Method | Endpoint | 🔒 | Description |
-|--------|----------|:--:|-------------|
-| `GET` | `/api/accounts` | ✅ | List all accounts |
-| `POST` | `/api/accounts` | ✅ | Create new account |
-| `DELETE` | `/api/accounts/:id` | ✅ | Delete account |
+### Accounts
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/accounts` | Yes | List all accounts |
+| `POST` | `/api/accounts` | Yes | Create new account |
+| `DELETE` | `/api/accounts/:id` | Yes | Delete account |
 
-### 📈 Trades
-| Method | Endpoint | 🔒 | Description |
-|--------|----------|:--:|-------------|
-| `GET` | `/api/trades` | ✅ | List all trades |
-| `POST` | `/api/trades` | ✅ | Create new trade |
-| `PUT` | `/api/trades/:id` | ✅ | Update trade |
-| `DELETE` | `/api/trades/:id` | ✅ | Delete trade |
+### Trades
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/trades` | Yes | List all trades |
+| `POST` | `/api/trades` | Yes | Create new trade |
+| `PUT` | `/api/trades/:id` | Yes | Update trade |
+| `DELETE` | `/api/trades/:id` | Yes | Delete trade |
 
-### 📝 Day Notes
-| Method | Endpoint | 🔒 | Description |
-|--------|----------|:--:|-------------|
-| `GET` | `/api/day-notes?month=YYYY-MM` | ✅ | Get notes for a month |
-| `PUT` | `/api/day-notes/:date` | ✅ | Create / update / delete a note |
+### Day Notes
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/day-notes?month=YYYY-MM` | Yes | Get notes for a month |
+| `PUT` | `/api/day-notes/:date` | Yes | Create / update / delete a note |
 
-### 🛠 Utilities
-| Method | Endpoint | 🔒 | Description |
-|--------|----------|:--:|-------------|
-| `GET` | `/api/screenshot?url=` | ❌ | Puppeteer webpage screenshot |
+### Utilities
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/screenshot?url=` | No | Puppeteer webpage screenshot |
 
 ---
 
-## 🔒 Security
+## Security
 
 | Measure | Detail |
 |---------|--------|
-| **🔑 Passwords** | Hashed with bcryptjs (12 rounds) |
-| **🎫 Authentication** | JWT-based with configurable expiry |
-| **🗄️ Database** | SQLite excluded from version control |
-| **🛡️ RLS** | Row Level Security required for Supabase deployment |
+| **Passwords** | Hashed with bcryptjs (12 rounds) |
+| **Authentication** | JWT-based with configurable expiry |
+| **Database** | SQLite excluded from version control |
+| **RLS** | Row Level Security required for Supabase deployment |
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-### ☁️ Cloudflare Pages
+### Cloudflare Pages
 
 The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) for automatic deployment to Cloudflare Pages on push to `master`.
 
-### 🔷 Supabase (Optional)
+### Supabase (Optional)
 
 For cloud database, configure these in `.env.local`:
 
@@ -278,7 +278,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ---
 
 <p align="center">
-  <b>Built with ❤️ by <a href="https://github.com/MAYURSHEWALE12">MAYURSHEWALE12</a></b>
+  <b>Built by <a href="https://github.com/MAYURSHEWALE12">MAYURSHEWALE12</a></b>
   <br/>
   <sub>Made for traders who take their journaling seriously.</sub>
 </p>

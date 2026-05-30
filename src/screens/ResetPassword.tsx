@@ -32,6 +32,7 @@ export default function ResetPassword() {
       search.includes('type=recovery');
 
     if (isRecovery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSupabaseRecovery(true);
       setResetError('');
       // Verify session exists

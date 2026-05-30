@@ -3,6 +3,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, ReferenceLine, Cell,
 } from 'recharts';
+import type { TooltipProps } from 'recharts';
+import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { Calendar, BarChart3, LineChart } from 'lucide-react';
 
 type ChartMode = 'daily' | 'weekly' | 'monthly' | 'equity';
@@ -144,7 +146,13 @@ function niceScale(maxRaw: number, minRaw: number): { min: number; max: number; 
 const toShortDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
-const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDarkMode, bestDay, worstDay }: any) {
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+  isDarkMode: boolean;
+  bestDay: string;
+  worstDay: string;
+}
+
+const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDarkMode, bestDay, worstDay }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d || d.balance !== undefined) {
@@ -381,7 +389,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
         <div className={chartHeight}>
           <ResponsiveContainer width="99%" height="100%" minWidth={0}>
             {mode === 'equity' ? (
-              <AreaChart data={visibleData as any} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
+              <AreaChart data={visibleData as Array<{ trial: string; balance: number }>} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
                 <defs>
                   <linearGradient id="eqGrad3" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={isDarkMode ? '#6366f1' : '#4f46e5'} stopOpacity={0.12} />
@@ -410,7 +418,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                   ticks={scale.ticks}
                 />
                 <Tooltip
-                  content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} bestDay={bestDay} worstDay={worstDay} />}
+                  content={<CustomTooltip isDarkMode={isDarkMode} bestDay={bestDay} worstDay={worstDay} />}
                   cursor={false}
                 />
                 <ReferenceLine
@@ -453,7 +461,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
                   ticks={scale.ticks}
                 />
                 <Tooltip
-                  content={(props: any) => <CustomTooltip {...props} isDarkMode={isDarkMode} bestDay={bestDay} worstDay={worstDay} />}
+                  content={<CustomTooltip isDarkMode={isDarkMode} bestDay={bestDay} worstDay={worstDay} />}
                   cursor={false}
                 />
                 <ReferenceLine

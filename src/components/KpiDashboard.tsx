@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, Minus, HelpCircle, Activity, Award, ShieldAlert, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Trade, CalendarDay } from '../types';
+import type { ThemeClasses } from '../context/UIContext';
 import { computeJournalistScore, type JournalistScoreResult } from '../lib/journalistScore';
 
 interface KpiDashboardProps {
@@ -14,11 +15,7 @@ interface KpiDashboardProps {
     wins: number;
     losses: number;
   };
-  themeClasses: {
-    bgBase: string; bgPanel: string; bgCard: string; bgHover: string;
-    border: string; borderActive: string;
-    textMain: string; textSub: string; navActive: string;
-  };
+  themeClasses: ThemeClasses;
   isDarkMode: boolean;
   calendarDays: CalendarDay[];
   currentYear: number;
@@ -150,7 +147,7 @@ function KpiCard({
 }: {
   kpi: KpiMeta;
   isDarkMode: boolean;
-  themeClasses: any;
+  themeClasses: ThemeClasses;
   icon: React.ReactNode;
   type?: 'default' | 'winrate' | 'profitfactor';
   className?: string;

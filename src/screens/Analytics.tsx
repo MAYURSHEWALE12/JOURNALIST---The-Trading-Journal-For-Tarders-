@@ -5,8 +5,14 @@ import { exportTradesToPDF } from '../lib/pdfExporter';
 import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
 import { memo } from 'react';
+import type { TooltipProps } from 'recharts';
+import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
-const CustomScatterTooltip = memo(function CustomScatterTooltip({ active, payload, isDarkMode }: any) {
+interface ScatterTooltipProps extends TooltipProps<ValueType, NameType> {
+  isDarkMode: boolean;
+}
+
+const CustomScatterTooltip = memo(function CustomScatterTooltip({ active, payload, isDarkMode }: ScatterTooltipProps) {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload;
   if (!data) return null;
@@ -46,7 +52,11 @@ const CustomScatterTooltip = memo(function CustomScatterTooltip({ active, payloa
   );
 });
 
-const CustomDonutTooltip = memo(function CustomDonutTooltip({ active, payload, isDarkMode }: any) {
+interface DonutTooltipProps extends TooltipProps<ValueType, NameType> {
+  isDarkMode: boolean;
+}
+
+const CustomDonutTooltip = memo(function CustomDonutTooltip({ active, payload, isDarkMode }: DonutTooltipProps) {
   if (!active || !payload?.length) return null;
   const data = payload[0];
   if (!data) return null;

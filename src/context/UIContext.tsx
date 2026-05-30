@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useMemo, useEffect, useCallback, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import type { TickerPrices } from '../types';
 
-interface ThemeClasses {
+export interface ThemeClasses {
   bgBase: string;
   bgPanel: string;
   bgCard: string;

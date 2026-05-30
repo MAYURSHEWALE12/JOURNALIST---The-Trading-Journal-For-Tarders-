@@ -254,10 +254,10 @@ export default function Calendar() {
             const hasTrades = dayTrades.length > 0;
             
             // Premium background and border computations (soft glassmorphism)
-            let cellBg = 'bg-transparent border-transparent';
+            let cellBg: string;
             let cellHover = 'hover:border-neutral-400 dark:hover:border-neutral-700';
             let pnlColor = 'text-gray-500';
-            let numberColor = cell.isCurrentMonth ? themeClasses.textMain : 'text-gray-400 dark:text-gray-600';
+            const numberColor = cell.isCurrentMonth ? themeClasses.textMain : 'text-gray-400 dark:text-gray-600';
             
             if (cell.isCurrentMonth) {
               if (hasTrades) {

@@ -30,6 +30,7 @@ export default function SettingsModal() {
   // Sync inputs with user state on open/change
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUsername(user.username || '');
       setTradingBio(user.tradingBio || '');
       setTwitterHandle(user.twitterHandle || '');

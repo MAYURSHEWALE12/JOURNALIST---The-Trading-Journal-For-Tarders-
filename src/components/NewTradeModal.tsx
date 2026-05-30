@@ -5,6 +5,7 @@ import LogoIcon from './LogoIcon';
 import { EMOTIONAL_STATES } from '../types';
 import type { NewTradeData } from '../types';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getEmotionIcon = (emotion: string, className = "w-3 h-3") => {
   switch (emotion) {
     case 'Calm':

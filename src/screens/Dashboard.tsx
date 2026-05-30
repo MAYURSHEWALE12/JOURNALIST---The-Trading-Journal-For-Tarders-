@@ -227,25 +227,24 @@ export default function Dashboard() {
             >
               Export PDF
             </button>
-
-            <div className={`flex border rounded items-center overflow-hidden shrink-0 ${themeClasses.border}`}>
-              <button
-                type="button"
-                onClick={() => setDashboardViewMode('CARDS')}
-                className={`p-1.5 transition cursor-pointer text-xs ${dashboardViewMode === 'CARDS' ? (isDarkMode ? 'bg-white text-black font-bold' : 'bg-black text-white font-bold') : 'text-gray-400 hover:text-white'}`}
-                title="Gallery Cards View"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setDashboardViewMode('TABLE')}
-                className={`p-1.5 transition cursor-pointer text-xs ${dashboardViewMode === 'TABLE' ? (isDarkMode ? 'bg-white text-black font-bold' : 'bg-black text-white font-bold') : 'text-gray-400 hover:text-white'}`}
-                title="Spreadsheet List View"
-              >
-                <List className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <div className={`flex border rounded items-center overflow-hidden shrink-0 h-10 ${themeClasses.border}`}>
+               <button
+                 type="button"
+                 onClick={() => setDashboardViewMode('CARDS')}
+                 className={`h-full px-3.5 transition cursor-pointer flex items-center justify-center ${dashboardViewMode === 'CARDS' ? (isDarkMode ? 'bg-white text-black font-bold' : 'bg-black text-white font-bold') : 'text-gray-400 hover:text-white'}`}
+                 title="Gallery Cards View"
+               >
+                 <LayoutGrid className="w-4 h-4" />
+               </button>
+               <button
+                 type="button"
+                 onClick={() => setDashboardViewMode('TABLE')}
+                 className={`h-full px-3.5 transition cursor-pointer flex items-center justify-center ${dashboardViewMode === 'TABLE' ? (isDarkMode ? 'bg-white text-black font-bold' : 'bg-black text-white font-bold') : 'text-gray-400 hover:text-white'}`}
+                 title="Spreadsheet List View"
+               >
+                 <List className="w-4 h-4" />
+               </button>
+             </div>
           </div>
         </div>
 

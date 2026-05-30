@@ -19,6 +19,9 @@ export interface TradeContextValue {
   setSearchTerm: Dispatch<SetStateAction<string>>;
   statusFilter: 'ALL' | 'WIN' | 'LOSS' | 'BREAKEVEN';
   setStatusFilter: Dispatch<SetStateAction<'ALL' | 'WIN' | 'LOSS' | 'BREAKEVEN'>>;
+  tagFilter: string[];
+  setTagFilter: Dispatch<SetStateAction<string[]>>;
+  allTags: string[];
   dashboardViewMode: 'CARDS' | 'TABLE';
   setDashboardViewMode: Dispatch<SetStateAction<'CARDS' | 'TABLE'>>;
   isNewTradeOpen: boolean;
@@ -67,6 +70,7 @@ export function TradeProvider({ children }: { children: ReactNode }) {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'WIN' | 'LOSS' | 'BREAKEVEN'>('ALL');
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [dashboardViewMode, setDashboardViewMode] = useState<'CARDS' | 'TABLE'>('CARDS');
 
   const [isNewTradeOpen, setIsNewTradeOpen] = useState(false);
@@ -117,6 +121,12 @@ export function TradeProvider({ children }: { children: ReactNode }) {
     return trades.filter(t => t.accountId === activeAccountId);
   }, [trades, activeAccountId]);
 
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    activeTrades.forEach(t => t.tags.forEach(tag => tagSet.add(tag)));
+    return Array.from(tagSet).sort();
+  }, [activeTrades]);
+
   const filteredTrades = useMemo(() => {
     return activeTrades.filter(t => {
       const matchesSearch = t.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,9 +136,10 @@ export function TradeProvider({ children }: { children: ReactNode }) {
                             t.notes.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
       const matchesDate = !selectedDate || t.entryTime.startsWith(selectedDate);
-      return matchesSearch && matchesStatus && matchesDate;
+      const matchesTag = tagFilter.length === 0 || tagFilter.some(tag => t.tags.includes(tag));
+      return matchesSearch && matchesStatus && matchesDate && matchesTag;
     });
-  }, [activeTrades, searchTerm, statusFilter, selectedDate]);
+  }, [activeTrades, searchTerm, statusFilter, selectedDate, tagFilter]);
 
   const handleAddNewTrade = async (e: FormEvent) => {
     e.preventDefault();
@@ -303,7 +314,7 @@ export function TradeProvider({ children }: { children: ReactNode }) {
 
   const value: TradeContextValue = {
     trades, activeTrades, filteredTrades,
-    searchTerm, setSearchTerm, statusFilter, setStatusFilter, dashboardViewMode, setDashboardViewMode,
+    searchTerm, setSearchTerm, statusFilter, setStatusFilter, tagFilter, setTagFilter, allTags, dashboardViewMode, setDashboardViewMode,
     isNewTradeOpen, setIsNewTradeOpen, newTradeStep, setNewTradeStep, newTradeData, setNewTradeData,
     isEditTradeOpen, setIsEditTradeOpen, editTradeData, setEditTradeData,
     deleteConfirmId, setDeleteConfirmId, selectedScreenshot, setSelectedScreenshot,

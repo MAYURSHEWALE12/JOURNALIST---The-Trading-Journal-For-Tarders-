@@ -21,6 +21,7 @@ export default function Dashboard() {
     themeClasses, isDarkMode,
     computedStats, calendarDays, assetSummary,
     filteredTrades, searchTerm, setSearchTerm, statusFilter, setStatusFilter,
+    tagFilter, setTagFilter, allTags,
     dashboardViewMode, setDashboardViewMode,
     dataLoading,
     activeTrades, activeAccountId, accounts, user,
@@ -239,6 +240,37 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pb-1">
+            {allTags.map(tag => {
+              const isActive = tagFilter.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  onClick={() => setTagFilter(prev => isActive ? prev.filter(t => t !== tag) : [...prev, tag])}
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full border transition cursor-pointer ${
+                    isActive
+                      ? isDarkMode
+                        ? 'bg-white/15 border-white/40 text-white font-semibold'
+                        : 'bg-black/10 border-black/30 text-black font-semibold'
+                      : `${themeClasses.border} ${themeClasses.textSub} hover:border-gray-400`
+                  }`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+            {tagFilter.length > 0 && (
+              <button
+                onClick={() => setTagFilter([])}
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full border transition cursor-pointer ${themeClasses.textSub} ${themeClasses.border} hover:border-red-400 hover:text-red-400`}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
 
         {dashboardViewMode === 'CARDS' ? (
           filteredTrades.length === 0 ? (

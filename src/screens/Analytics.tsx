@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Cell, PieChart, Pie, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
-import { exportTradesToCSV } from '../lib/csvExporter';
+import { exportTradesToCSV, exportTradesToExcel } from '../lib/csvExporter';
 import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
 
@@ -148,12 +148,20 @@ export default function Analytics() {
           <p className={`text-xs ${themeClasses.textSub}`}>Discover statistical edges, duration efficiencies, and risk profiles in stark layout.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => exportTradesToCSV(dateFilteredTrades)}
-            className={`px-3.5 py-1.5 border text-xs rounded transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
-          >
-            Export CSV
-          </button>
+          <div className={`flex border rounded overflow-hidden ${themeClasses.border}`}>
+            <button
+              onClick={() => exportTradesToExcel(dateFilteredTrades)}
+              className={`px-2.5 py-1.5 text-[10px] font-mono transition cursor-pointer font-bold ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-r border-gray-700 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-r border-gray-200 hover:bg-emerald-100'}`}
+            >
+              Excel
+            </button>
+            <button
+              onClick={() => exportTradesToCSV(dateFilteredTrades)}
+              className={`px-2.5 py-1.5 text-[10px] font-mono transition cursor-pointer ${themeClasses.textSub} hover:bg-gray-500/10`}
+            >
+              CSV
+            </button>
+          </div>
           <button
             onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(dateFilteredTrades, localStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
             className={`px-3.5 py-1.5 border text-xs rounded transition cursor-pointer font-bold ${

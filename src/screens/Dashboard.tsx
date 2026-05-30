@@ -9,7 +9,7 @@ import { DashboardSkeleton } from '../components/Skeleton';
 import PremiumPnLChart from '../components/PremiumPnLChart';
 import KpiDashboard from '../components/KpiDashboard';
 import { exportTradesToPDF } from '../lib/pdfExporter';
-import { exportTradesToCSV, importTradesFromCSV } from '../lib/csvExporter';
+import { exportTradesToCSV, exportTradesToExcel, importTradesFromCSV } from '../lib/csvExporter';
 import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
 import { computeJournalistScore } from '../lib/journalistScore';
@@ -230,15 +230,20 @@ export default function Dashboard() {
               <option value="LOSS">Losses</option>
               <option value="BREAKEVEN">Breakevens</option>
             </select>
-            <button
-              onClick={() => exportTradesToCSV(activeTrades)}
-              className={`px-3 py-1.5 border text-xs rounded transition cursor-pointer shrink-0 ${themeClasses.border} ${themeClasses.textSub} ${themeClasses.bgHover}`}
-            >
-              <span className="hidden sm:inline">Export CSV</span>
-              <span className="sm:hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              </span>
-            </button>
+            <div className={`flex border rounded overflow-hidden shrink-0 ${themeClasses.border}`}>
+              <button
+                onClick={() => exportTradesToExcel(activeTrades)}
+                className={`px-2 py-1.5 text-[10px] font-mono transition cursor-pointer font-bold ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border-r border-gray-700 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-r border-gray-200 hover:bg-emerald-100'}`}
+              >
+                Excel
+              </button>
+              <button
+                onClick={() => exportTradesToCSV(activeTrades)}
+                className={`px-2 py-1.5 text-[10px] font-mono transition cursor-pointer ${themeClasses.textSub} hover:bg-gray-500/10`}
+              >
+                CSV
+              </button>
+            </div>
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isImporting}

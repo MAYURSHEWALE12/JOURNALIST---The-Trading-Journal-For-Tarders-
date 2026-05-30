@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider, useApp } from './context/AppContext';
+import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 import LandingPage from './screens/LandingPage';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -142,6 +143,7 @@ export default function App() {
             </Routes>
             <CursorFollower />
             <ExportingOverlay />
+            <VercelAnalytics />
           </AppSuspense>
         </AppProvider>
       </BrowserRouter>

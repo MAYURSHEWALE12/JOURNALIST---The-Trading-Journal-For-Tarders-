@@ -3,8 +3,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, ReferenceLine, Cell,
 } from 'recharts';
-import type { TooltipProps } from 'recharts';
-import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { Calendar, BarChart3, LineChart } from 'lucide-react';
 
 type ChartMode = 'daily' | 'weekly' | 'monthly' | 'equity';
@@ -146,7 +144,10 @@ function niceScale(maxRaw: number, minRaw: number): { min: number; max: number; 
 const toShortDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
-interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: Record<string, unknown>; value: number; [key: string]: unknown }>;
+  label?: string;
   isDarkMode: boolean;
   bestDay: string;
   worstDay: string;
@@ -166,8 +167,10 @@ const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDa
   }
   const isLoss = d.pnl < 0;
   const isWin = d.pnl > 0;
-  const isBestDay = bestDay != null && d.pnl === bestDay && bestDay > 0;
-  const isWorstDay = worstDay != null && d.pnl === worstDay && worstDay < 0;
+  const bestDayVal = Number(bestDay);
+  const worstDayVal = Number(worstDay);
+  const isBestDay = bestDay != null && d.pnl === bestDayVal && bestDayVal > 0;
+  const isWorstDay = worstDay != null && d.pnl === worstDayVal && worstDayVal < 0;
   const badge = isLoss ? 'LOSS DAY' : isBestDay ? 'BEST DAY' : isWorstDay ? 'WORST DAY' : isWin ? 'WINNING DAY' : null;
   const badgeColor = isLoss ? 'text-rose-500' : isBestDay ? 'text-emerald-500' : isWorstDay ? 'text-rose-400' : 'text-emerald-500';
   return (
@@ -389,7 +392,7 @@ function PremiumPnLChart({ trades, themeClasses, isDarkMode }: PremiumPnLChartPr
         <div className={chartHeight}>
           <ResponsiveContainer width="99%" height="100%" minWidth={0}>
             {mode === 'equity' ? (
-              <AreaChart data={visibleData as Array<{ trial: string; balance: number }>} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
+              <AreaChart data={visibleData as unknown as Array<{ trial: string; balance: number }>} margin={{ top: 8, right: 12, bottom: 4, left: -4 }}>
                 <defs>
                   <linearGradient id="eqGrad3" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={isDarkMode ? '#6366f1' : '#4f46e5'} stopOpacity={0.12} />

@@ -380,223 +380,256 @@ export default function Dashboard() {
 
       {/* Portfolio Performance Card Modal */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto select-none">
-          <div className="flex flex-col items-center gap-5 my-auto w-full max-w-[340px] sm:max-w-sm py-4">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center w-full px-1">
-              <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate Performance Card</span>
-              <button 
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 select-none">
+          <div className="flex flex-col w-full max-w-[420px] sm:max-w-lg max-h-[96vh] sm:max-h-[90vh] bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] overflow-hidden shadow-2xl">
+            
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 shrink-0 border-b border-white/[0.04]">
+              <span className="text-white/80 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold">
+                Generate Performance Card
+              </span>
+              <button
                 onClick={() => setIsShareModalOpen(false)}
-                className="text-gray-400 hover:text-white transition cursor-pointer p-1 rounded-full hover:bg-white/5"
+                className="text-gray-500 hover:text-white transition cursor-pointer p-1.5 rounded-full hover:bg-white/5"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* The Sharable Card Container */}
-            <div 
-              id="journalist-portfolio-card"
-              className="w-full max-w-[340px] aspect-[4/5] rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300 border"
-              style={{
-                background: glowTheme === 'emerald' 
-                  ? 'linear-gradient(135deg, #0c1410 0%, #09090b 50%, #040405 100%)' 
-                  : glowTheme === 'indigo'
-                    ? 'linear-gradient(135deg, #0e0e16 0%, #09090b 50%, #040405 100%)'
-                    : 'linear-gradient(135deg, #0e0e11 0%, #09090b 50%, #040405 100%)',
-                borderColor: glowTheme === 'emerald' 
-                  ? 'rgba(16,185,129,0.3)' 
-                  : glowTheme === 'indigo'
-                    ? 'rgba(99,102,241,0.3)'
-                    : 'rgba(255,255,255,0.1)'
-              }}
-            >
-              {/* Soft Ambient Glow Orb */}
-              <div 
-                className="absolute inset-0 pointer-events-none select-none transition-all duration-500" 
-                style={{
-                  background: glowTheme === 'emerald' 
-                    ? 'radial-gradient(circle at 50% 40%, rgba(16,185,129,0.06) 0%, transparent 60%)' 
-                    : glowTheme === 'indigo'
-                      ? 'radial-gradient(circle at 50% 40%, rgba(99,102,241,0.06) 0%, transparent 60%)'
-                      : 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03) 0%, transparent 60%)'
-                }}
-              />
-
-              {/* Rotating Logo Watermark */}
-              <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
-                <LogoIcon className="w-full h-full text-white" isDark={true} />
-              </div>
-
-              {/* User Profile Header */}
-              <div className="flex items-center gap-3 relative z-10">
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300 overflow-hidden relative shrink-0"
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto overflow-x-hidden px-4 sm:px-6 pb-2 flex-1 min-h-0 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+              
+              {/* Card Preview - scaled to fit */}
+              <div className="flex justify-center py-4 sm:py-6">
+                <div
+                  id="journalist-portfolio-card"
+                  className="w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[340px] aspect-[4/5] rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl border"
                   style={{
-                    backgroundColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.1)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)',
-                    borderColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.3)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.2)',
-                    color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                    background: glowTheme === 'emerald'
+                      ? 'linear-gradient(135deg, #0c1410 0%, #09090b 50%, #040405 100%)'
+                      : glowTheme === 'indigo'
+                        ? 'linear-gradient(135deg, #0e0e16 0%, #09090b 50%, #040405 100%)'
+                        : 'linear-gradient(135deg, #0e0e11 0%, #09090b 50%, #040405 100%)',
+                    borderColor: glowTheme === 'emerald'
+                      ? 'rgba(16,185,129,0.3)'
+                      : glowTheme === 'indigo'
+                        ? 'rgba(99,102,241,0.3)'
+                        : 'rgba(255,255,255,0.1)'
                   }}
                 >
-                  {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    user?.username?.slice(0, 2) || 'TR'
-                  )}
-                </div>
-                <div>
-                  <div className="text-xs font-bold font-mono text-white" style={{ color: '#ffffff' }}>{user?.username || 'JournalistTrader'}</div>
-                  <div className="text-[9px] font-mono mt-0.5" style={{ color: '#a3a3a3' }}>
-                    {user?.tradingBio || 'Systematic Pro'} &bull; {activeAccountName}
-                  </div>
-                </div>
-              </div>
+                  {/* Soft Ambient Glow Orb */}
+                  <div
+                    className="absolute inset-0 pointer-events-none select-none transition-all duration-500"
+                    style={{
+                      background: glowTheme === 'emerald'
+                        ? 'radial-gradient(circle at 50% 40%, rgba(16,185,129,0.06) 0%, transparent 60%)'
+                        : glowTheme === 'indigo'
+                          ? 'radial-gradient(circle at 50% 40%, rgba(99,102,241,0.06) 0%, transparent 60%)'
+                          : 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03) 0%, transparent 60%)'
+                    }}
+                  />
 
-              {/* Core Account Performance Stats */}
-              <div className="my-auto relative z-10 py-2">
-                <div className="text-[8px] font-mono uppercase tracking-widest font-bold leading-none text-gray-500" style={{ color: '#737373' }}>Net cumulative profit</div>
-                
-                {/* Huge PNL display with selective Glow themes */}
-                <div 
-                  className="mt-1 font-display text-4.5xl font-black tracking-tight leading-none"
-                  style={{
-                    color: computedStats.totalPnl >= 0 ? '#34d399' : '#f87171'
-                  }}
-                >
-                  {computedStats.totalPnl >= 0 ? '+' : ''}${computedStats.totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </div>
+                  {/* Rotating Logo Watermark */}
+                  <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
+                    <LogoIcon className="w-full h-full text-white" isDark={true} />
+                  </div>
 
-                {/* Sub-KPI Grid */}
-                <div className="mt-8 grid grid-cols-3 gap-2 border-t pt-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                  <div>
-                    <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none text-gray-500" style={{ color: '#737373' }}>Win Rate</div>
-                    <div className="text-sm font-bold font-mono mt-1.5 text-white" style={{ color: '#ffffff' }}>{winRate}%</div>
-                  </div>
-                  <div>
-                    <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none text-gray-500" style={{ color: '#737373' }}>Profit Factor</div>
-                    <div className="text-sm font-bold font-mono mt-1.5 text-white" style={{ color: '#ffffff' }}>{computedStats.profitFactor}x</div>
-                  </div>
-                  <div>
-                    <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none text-gray-500" style={{ color: '#737373' }}>Journal Score</div>
-                    <div 
-                      className="text-sm font-bold font-mono mt-1.5 transition-colors duration-300"
+                  {/* User Profile Header */}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300 overflow-hidden relative shrink-0"
                       style={{
+                        backgroundColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.1)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)',
+                        borderColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.3)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.2)',
                         color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
                       }}
                     >
-                      {scoreObj.score}
+                      {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        user?.username?.slice(0, 2) || 'TR'
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold font-mono text-white" style={{ color: '#ffffff' }}>{user?.username || 'JournalistTrader'}</div>
+                      <div className="text-[9px] font-mono mt-0.5" style={{ color: '#a3a3a3' }}>
+                        {user?.tradingBio || 'Systematic Pro'} &bull; {activeAccountName}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Core Account Performance Stats */}
+                  <div className="my-auto relative z-10 py-2">
+                    <div className="text-[8px] font-mono uppercase tracking-widest font-bold leading-none" style={{ color: '#737373' }}>Net cumulative profit</div>
+                    <div
+                      className="mt-1 font-display text-4.5xl font-black tracking-tight leading-none"
+                      style={{
+                        color: computedStats.totalPnl >= 0 ? '#34d399' : '#f87171'
+                      }}
+                    >
+                      {computedStats.totalPnl >= 0 ? '+' : ''}${computedStats.totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <div className="mt-8 grid grid-cols-3 gap-2 border-t pt-4" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                      <div>
+                        <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none" style={{ color: '#737373' }}>Win Rate</div>
+                        <div className="text-sm font-bold font-mono mt-1.5 text-white" style={{ color: '#ffffff' }}>{winRate}%</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none" style={{ color: '#737373' }}>Profit Factor</div>
+                        <div className="text-sm font-bold font-mono mt-1.5 text-white" style={{ color: '#ffffff' }}>{computedStats.profitFactor}x</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none" style={{ color: '#737373' }}>Journal Score</div>
+                        <div
+                          className="text-sm font-bold font-mono mt-1.5 transition-colors duration-300"
+                          style={{
+                            color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                          }}
+                        >
+                          {scoreObj.score}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lower detailed metadata */}
+                  <div className="border-t pt-4 grid grid-cols-2 gap-4 relative z-10 font-mono" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <div className="text-[8px] uppercase tracking-widest font-bold" style={{ color: '#737373' }}>Total Trades</div>
+                      <div className="text-xs font-semibold mt-0.5 text-white" style={{ color: '#ffffff' }}>{activeTrades.length} documented</div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] uppercase tracking-widest font-bold" style={{ color: '#737373' }}>Journalist Level</div>
+                      <div
+                        className="text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight transition-colors duration-300"
+                        style={{
+                          color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                        }}
+                      >
+                        {scoreObj.levelLabel}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Branding Footer */}
+                  <div className="border-t pt-4 mt-4 flex items-center justify-between relative z-10 select-none" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
+                        <LogoIcon className="w-3.5 h-3.5" isDark={false} />
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-extrabold font-display tracking-tight leading-none text-white" style={{ color: '#ffffff' }}>JOURNALIST</div>
+                        <div className="text-[7px] font-mono mt-0.5 leading-none" style={{ color: '#737373' }}>Systematic Portfolio Core</div>
+                      </div>
+                    </div>
+                    {user?.twitterHandle || user?.telegramHandle ? (
+                      <div className="text-right font-mono flex flex-col items-end justify-center">
+                        {user.twitterHandle && (
+                          <span className="text-[8px] font-bold" style={{ color: '#a3a3a3' }}>𝕏 {user.twitterHandle}</span>
+                        )}
+                        {user.telegramHandle && (
+                          <span className="text-[7px] mt-0.5" style={{ color: '#737373' }}>✈️ {user.telegramHandle}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
+                          <rect x="1" y="1" width="7" height="7" />
+                          <rect x="16" y="1" width="7" height="7" />
+                          <rect x="16" y="16" width="7" height="7" />
+                          <rect x="1" y="16" width="7" height="7" />
+                          <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
+                          <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
+                          <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
+                          <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Lower detailed metadata */}
-              <div className="border-t pt-4 grid grid-cols-2 gap-4 relative z-10 font-mono" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+              {/* Controls */}
+              <div className="space-y-3 sm:space-y-4 font-mono text-xs pb-2">
                 <div>
-                  <div className="text-[8px] uppercase tracking-widest font-bold text-gray-500" style={{ color: '#737373' }}>Total Trades</div>
-                  <div className="text-xs font-semibold mt-0.5 text-white" style={{ color: '#ffffff' }}>{activeTrades.length} documented</div>
-                </div>
-                <div>
-                  <div className="text-[8px] uppercase tracking-widest font-bold text-gray-500" style={{ color: '#737373' }}>Journalist Level</div>
-                  <div 
-                    className="text-[10px] font-semibold mt-0.5 uppercase tracking-wide leading-tight transition-colors duration-300"
-                    style={{
-                      color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
-                    }}
-                  >
-                    {scoreObj.levelLabel}
+                  <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Glow Theme</label>
+                  <div className="flex gap-2">
+                    {(['slate', 'emerald', 'indigo'] as const).map(t => {
+                      const isActive = glowTheme === t;
+                      const btnClass = !isActive
+                        ? `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`
+                        : t === 'emerald'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                          : t === 'indigo'
+                            ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]'
+                            : 'bg-white text-black border-white';
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setGlowTheme(t)}
+                          className={`flex-1 py-2 border text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all duration-300 cursor-pointer ${btnClass}`}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
-
-              {/* Branding Footer */}
-              <div className="border-t pt-4 mt-4 flex items-center justify-between relative z-10 select-none" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
-                    <LogoIcon className="w-3.5 h-3.5" isDark={false} />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-extrabold font-display tracking-tight leading-none text-white" style={{ color: '#ffffff' }}>JOURNALIST</div>
-                    <div className="text-[7px] font-mono mt-0.5 leading-none text-gray-500" style={{ color: '#737373' }}>Systematic Portfolio Core</div>
-                  </div>
-                </div>
-
-                {/* Dynamic Social Watermarks or QR Code */}
-                {user?.twitterHandle || user?.telegramHandle ? (
-                  <div className="text-right font-mono flex flex-col items-end justify-center">
-                    {user.twitterHandle && (
-                      <span className="text-[8px] font-bold text-gray-400" style={{ color: '#a3a3a3' }}>
-                        𝕏 {user.twitterHandle}
-                      </span>
-                    )}
-                    {user.telegramHandle && (
-                      <span className="text-[7px] text-gray-500 mt-0.5" style={{ color: '#737373' }}>
-                        ✈️ {user.telegramHandle}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 p-1 bg-white rounded flex items-center justify-center shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black w-full h-full">
-                      <rect x="1" y="1" width="7" height="7" />
-                      <rect x="16" y="1" width="7" height="7" />
-                      <rect x="16" y="16" width="7" height="7" />
-                      <rect x="1" y="16" width="7" height="7" />
-                      <rect x="4" y="4" width="1" height="1" strokeWidth="2" />
-                      <rect x="19" y="4" width="1" height="1" strokeWidth="2" />
-                      <rect x="19" y="19" width="1" height="1" strokeWidth="2" />
-                      <rect x="4" y="19" width="1" height="1" strokeWidth="2" />
-                    </svg>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Control Panel */}
-            <div className="space-y-4 font-mono text-xs w-full max-w-sm px-2">
-              {/* Theme selection */}
-              <div>
-                <label className="block text-[9px] uppercase text-gray-500 mb-1.5 font-bold">Select Glow Theme</label>
-                <div className="flex gap-2">
-                  {(['slate', 'emerald', 'indigo'] as const).map(t => {
-                    const isActive = glowTheme === t;
-                    let themeButtonClass = '';
-                    if (isActive) {
-                      if (t === 'emerald') {
-                        themeButtonClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]';
-                      } else if (t === 'indigo') {
-                        themeButtonClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]';
-                      } else {
-                        themeButtonClass = 'bg-white text-black border-white';
-                      }
-                    } else {
-                      themeButtonClass = `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`;
-                    }
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setGlowTheme(t)}
-                        className={`px-3.5 py-2 border text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all duration-300 cursor-pointer ${themeButtonClass}`}
-                      >
-                        {t} Glow
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Sticky Action Bar */}
+            <div className="shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-white/[0.06] bg-neutral-900/95">
+              <div className="flex gap-2">
+                <button
+                  onClick={exportPortfolioCard}
+                  disabled={isExporting}
+                  className="flex-1 py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer bg-white text-black hover:bg-gray-200 disabled:opacity-50"
+                >
+                  {isExporting ? (
+                    <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> EXPORTING</>
+                  ) : (
+                    <><Download className="w-3.5 h-3.5" /> Download</>
+                  )}
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      const card = document.getElementById('journalist-portfolio-card');
+                      if (!card) return;
+                      const canvas = await html2canvas(card, { useCORS: true, allowTaint: true, backgroundColor: null, scale: 2 });
+                      canvas.toBlob(async (blob) => {
+                        if (!blob) return;
+                        if (navigator.share) {
+                          await navigator.share({
+                            title: 'Journalist Portfolio Card',
+                            files: [new File([blob], 'portfolio-card.png', { type: 'image/png' })]
+                          });
+                        }
+                      });
+                    } catch { /* user cancelled or unsupported */ }
+                  }}
+                  className="flex-1 py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer border border-white/10 text-gray-400 hover:text-white hover:border-white/20"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Share
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      const card = document.getElementById('journalist-portfolio-card');
+                      if (!card) return;
+                      const canvas = await html2canvas(card, { useCORS: true, allowTaint: true, backgroundColor: null, scale: 2 });
+                      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve));
+                      if (!blob) return;
+                      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    } catch { /* fallback silently */ }
+                  }}
+                  className="flex-1 py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer border border-white/10 text-gray-400 hover:text-white hover:border-white/20"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy
+                </button>
               </div>
-
-              {/* Download CTA */}
-              <button
-                onClick={exportPortfolioCard}
-                disabled={isExporting}
-                className="w-full py-3 mt-2 rounded-xl text-xs font-bold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer bg-white text-black hover:bg-gray-200"
-              >
-                {isExporting ? (
-                  <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> EXPORTING...</>
-                ) : (
-                  <><Download className="w-3.5 h-3.5" /> DOWNLOAD ACCOUNT CARD</>
-                )}
-              </button>
             </div>
           </div>
         </div>

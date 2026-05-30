@@ -34,3 +34,7 @@ database.sqlite
 *.db
 *.sqlite
 *.sqlite3
+
+# Local Deployment Scripts & Backups
+deploy.ps1
+.vercel/

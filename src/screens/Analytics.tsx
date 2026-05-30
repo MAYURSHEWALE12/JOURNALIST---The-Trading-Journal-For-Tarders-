@@ -1,10 +1,10 @@
+import { useState, useMemo, memo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Cell, PieChart, Pie, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
 import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
-import { memo } from 'react';
 
 interface ScatterTooltipProps {
   active?: boolean;
@@ -75,6 +75,39 @@ const CustomDonutTooltip = memo(function CustomDonutTooltip({ active, payload, i
 export default function Analytics() {
   const { themeClasses, isDarkMode, activeTrades, computedStats, dataLoading, activeAccountId, accounts, user, calendarDays, setIsExportingPDF } = useApp();
 
+  const [startDate, setStartDate] = useState(() => {
+    const dates = activeTrades.map(t => t.entryTime.split('T')[0]).filter(Boolean).sort();
+    return dates.length > 30 ? dates[dates.length - 31] : dates[0] || '';
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const dates = activeTrades.map(t => t.entryTime.split('T')[0]).filter(Boolean).sort();
+    return dates[dates.length - 1] || '';
+  });
+
+  const dateFilteredTrades = useMemo(() => {
+    if (!startDate && !endDate) return activeTrades;
+    return activeTrades.filter(t => {
+      const d = t.entryTime.split('T')[0];
+      if (startDate && d < startDate) return false;
+      if (endDate && d > endDate) return false;
+      return true;
+    });
+  }, [activeTrades, startDate, endDate]);
+
+  const localStats = useMemo(() => {
+    const total = dateFilteredTrades.length;
+    if (total === 0) return { winRate: 0, profitFactor: 0, totalPnl: 0, averagePnl: 0, wins: 0, losses: 0 };
+    const wins = dateFilteredTrades.filter(t => t.status === 'WIN');
+    const losses = dateFilteredTrades.filter(t => t.status === 'LOSS');
+    const wr = Math.round((wins.length / total) * 100);
+    const totalPnl = dateFilteredTrades.reduce((sum, t) => sum + t.netPnl, 0);
+    const avgPnl = totalPnl / total;
+    const grossWins = wins.reduce((sum, t) => sum + t.netPnl, 0);
+    const grossLosses = Math.abs(losses.reduce((sum, t) => sum + t.netPnl, 0));
+    const pf = grossLosses > 0 ? +(grossWins / grossLosses).toFixed(2) : grossWins > 0 ? 9.99 : 0;
+    return { winRate: wr, profitFactor: pf, totalPnl, averagePnl: avgPnl, wins: wins.length, losses: losses.length };
+  }, [dateFilteredTrades]);
+
   if (dataLoading) {
     return <AnalyticsSkeleton />;
   }
@@ -97,13 +130,13 @@ export default function Analytics() {
   }
 
   const outcomesData = [
-    { name: 'Wins', value: computedStats.wins, color: '#10b981' },
-    { name: 'Losses', value: computedStats.losses, color: '#f43f5e' },
-    { name: 'Breakeven', value: activeTrades.filter(t => t.status === 'BREAKEVEN').length, color: '#9ca3af' }
+    { name: 'Wins', value: localStats.wins, color: '#10b981' },
+    { name: 'Losses', value: localStats.losses, color: '#f43f5e' },
+    { name: 'Breakeven', value: dateFilteredTrades.filter(t => t.status === 'BREAKEVEN').length, color: '#9ca3af' }
   ];
 
-  const uniqueTags = Array.from(new Set(activeTrades.flatMap(t => t.tags || [])));
-  const winRate = activeTrades.length > 0 ? Math.round((computedStats.wins / activeTrades.length) * 100) : 0;
+  const uniqueTags = Array.from(new Set(dateFilteredTrades.flatMap(t => t.tags || [])));
+  const winRate = dateFilteredTrades.length > 0 ? Math.round((localStats.wins / dateFilteredTrades.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -121,7 +154,7 @@ export default function Analytics() {
             Export CSV
           </button>
           <button
-            onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(activeTrades, computedStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
+            onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(dateFilteredTrades, localStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
             className={`px-3.5 py-1.5 border text-xs rounded transition cursor-pointer font-bold ${
               isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
             }`}
@@ -131,9 +164,41 @@ export default function Analytics() {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <label className={`text-[10px] font-mono font-semibold uppercase tracking-wider ${themeClasses.textSub}`}>From</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+            className={`border rounded py-1.5 px-2 text-xs font-mono focus:outline-none ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className={`text-[10px] font-mono font-semibold uppercase tracking-wider ${themeClasses.textSub}`}>To</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+            className={`border rounded py-1.5 px-2 text-xs font-mono focus:outline-none ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+          />
+        </div>
+        {(startDate || endDate) && (
+          <button
+            onClick={() => { setStartDate(''); setEndDate(''); }}
+            className={`text-[10px] font-mono px-2 py-1.5 border rounded transition cursor-pointer ${themeClasses.border} ${themeClasses.textSub} hover:border-red-400 hover:text-red-400`}
+          >
+            Clear
+          </button>
+        )}
+        <span className={`text-[10px] font-mono ml-auto ${themeClasses.textSub}`}>
+          {dateFilteredTrades.length} of {activeTrades.length} trades
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         <div className="lg:col-span-1">
-          <JournalistScore trades={activeTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} className="h-full" />
+          <JournalistScore trades={dateFilteredTrades} themeClasses={themeClasses} isDarkMode={isDarkMode} className="h-full" />
         </div>
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-stretch">
@@ -148,8 +213,8 @@ export default function Analytics() {
                     <XAxis type="number" dataKey="plannedR" name="Planned R" stroke="rgba(128,128,128,0.5)" fontSize={10} unit="R" domain={[0, (dataMax: number) => Math.max(3, dataMax + 0.5)]} />
                     <YAxis type="number" dataKey="realizedR" name="Realized R" stroke="rgba(128,128,128,0.5)" fontSize={10} unit="R" domain={[(dataMin: number) => Math.min(-1, dataMin - 0.5), (dataMax: number) => Math.max(2, dataMax + 0.5)]} />
                     <Tooltip content={<CustomScatterTooltip isDarkMode={isDarkMode} />} cursor={{ strokeDasharray: '3 3' }} />
-                    <Scatter name="Trades Performance" data={activeTrades}>
-                      {activeTrades.map((entry, index) => (
+                    <Scatter name="Trades Performance" data={dateFilteredTrades}>
+                      {dateFilteredTrades.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.status === 'WIN' ? '#10b981' : (entry.status === 'BREAKEVEN' ? '#9ca3af' : '#f43f5e')} />
                       ))}
                     </Scatter>
@@ -191,7 +256,7 @@ export default function Analytics() {
                 <div className={`flex justify-around items-center text-xs border-t pt-3 font-mono ${themeClasses.border} ${themeClasses.textSub} mt-4`}>
                   <span className="font-semibold text-emerald-500">● Wins: {computedStats.wins}</span>
                   <span className="font-semibold text-rose-500">● Losses: {computedStats.losses}</span>
-                  <span className="font-semibold text-gray-400">● Breakevens: {activeTrades.filter(t => t.status === 'BREAKEVEN').length}</span>
+                  <span className="font-semibold text-gray-400">● Breakevens: {dateFilteredTrades.filter(t => t.status === 'BREAKEVEN').length}</span>
                 </div>
               </div>
             </div>
@@ -204,7 +269,7 @@ export default function Analytics() {
         <div className="flex flex-wrap gap-2.5">
           {uniqueTags.length > 0 ? (
             uniqueTags.map((tag, i) => {
-              const tagTrades = activeTrades.filter(t => (t.tags || []).includes(tag));
+              const tagTrades = dateFilteredTrades.filter(t => (t.tags || []).includes(tag));
               const wins = tagTrades.filter(t => t.status === 'WIN').length;
               const wr = tagTrades.length > 0 ? Math.round((wins / tagTrades.length) * 100) : 0;
 

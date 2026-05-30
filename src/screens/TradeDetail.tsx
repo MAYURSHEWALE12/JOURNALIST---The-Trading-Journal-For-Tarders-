@@ -332,7 +332,7 @@ export default function TradeDetail() {
       {/* Share Card Modal Overlay */}
       {isShareModalOpen && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto select-none">
-          <div className="flex flex-col items-center gap-3.5 my-auto w-full max-w-[315px] py-4">
+          <div className="flex flex-col items-center gap-5 my-auto w-full max-w-[340px] sm:max-w-sm py-4">
             {/* Modal Header */}
             <div className="flex justify-between items-center w-full px-1">
               <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate PNL Card</span>
@@ -347,7 +347,7 @@ export default function TradeDetail() {
             {/* The Sharable Card DOM Target */}
             <div 
               id="journalist-share-card"
-              className="w-full aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-5 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0"
+              className="w-full max-w-[340px] aspect-[4/5] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl shrink-0 transition-all duration-300"
               style={{ aspectRatio: '4/5' }}
             >
               {/* Rotating Logo Watermark */}

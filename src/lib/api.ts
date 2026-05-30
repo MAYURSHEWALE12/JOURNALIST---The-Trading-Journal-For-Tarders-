@@ -95,8 +95,14 @@ export async function deleteAccount(id: string): Promise<void> {
 // ─── Day Notes ────────────────────────────────────────────────
 
 export async function fetchMonthNotes(month: string): Promise<DayNote[]> {
+  const startDate = `${month}-01`;
+  const endYear = Number(month.split('-')[0]);
+  const endMonth = Number(month.split('-')[1]);
+  const lastDay = new Date(endYear, endMonth, 0).getDate();
+  const endDate = `${month}-${String(lastDay).padStart(2, '0')}`;
+
   if (isSupabaseSession()) {
-    const res = await supabaseFetch(`/day_notes?select=*&date=like=${month}*`);
+    const res = await supabaseFetch(`/day_notes?select=*&date=gte.${startDate}&date=lte.${endDate}`);
     if (!res.ok) throw new Error('Failed to fetch day notes.');
     return res.json() as unknown as DayNote[];
   }

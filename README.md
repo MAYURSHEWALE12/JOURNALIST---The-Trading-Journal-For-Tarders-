@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="/logo-dark.png">
-    <img src="/logo-dark.png" alt="Journalist Logo" width="120" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-/master/public/logo-dark.png">
+    <img src="https://raw.githubusercontent.com/MAYURSHEWALE12/JOURNALIST---The-Trading-Journal-For-Tarders-/master/public/logo-light.png" alt="Journalist Logo" width="120" />
   </picture>
 </p>
 

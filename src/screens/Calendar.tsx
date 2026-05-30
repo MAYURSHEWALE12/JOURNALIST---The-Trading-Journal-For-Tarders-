@@ -21,7 +21,7 @@ const MONTHS = [
 
 export default function Calendar() {
   const navigate = useNavigate();
-  const { themeClasses, isDarkMode, activeTrades } = useApp();
+  const { themeClasses, isDarkMode, activeTrades, user } = useApp();
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[]; date: string } | null>(null);
@@ -50,7 +50,7 @@ export default function Calendar() {
 
   const handleSaveDayNote = async (date: string, content: string) => {
     const existingId = dayNoteIds[date];
-    await upsertDayNote(date, content, existingId);
+    await upsertDayNote(date, content, existingId, user?.id);
     setDayNotes(prev => {
       const next = { ...prev };
       if (content.trim()) {

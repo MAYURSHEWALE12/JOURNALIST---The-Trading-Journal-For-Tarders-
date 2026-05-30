@@ -112,7 +112,7 @@ export async function fetchMonthNotes(month: string): Promise<DayNote[]> {
   return res.json();
 }
 
-export async function upsertDayNote(date: string, content: string, existingId?: string): Promise<void> {
+export async function upsertDayNote(date: string, content: string, existingId?: string, userId?: string): Promise<void> {
   if (isSupabaseSession()) {
     if (content.trim() === '') {
       if (existingId) {
@@ -130,9 +130,11 @@ export async function upsertDayNote(date: string, content: string, existingId?: 
     } else {
       const id = `note-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
       const now = new Date().toISOString();
+      const body: Record<string, string> = { id, date, content: content.trim(), createdAt: now, updatedAt: now };
+      if (userId) body.userId = userId;
       const res = await supabaseFetch('/day_notes', {
         method: 'POST',
-        body: JSON.stringify({ id, date, content: content.trim(), createdAt: now, updatedAt: now }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error('Failed to create day note.');
     }

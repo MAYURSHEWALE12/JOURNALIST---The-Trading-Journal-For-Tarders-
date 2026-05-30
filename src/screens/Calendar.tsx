@@ -347,34 +347,35 @@ export default function Calendar() {
                 className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${cell.isCurrentMonth ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
                 {/* Day label */}
-                <div className="flex justify-between items-start leading-none">
-                  <span className={`text-[10px] md:text-xs font-mono font-bold ${numberColor}`}>
-                    {cell.day}
-                  </span>
-                  
-                  {/* Note icon with hover tooltip */}
+                <div className="leading-none">
+                  <div className="flex justify-between items-start">
+                    <span className={`text-[10px] md:text-xs font-mono font-bold ${numberColor}`}>
+                      {cell.day}
+                    </span>
+                    {/* Subtle dots for trade notes / screenshots */}
+                    {hasTrades && cell.isCurrentMonth && (
+                      <div className="flex items-center gap-0.5">
+                        {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
+                          <span className="w-1 h-1 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
+                        )}
+                        {dayTrades.some(t => t.screenshotUrl) && (
+                          <span className="w-1 h-1 rounded-full bg-violet-500/80 dark:bg-violet-400/80" title="Has Screenshots" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {/* Note icon below date */}
                   {dayNotes[cell.dateString] && cell.isCurrentMonth && (
-                    <div className="relative group">
+                    <div className="relative group inline-block mt-0.5">
                       <NotebookPen className="w-3 h-3 text-amber-500/80 hover:text-amber-400 transition-colors" />
-                      <div className="absolute right-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
+                      <div className="absolute left-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
                         {dayNotes[cell.dateString]}
                       </div>
                     </div>
                   )}
-                  {/* Subtle dots for trade notes / screenshots */}
-                  {hasTrades && cell.isCurrentMonth && (
-                    <div className="flex items-center gap-0.5">
-                      {dayTrades.some(t => t.notes && t.notes.trim().length > 0) && (
-                        <span className="w-1 h-1 rounded-full bg-blue-500/80 dark:bg-blue-400/80" title="Has Notes" />
-                      )}
-                      {dayTrades.some(t => t.screenshotUrl) && (
-                        <span className="w-1 h-1 rounded-full bg-violet-500/80 dark:bg-violet-400/80" title="Has Screenshots" />
-                      )}
-                    </div>
-                  )}
                 </div>
 
-                {/* Day aggregates (PNL & Trades Count) or note-only icon */}
+                {/* Day aggregates (PNL & Trades Count) */}
                 {hasTrades && cell.isCurrentMonth ? (
                   <div className="space-y-0 text-right mt-1 leading-none">
                     <p className={`text-[10px] md:text-xs font-mono font-extrabold ${pnlColor}`}>
@@ -384,17 +385,8 @@ export default function Calendar() {
                       {dayTrades.length} {dayTrades.length === 1 ? 'tr' : 'trs'}
                     </p>
                   </div>
-                ) : dayNotes[cell.dateString] && cell.isCurrentMonth ? (
-                  <div className="flex justify-end mt-1">
-                    <div className="relative group">
-                      <NotebookPen className="w-3.5 h-3.5 text-amber-500/60 hover:text-amber-400 transition-colors" />
-                      <div className="absolute right-0 top-full mt-1 z-50 w-48 p-2 rounded-lg border shadow-lg text-[10px] font-mono leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-gray-900 border-gray-700 text-gray-200">
-                        {dayNotes[cell.dateString]}
-                      </div>
-                    </div>
-                  </div>
                 ) : (
-                  <div className="h-4" /> // Placeholder layout balancer
+                  <div className="h-4" />
                 )}
               </div>
             );

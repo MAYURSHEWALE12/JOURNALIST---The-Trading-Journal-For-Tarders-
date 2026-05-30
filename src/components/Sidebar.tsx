@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown, Compass, BarChart3, BookOpen, Calendar, Search, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Compass, BarChart3, BookOpen, Calendar, Search, User, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
@@ -18,7 +18,7 @@ export default function Sidebar() {
     themeClasses, isDarkMode, sidebarCollapsed, setSidebarCollapsed,
     mobileMenuOpen, setMobileMenuOpen,
     activeAccountId, setActiveAccountId, accounts, setIsAddAccountOpen,
-    user, handleLogOut, setIsCommandOpen, setIsSettingsOpen,
+    user, handleLogOut, setIsCommandOpen, setIsSettingsOpen, handleDeleteAccount,
   } = useApp();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -94,16 +94,31 @@ export default function Sidebar() {
                             setDropdownOpen(false);
                             setMobileMenuOpen(false);
                           }}
-                          className={`w-full text-left px-2.5 py-2.5 rounded text-xs transition duration-150 cursor-pointer flex justify-between items-center ${
+                          className={`group w-full text-left px-2.5 py-2.5 rounded text-xs transition duration-150 cursor-pointer flex justify-between items-center ${
                             isActive
                               ? (isDarkMode ? 'bg-white/10 text-white font-semibold' : 'bg-black/5 text-black font-semibold')
                               : (isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/[0.04]' : 'text-gray-600 hover:text-black hover:bg-black/[0.03]')
                           }`}
                         >
-                          <span className="truncate">
+                          <span className="truncate flex-1 pr-2">
                             {acc.name} <span className="text-[10px] text-gray-500 ml-1 font-mono font-normal">({acc.type})</span>
                           </span>
-                          {isActive && <span className="text-[10px] text-gray-400">✦</span>}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {isActive && <span className="text-[10px] text-gray-400 group-hover:hidden">✦</span>}
+                            <button
+                              type="button"
+                              title="Delete Account"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Are you sure you want to delete "${acc.name}"? This will permanently delete this account and all associated trades.`)) {
+                                  handleDeleteAccount(acc.id);
+                                }
+                              }}
+                              className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-0.5 rounded transition cursor-pointer text-gray-500 flex items-center justify-center"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       );
                     })}

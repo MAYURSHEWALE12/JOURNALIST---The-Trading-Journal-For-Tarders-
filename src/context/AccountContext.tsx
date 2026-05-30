@@ -16,6 +16,7 @@ export interface AccountContextValue {
   handleAddNewAccount: (e: FormEvent) => Promise<void>;
   isCreatingAccount: boolean;
   loadAccountsFromServer: () => Promise<void>;
+  handleDeleteAccount: (id: string) => Promise<void>;
 }
 
 const AccountContext = createContext<AccountContextValue>(null as unknown as AccountContextValue);
@@ -121,10 +122,39 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setNewAccountData({ name: '', type: 'Crypto', accountSize: '' });
   };
 
+  const handleDeleteAccount = async (id: string) => {
+    try {
+      await api.deleteAccount(id);
+      setAccounts(prev => {
+        const updated = prev.filter(acc => acc.id !== id);
+        localStorage.setItem('journalist_sandbox_accounts', JSON.stringify(updated));
+        return updated;
+      });
+    } catch {
+      setAccounts(prev => {
+        const updated = prev.filter(acc => acc.id !== id);
+        localStorage.setItem('journalist_sandbox_accounts', JSON.stringify(updated));
+        return updated;
+      });
+    }
+
+    if (id === activeAccountId) {
+      setAccounts(prev => {
+        const remaining = prev.filter(acc => acc.id !== id);
+        if (remaining.length > 0) {
+          setActiveAccountId(remaining[0].id);
+        } else {
+          setActiveAccountId('');
+        }
+        return prev;
+      });
+    }
+  };
+
   const value: AccountContextValue = {
     accounts, activeAccountId, setActiveAccountId, activeAccount,
     isAddAccountOpen, setIsAddAccountOpen, newAccountData, setNewAccountData,
-    handleAddNewAccount, isCreatingAccount, loadAccountsFromServer,
+    handleAddNewAccount, isCreatingAccount, loadAccountsFromServer, handleDeleteAccount,
   };
 
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;

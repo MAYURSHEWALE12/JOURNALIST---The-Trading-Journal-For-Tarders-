@@ -324,11 +324,10 @@ export default function Calendar() {
                   pnlColor = themeClasses.textSub;
                 }
               } else {
-                // Empty days inside the active month - solid clean grey boxes!
+                // Empty days inside the active month - clickable for notes
                 cellBg = isDarkMode 
                   ? 'bg-neutral-900/40 border-white/[0.04]' 
                   : 'bg-gray-100/90 border-black/[0.04]';
-                cellHover = ''; // Disable hover scale for untraded days
               }
             } else {
               // Outside month padding cells (fully transparent/invisible)
@@ -340,12 +339,12 @@ export default function Calendar() {
               <div 
                 key={`${cell.dateString}-${index}`}
                 onClick={() => {
-                  if (!hasTrades && !dayNotes[cell.dateString]) return;
+                  if (!cell.isCurrentMonth) return;
                   setSelectedDayTrades({ day: cell.day, trades: dayTrades, date: cell.dateString });
                   setDayNote(dayNotes[cell.dateString] || '');
                   setSavedNote(dayNotes[cell.dateString] || '');
                 }}
-                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${(hasTrades || dayNotes[cell.dateString]) ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
+                className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${cell.isCurrentMonth ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
                 {/* Day label */}
                 <div className="flex justify-between items-start leading-none">

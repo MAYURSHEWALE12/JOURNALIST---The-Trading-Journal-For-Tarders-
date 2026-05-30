@@ -1,4 +1,5 @@
 import { Search, Plus } from 'lucide-react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { exportTradesToPDF } from '../lib/pdfExporter';
@@ -6,17 +7,34 @@ import { exportTradesToPDF } from '../lib/pdfExporter';
 export default function CommandPalette() {
   const navigate = useNavigate();
   const {
-    isDarkMode, isCommandOpen,
+    isDarkMode, isCommandOpen, setIsCommandOpen,
     handleCommandAction, handleOpenNewTradeModal, accounts,
     activeAccountId, setActiveAccountId, activeAccount,
     activeTrades, computedStats, user, calendarDays, setIsExportingPDF
   } = useApp();
 
+  useEffect(() => {
+    if (!isCommandOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsCommandOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCommandOpen, setIsCommandOpen]);
+
   if (!isCommandOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className={`border w-full max-w-xl rounded shadow-2xl overflow-hidden font-sans transition-all duration-200 ${isDarkMode ? 'bg-[#121212] border-border-active' : 'bg-[#f0f0f0] border-gray-400'}`}>
+    <div 
+      className="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-pointer"
+      onClick={() => setIsCommandOpen(false)}
+    >
+      <div 
+        className={`border w-full max-w-xl rounded shadow-2xl overflow-hidden font-sans transition-all duration-200 cursor-default ${isDarkMode ? 'bg-[#121212] border-border-active' : 'bg-[#f0f0f0] border-gray-400'}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={`p-4 border-b flex items-center space-x-3 ${isDarkMode ? 'border-border-subtle' : 'border-gray-200'}`}>
           <Search className="w-5 h-5 text-gray-400" />
           <input
@@ -24,6 +42,11 @@ export default function CommandPalette() {
             placeholder="Type a workspace command or search assets..."
             className={`w-full bg-transparent text-sm border-none focus:outline-none ${isDarkMode ? 'text-white placeholder-gray-500' : 'text-black placeholder-gray-400'}`}
             autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setIsCommandOpen(false);
+              }
+            }}
           />
           <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded text-gray-500 ${isDarkMode ? 'bg-black border border-border-subtle' : 'bg-[#ffffff] border border-gray-300'}`}>ESC</span>
         </div>

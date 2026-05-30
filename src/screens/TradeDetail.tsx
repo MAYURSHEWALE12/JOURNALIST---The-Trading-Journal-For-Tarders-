@@ -552,6 +552,7 @@ export default function TradeDetail() {
               </button>
             </div>
           </div>
+        </div>
         </>
       )}
     </div>

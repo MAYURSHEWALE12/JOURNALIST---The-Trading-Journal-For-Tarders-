@@ -43,6 +43,17 @@ export default function TradeDetail() {
   const [leverage, setLeverage] = React.useState<number>(10);
   const [isExporting, setIsExporting] = React.useState(false);
 
+  React.useEffect(() => {
+    if (isShareModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isShareModalOpen]);
+
   if (dataLoading) {
     return <TradeDetailSkeleton />;
   }
@@ -320,8 +331,9 @@ export default function TradeDetail() {
 
       {/* Share Card Modal Overlay */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex flex-col items-center justify-start p-4 overflow-y-auto select-none sm:justify-center">
-          <div className="flex flex-col items-center gap-3.5 w-full max-w-[315px] py-4 sm:py-3">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 overflow-y-auto select-none">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="flex flex-col items-center gap-3.5 w-full max-w-[315px] py-4">
             {/* Modal Header */}
             <div className="flex justify-between items-center w-full px-1">
               <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate PNL Card</span>
@@ -537,6 +549,7 @@ export default function TradeDetail() {
             </div>
           </div>
         </div>
+      </div>
       )}
     </div>
   );

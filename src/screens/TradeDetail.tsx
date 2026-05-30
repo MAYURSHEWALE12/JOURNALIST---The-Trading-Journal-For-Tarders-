@@ -41,6 +41,7 @@ export default function TradeDetail() {
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   const [shareType, setShareType] = React.useState<'pnl' | 'roi' | 'both'>('both');
   const [leverage, setLeverage] = React.useState<number>(10);
+  const [glowTheme, setGlowTheme] = React.useState<'slate' | 'emerald' | 'indigo'>('indigo');
   const [isExporting, setIsExporting] = React.useState(false);
 
   React.useEffect(() => {
@@ -333,7 +334,7 @@ export default function TradeDetail() {
       {isShareModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-3 pt-4 sm:p-6 overflow-y-auto select-none">
           <div className="w-full max-w-[420px] sm:max-w-xl bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-2xl">
-            
+
             {/* Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-white/[0.04]">
               <span className="text-white/80 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold">
@@ -352,17 +353,47 @@ export default function TradeDetail() {
               <div className="flex justify-center">
                 <div
                   id="journalist-share-card"
-                  className="w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[340px] bg-gradient-to-br from-[#0e0e11] via-[#09090b] to-[#040405] border border-white/10 rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300"
-                  style={{ aspectRatio: '4/5' }}
+                  className="w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[340px] aspect-[4/5] rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl border transition-all duration-300"
+                  style={{
+                    background: glowTheme === 'emerald'
+                      ? 'linear-gradient(135deg, #0c1410 0%, #09090b 50%, #040405 100%)'
+                      : glowTheme === 'indigo'
+                        ? 'linear-gradient(135deg, #0e0e16 0%, #09090b 50%, #040405 100%)'
+                        : 'linear-gradient(135deg, #0e0e11 0%, #09090b 50%, #040405 100%)',
+                    borderColor: glowTheme === 'emerald'
+                      ? 'rgba(16,185,129,0.3)'
+                      : glowTheme === 'indigo'
+                        ? 'rgba(99,102,241,0.3)'
+                        : 'rgba(255,255,255,0.1)'
+                  }}
                 >
+                  {/* Ambient Glow Orb */}
+                  <div
+                    className="absolute inset-0 pointer-events-none select-none transition-all duration-500"
+                    style={{
+                      background: glowTheme === 'emerald'
+                        ? 'radial-gradient(circle at 50% 40%, rgba(16,185,129,0.06) 0%, transparent 60%)'
+                        : glowTheme === 'indigo'
+                          ? 'radial-gradient(circle at 50% 40%, rgba(99,102,241,0.06) 0%, transparent 60%)'
+                          : 'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03) 0%, transparent 60%)'
+                    }}
+                  />
+
                   {/* Rotating Logo Watermark */}
                   <div className="absolute right-[-30px] top-[-35px] w-56 h-56 text-white/[0.03] rotate-[15deg] pointer-events-none select-none">
                     <LogoIcon className="w-full h-full text-white" isDark={true} />
                   </div>
 
-                  {/* Top User Profile block */}
+                  {/* Top Section: Avatar + User Info */}
                   <div className="flex items-center gap-3 relative z-10">
-                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs uppercase overflow-hidden relative shrink-0">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase border transition-all duration-300 overflow-hidden relative shrink-0"
+                      style={{
+                        backgroundColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.1)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.1)',
+                        borderColor: glowTheme === 'emerald' ? 'rgba(16,185,129,0.3)' : glowTheme === 'indigo' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.2)',
+                        color: glowTheme === 'emerald' ? '#34d399' : glowTheme === 'indigo' ? '#818cf8' : '#ffffff'
+                      }}
+                    >
                       {user?.avatarUrl ? (
                         <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
                       ) : (
@@ -370,16 +401,16 @@ export default function TradeDetail() {
                       )}
                     </div>
                     <div>
-                      <div className="text-white text-xs font-bold font-mono">{user?.username || 'JournalistTrader'}</div>
-                      <div className="text-gray-500 text-[9px] font-mono mt-0.5">
+                      <div className="text-xs font-bold font-mono text-white">{user?.username || 'JournalistTrader'}</div>
+                      <div className="text-[9px] font-mono mt-0.5" style={{ color: '#a3a3a3' }}>
                         {user?.tradingBio || 'Systematic Trader'} &bull; {new Date(trade.entryTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                       </div>
                     </div>
                   </div>
 
-                  {/* Trade Details Block */}
-                  <div className="my-auto relative z-10 py-4">
-                    <div className="flex items-center gap-2">
+                  {/* Center Section: Trade Info + Hero Metric */}
+                  <div className="my-auto relative z-10 py-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <div className="text-white font-display text-xl font-black uppercase tracking-tight">{trade.asset}</div>
                       <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider border ${
                         trade.status === 'WIN'
@@ -388,93 +419,86 @@ export default function TradeDetail() {
                             ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                             : 'bg-white/5 text-gray-400 border-white/10'
                       }`}>{trade.status}</span>
-                    </div>
-                    
-                    <div className="mt-1 flex items-center gap-1.5 font-mono">
-                      <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider ${
-                        trade.direction === 'LONG' 
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                      }`}>
-                        {trade.direction}
-                      </span>
-                      <span className="text-[9px] px-2 py-0.5 rounded font-black tracking-wider bg-white/5 text-gray-400 border border-white/5">
-                        {leverage}X Leverage
-                      </span>
+                      <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-wider border ${
+                        trade.direction === 'LONG'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                      }`}>{trade.direction}</span>
                     </div>
 
-                    {/* Big P&L / ROI numbers */}
-                    <div className="mt-6 space-y-1">
-                      {(shareType === 'pnl' || shareType === 'both') && (
-                        <div>
-                          {shareType === 'both' && <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold">Realized profit</div>}
-                          <div className={`font-display text-4xl font-extrabold tracking-tighter ${
-                            trade.netPnl >= 0 
-                              ? 'text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.15)]' 
-                              : 'text-rose-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.15)]'
-                          }`}>
-                            {trade.netPnl >= 0 ? '+' : ''}${trade.netPnl.toFixed(2)}
-                          </div>
-                        </div>
-                      )}
+                    <div className="text-[9px] font-mono mt-1.5" style={{ color: '#737373' }}>{trade.strategy}</div>
 
-                      {(shareType === 'roi' || shareType === 'both') && (
-                        <div className={shareType === 'both' ? 'pt-1.5' : ''}>
-                          {shareType === 'both' && <div className="text-gray-500 text-[8px] font-mono uppercase tracking-widest font-bold">Return on Investment</div>}
-                          <div className={`font-display font-extrabold tracking-tighter ${
-                            shareType === 'both' ? 'text-lg font-bold' : 'text-4xl'
-                          } ${
-                            trade.netPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'
-                          }`}>
-                            {trade.netPnl >= 0 ? '+' : ''}{computedRoi.toFixed(2)}%
-                          </div>
-                        </div>
-                      )}
+                    {/* Hero P&L */}
+                    <div className="mt-6">
+                      <div className="text-[8px] font-mono uppercase tracking-widest font-bold leading-none" style={{ color: '#737373' }}>Net Realized P&L</div>
+                      <div
+                        className="mt-1 font-display text-4xl sm:text-4.5xl font-black tracking-tight leading-none"
+                        style={{
+                          color: trade.netPnl >= 0 ? '#34d399' : '#f87171'
+                        }}
+                      >
+                        {trade.netPnl >= 0 ? '+' : ''}${Math.abs(trade.netPnl).toFixed(2)}
+                      </div>
                     </div>
+
+                    {/* ROI section */}
+                    {(shareType === 'roi' || shareType === 'both') && (
+                      <div className="mt-3">
+                        <div
+                          className="font-display text-sm sm:text-base font-bold tracking-tight"
+                          style={{
+                            color: trade.netPnl >= 0 ? '#34d399' : '#f87171'
+                          }}
+                        >
+                          {trade.netPnl >= 0 ? '+' : ''}{computedRoi.toFixed(2)}% ROI {shareType === 'both' && <span className="text-xs font-mono font-normal" style={{ color: '#737373' }}>({leverage}x)</span>}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Bottom Prices Row */}
-                  <div className="border-t border-white/5 pt-4 grid grid-cols-2 gap-4 relative z-10">
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-3 gap-2 border-t pt-4 relative z-10" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                     <div>
-                      <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold font-mono">Entry Price</div>
-                      <div className="text-white text-xs font-bold font-mono mt-0.5">
-                        {Number(trade.entryPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+                      <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none" style={{ color: '#737373' }}>Entry</div>
+                      <div className="text-xs font-semibold font-mono mt-1.5 text-white">${Number(trade.entryPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 })}</div>
+                    </div>
+                    <div>
+                      <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none" style={{ color: '#737373' }}>Exit</div>
+                      <div className="text-xs font-semibold font-mono mt-1.5 text-white">
+                        {trade.exitPrice ? '$' + Number(trade.exitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 }) : '-'}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[8px] uppercase tracking-widest text-gray-500 font-bold font-mono">Exit Price</div>
-                      <div className="text-white text-xs font-bold font-mono mt-0.5">
-                        {trade.exitPrice 
-                          ? Number(trade.exitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 }) 
-                          : '-'}
+                      <div className="text-[8px] uppercase tracking-wider font-bold font-mono leading-none" style={{ color: '#737373' }}>R Multiple</div>
+                      <div
+                        className="text-xs font-semibold font-mono mt-1.5"
+                        style={{
+                          color: trade.realizedR >= trade.plannedR ? '#34d399' : (trade.status === 'LOSS' ? '#f87171' : '#ffffff')
+                        }}
+                      >
+                        {trade.realizedR}R
                       </div>
                     </div>
                   </div>
 
-                  {/* Branding Footer bar */}
-                  <div className="border-t border-white/5 pt-4 mt-4 flex items-center justify-between relative z-10 select-none">
+                  {/* Branding Footer */}
+                  <div className="border-t pt-4 mt-4 flex items-center justify-between relative z-10 select-none" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded bg-white text-black flex items-center justify-center p-0.5 shrink-0">
                         <LogoIcon className="w-3.5 h-3.5" isDark={false} />
                       </div>
                       <div>
-                        <div className="text-white text-[10px] font-extrabold font-display tracking-tight leading-none">JOURNALIST</div>
-                        <div className="text-gray-500 text-[7px] font-mono mt-0.5 leading-none">Systematic Portfolio Core</div>
+                        <div className="text-[10px] font-extrabold font-display tracking-tight leading-none text-white">JOURNALIST</div>
+                        <div className="text-[7px] font-mono mt-0.5 leading-none" style={{ color: '#737373' }}>Single Trade Showcase</div>
                       </div>
                     </div>
-
-                    {/* Dynamic Social Watermarks or QR Code */}
                     {user?.twitterHandle || user?.telegramHandle ? (
                       <div className="text-right font-mono flex flex-col items-end justify-center">
                         {user.twitterHandle && (
-                          <span className="text-[8px] font-bold text-gray-400" style={{ color: '#a3a3a3' }}>
-                            𝕏 {user.twitterHandle}
-                          </span>
+                          <span className="text-[8px] font-bold" style={{ color: '#a3a3a3' }}>𝕏 {user.twitterHandle}</span>
                         )}
                         {user.telegramHandle && (
-                          <span className="text-[7px] text-gray-500 mt-0.5" style={{ color: '#737373' }}>
-                            ✈️ {user.telegramHandle}
-                          </span>
+                          <span className="text-[7px] mt-0.5" style={{ color: '#737373' }}>✈️ {user.telegramHandle}</span>
                         )}
                       </div>
                     ) : (
@@ -498,6 +522,33 @@ export default function TradeDetail() {
 
             {/* Controls */}
             <div className="px-4 sm:px-6 pt-3 sm:pt-4 space-y-3 font-mono text-xs">
+              {/* Glow Theme */}
+              <div>
+                <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Glow Theme</label>
+                <div className="flex gap-2">
+                  {(['slate', 'emerald', 'indigo'] as const).map(t => {
+                    const isActive = glowTheme === t;
+                    const btnClass = !isActive
+                      ? `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`
+                      : t === 'emerald'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                        : t === 'indigo'
+                          ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]'
+                          : 'bg-white text-black border-white';
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setGlowTheme(t)}
+                        className={`flex-1 py-2 border text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all duration-300 cursor-pointer ${btnClass}`}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Type Select */}
               <div>
                 <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Show On Card</label>

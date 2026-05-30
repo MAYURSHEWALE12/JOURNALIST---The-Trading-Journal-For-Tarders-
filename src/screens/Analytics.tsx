@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Cell, PieChart, Pie, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsSkeleton } from '../components/Skeleton';
 import { exportTradesToPDF } from '../lib/pdfExporter';
+import { exportTradesToCSV } from '../lib/csvExporter';
 import JournalistScore from '../components/JournalistScore';
 import Seo from '../components/Seo';
 
@@ -148,7 +149,7 @@ export default function Analytics() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => alert('Exporting portfolio metrics to CSV...')}
+            onClick={() => exportTradesToCSV(dateFilteredTrades)}
             className={`px-3.5 py-1.5 border text-xs rounded transition cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} ${themeClasses.bgHover}`}
           >
             Export CSV

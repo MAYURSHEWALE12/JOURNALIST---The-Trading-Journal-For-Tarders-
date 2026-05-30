@@ -1,5 +1,5 @@
 import { BookOpen, Trash2 } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TimelineSkeleton } from '../components/Skeleton';
 import { getWeekOfMonth, getShortTradeId, getDirectImageUrl } from '../types';

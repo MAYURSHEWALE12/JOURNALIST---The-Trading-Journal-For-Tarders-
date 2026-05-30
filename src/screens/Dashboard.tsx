@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   TrendingUp, TrendingDown,
   Search, LayoutGrid, List, Share2, Download, X
@@ -9,6 +9,7 @@ import { DashboardSkeleton } from '../components/Skeleton';
 import PremiumPnLChart from '../components/PremiumPnLChart';
 import KpiDashboard from '../components/KpiDashboard';
 import { exportTradesToPDF } from '../lib/pdfExporter';
+import { exportTradesToCSV, importTradesFromCSV } from '../lib/csvExporter';
 import Seo from '../components/Seo';
 import LogoIcon from '../components/LogoIcon';
 import { computeJournalistScore } from '../lib/journalistScore';
@@ -32,6 +33,25 @@ export default function Dashboard() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [glowTheme, setGlowTheme] = useState<'slate' | 'emerald' | 'indigo'>('indigo');
   const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ imported: number; errors: string[] } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    setImportResult(null);
+    try {
+      const result = await importTradesFromCSV(file);
+      setImportResult(result);
+    } catch (err) {
+      setImportResult({ imported: 0, errors: [err instanceof Error ? err.message : 'Import failed'] });
+    } finally {
+      setIsImporting(false);
+      if (e.target) e.target.value = '';
+    }
+  }, []);
 
   if (dataLoading) {
     return <DashboardSkeleton />;
@@ -211,6 +231,29 @@ export default function Dashboard() {
               <option value="BREAKEVEN">Breakevens</option>
             </select>
             <button
+              onClick={() => exportTradesToCSV(activeTrades)}
+              className={`px-3 py-1.5 border text-xs rounded transition cursor-pointer shrink-0 ${themeClasses.border} ${themeClasses.textSub} ${themeClasses.bgHover}`}
+            >
+              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </span>
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImporting}
+              className={`px-3 py-1.5 border text-xs rounded transition cursor-pointer shrink-0 ${themeClasses.border} ${themeClasses.textSub} ${themeClasses.bgHover}`}
+            >
+              {isImporting ? 'Importing...' : 'Import CSV'}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleImport}
+              className="hidden"
+            />
+            <button
               onClick={async () => { setIsExportingPDF(true); try { await exportTradesToPDF(activeTrades, computedStats, accounts.find(a => a.id === activeAccountId), user, calendarDays); } finally { setIsExportingPDF(false); } }}
               className={`px-3 py-1.5 border text-xs rounded transition font-bold flex items-center gap-1.5 cursor-pointer shrink-0 ${
                 isDarkMode ? 'bg-white text-black border-white hover:bg-gray-200' : 'bg-black text-white border-black hover:bg-gray-800'
@@ -269,6 +312,28 @@ export default function Dashboard() {
                 Clear
               </button>
             )}
+          </div>
+        )}
+
+        {importResult && (
+          <div className={`border rounded p-3 flex items-center justify-between ${importResult.errors.length > 0 ? 'border-brand-rose/30' : 'border-emerald-500/30'} ${themeClasses.bgPanel}`}>
+            <div className="flex items-center gap-2">
+              {importResult.errors.length > 0 ? (
+                <span className="text-brand-rose text-xs font-mono">
+                  Imported {importResult.imported} trades, {importResult.errors.length} error{importResult.errors.length !== 1 ? 's' : ''}
+                </span>
+              ) : (
+                <span className="text-emerald-500 text-xs font-mono font-bold">
+                  Successfully imported {importResult.imported} trade{importResult.imported !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setImportResult(null)}
+              className="text-[10px] text-gray-500 hover:text-gray-300 font-mono cursor-pointer"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 

@@ -331,8 +331,8 @@ export default function TradeDetail() {
 
       {/* Share Card Modal Overlay */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 overflow-y-auto select-none p-4">
-          <div className="relative mx-auto my-6 w-full max-w-[340px] flex flex-col items-center gap-5">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 overflow-hidden select-none flex items-center justify-center p-3 sm:p-4">
+          <div className="w-full max-w-[340px] max-h-[96vh] overflow-y-auto flex flex-col items-center gap-4 py-2 scrollbar-none pointer-events-auto">
             {/* Modal Header */}
             <div className="flex justify-between items-center w-full px-1">
               <span className="text-white font-mono text-[10px] uppercase tracking-widest font-extrabold opacity-80">Generate PNL Card</span>

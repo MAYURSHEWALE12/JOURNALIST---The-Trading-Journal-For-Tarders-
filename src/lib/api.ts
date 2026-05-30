@@ -106,13 +106,30 @@ export async function fetchMonthNotes(month: string): Promise<DayNote[]> {
   return res.json();
 }
 
-export async function upsertDayNote(date: string, content: string): Promise<void> {
+export async function upsertDayNote(date: string, content: string, existingId?: string): Promise<void> {
   if (isSupabaseSession()) {
-    const res = await supabaseFetch(`/day_notes?date=eq.${encodeURIComponent(date)}`, {
-      method: 'PUT',
-      body: JSON.stringify({ date, content }),
-    });
-    if (!res.ok) throw new Error('Failed to save day note.');
+    if (content.trim() === '') {
+      if (existingId) {
+        const res = await supabaseFetch(`/day_notes?id=eq.${encodeURIComponent(existingId)}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete day note.');
+      }
+      return;
+    }
+    if (existingId) {
+      const res = await supabaseFetch(`/day_notes?id=eq.${encodeURIComponent(existingId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ content: content.trim() }),
+      });
+      if (!res.ok) throw new Error('Failed to update day note.');
+    } else {
+      const id = `note-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+      const now = new Date().toISOString();
+      const res = await supabaseFetch('/day_notes', {
+        method: 'POST',
+        body: JSON.stringify({ id, date, content: content.trim(), createdAt: now, updatedAt: now }),
+      });
+      if (!res.ok) throw new Error('Failed to create day note.');
+    }
     return;
   }
   const res = await fetch(`/api/day-notes/${encodeURIComponent(date)}`, {

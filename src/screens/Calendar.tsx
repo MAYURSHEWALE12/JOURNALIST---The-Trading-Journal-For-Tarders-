@@ -27,6 +27,7 @@ export default function Calendar() {
   const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[]; date: string } | null>(null);
   const [dayNote, setDayNote] = useState('');
   const [dayNotes, setDayNotes] = useState<Record<string, string>>({});
+  const [dayNoteIds, setDayNoteIds] = useState<Record<string, string>>({});
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
@@ -35,16 +36,20 @@ export default function Calendar() {
 
   useEffect(() => {
     fetchMonthNotes(monthKey).then(notes => {
-      const map: Record<string, string> = {};
+      const contentMap: Record<string, string> = {};
+      const idMap: Record<string, string> = {};
       for (const n of notes) {
-        map[n.date] = n.content;
+        contentMap[n.date] = n.content;
+        idMap[n.date] = n.id;
       }
-      setDayNotes(map);
+      setDayNotes(contentMap);
+      setDayNoteIds(idMap);
     }).catch(() => {});
   }, [monthKey]);
 
   const handleSaveDayNote = async (date: string, content: string) => {
-    await upsertDayNote(date, content);
+    const existingId = dayNoteIds[date];
+    await upsertDayNote(date, content, existingId);
     setDayNotes(prev => {
       const next = { ...prev };
       if (content.trim()) {
@@ -54,6 +59,17 @@ export default function Calendar() {
       }
       return next;
     });
+    if (!existingId && content.trim()) {
+      // Fetch again to get the new server-assigned ID
+      fetchMonthNotes(monthKey).then(notes => {
+        const idMap: Record<string, string> = {};
+        for (const n of notes) idMap[n.date] = n.id;
+        setDayNoteIds(idMap);
+      }).catch(() => {});
+    }
+    if (!content.trim() && existingId) {
+      setDayNoteIds(prev => { const next = { ...prev }; delete next[date]; return next; });
+    }
   };
 
   // iOS Drag-to-Dismiss Gesture States

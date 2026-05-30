@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Compass, BarChart3, BookOpen, Calendar, Search, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Compass, BarChart3, BookOpen, Calendar, Search, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import LogoIcon from './LogoIcon';
@@ -51,16 +51,17 @@ export default function Sidebar() {
                 <button onClick={() => setIsAddAccountOpen(true)}
                   className={`text-[10px] font-bold underline cursor-pointer ${isDarkMode ? 'text-white' : 'text-black'}`}>＋ Add</button>
               </div>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <select value={activeAccountId}
                   onChange={(e) => { setActiveAccountId(e.target.value); setMobileMenuOpen(false); }}
-                  className={`w-full text-xs font-medium bg-transparent border-0 outline-none p-0 cursor-pointer ${themeClasses.textMain}`}>
+                  className={`w-full text-xs font-medium bg-transparent border-0 outline-none p-0 pr-6 cursor-pointer appearance-none ${themeClasses.textMain}`}>
                   {accounts.map(acc => (
                     <option key={acc.id} value={acc.id} className={isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}>
                       {acc.name} ({acc.type})
                     </option>
                   ))}
                 </select>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-500 absolute right-0 pointer-events-none" />
               </div>
             </div>
           )}

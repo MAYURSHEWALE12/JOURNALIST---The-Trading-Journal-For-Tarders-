@@ -380,11 +380,11 @@ export default function Dashboard() {
 
       {/* Portfolio Performance Card Modal */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 select-none">
-          <div className="flex flex-col w-full max-w-[420px] sm:max-w-lg max-h-[96vh] sm:max-h-[90vh] bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-3 pt-4 sm:p-6 overflow-y-auto select-none">
+          <div className="w-full max-w-[420px] sm:max-w-xl bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-2xl">
             
-            {/* Sticky Header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 shrink-0 border-b border-white/[0.04]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-white/[0.04]">
               <span className="text-white/80 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold">
                 Generate Performance Card
               </span>
@@ -396,11 +396,9 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Scrollable Content */}
-            <div className="overflow-y-auto overflow-x-hidden px-4 sm:px-6 pb-2 flex-1 min-h-0 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-              
-              {/* Card Preview - scaled to fit */}
-              <div className="flex justify-center py-4 sm:py-6">
+            {/* Card Preview */}
+            <div className="px-4 sm:px-6 pt-3 sm:pt-4">
+              <div className="flex justify-center">
                 <div
                   id="journalist-portfolio-card"
                   className="w-full max-w-[280px] xs:max-w-[300px] sm:max-w-[340px] aspect-[4/5] rounded-2xl p-5 sm:p-6 relative flex flex-col justify-between overflow-hidden shadow-2xl border"
@@ -548,39 +546,39 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Controls */}
-              <div className="space-y-3 sm:space-y-4 font-mono text-xs pb-2">
-                <div>
-                  <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Glow Theme</label>
-                  <div className="flex gap-2">
-                    {(['slate', 'emerald', 'indigo'] as const).map(t => {
-                      const isActive = glowTheme === t;
-                      const btnClass = !isActive
-                        ? `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`
-                        : t === 'emerald'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
-                          : t === 'indigo'
-                            ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]'
-                            : 'bg-white text-black border-white';
-                      return (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => setGlowTheme(t)}
-                          className={`flex-1 py-2 border text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all duration-300 cursor-pointer ${btnClass}`}
-                        >
-                          {t}
-                        </button>
-                      );
-                    })}
-                  </div>
+            {/* Controls */}
+            <div className="px-4 sm:px-6 pt-3 sm:pt-4 pb-3 space-y-3 sm:space-y-4 font-mono text-xs">
+              <div>
+                <label className="block text-[9px] uppercase tracking-widest mb-2 font-bold" style={{ color: '#737373' }}>Glow Theme</label>
+                <div className="flex gap-2">
+                  {(['slate', 'emerald', 'indigo'] as const).map(t => {
+                    const isActive = glowTheme === t;
+                    const btnClass = !isActive
+                      ? `${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textSub} hover:border-gray-500 hover:text-white`
+                      : t === 'emerald'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                        : t === 'indigo'
+                          ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]'
+                          : 'bg-white text-black border-white';
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setGlowTheme(t)}
+                        className={`flex-1 py-2 border text-[10px] font-bold rounded-lg uppercase tracking-wider transition-all duration-300 cursor-pointer ${btnClass}`}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-            {/* Sticky Action Bar */}
-            <div className="shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-white/[0.06] bg-neutral-900/95">
+            {/* Action Bar */}
+            <div className="px-4 sm:px-6 pb-4 sm:pb-5 pt-3 border-t border-white/[0.06]">
               <div className="flex gap-2">
                 <button
                   onClick={exportPortfolioCard}

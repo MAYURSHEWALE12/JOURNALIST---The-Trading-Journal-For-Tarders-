@@ -331,8 +331,8 @@ export default function TradeDetail() {
 
       {/* Share Card Modal Overlay */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto select-none">
-          <div className="w-full max-w-[420px] sm:max-w-lg bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-2xl my-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-3 pt-4 sm:p-6 overflow-y-auto select-none">
+          <div className="w-full max-w-[420px] sm:max-w-xl bg-neutral-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-2xl">
             
             {/* Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3 border-b border-white/[0.04]">

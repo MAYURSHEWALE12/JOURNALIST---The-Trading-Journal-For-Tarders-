@@ -96,7 +96,7 @@ export async function deleteAccount(id: string): Promise<void> {
 
 export async function fetchMonthNotes(month: string): Promise<DayNote[]> {
   if (isSupabaseSession()) {
-    const res = await supabaseFetch(`/day_notes?select=*&date=like=${month}%`);
+    const res = await supabaseFetch(`/day_notes?select=*&date=like=${month}*`);
     if (!res.ok) throw new Error('Failed to fetch day notes.');
     return res.json() as unknown as DayNote[];
   }

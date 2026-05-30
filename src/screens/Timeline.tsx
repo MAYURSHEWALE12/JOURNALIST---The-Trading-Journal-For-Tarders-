@@ -1,11 +1,14 @@
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Trash2 } from 'lucide-react';
+import { useState, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { TimelineSkeleton } from '../components/Skeleton';
 import { getWeekOfMonth, getShortTradeId, getDirectImageUrl } from '../types';
 import Seo from '../components/Seo';
 
 export default function Timeline() {
-  const { themeClasses, isDarkMode, activeTrades, setSelectedScreenshot, dataLoading } = useApp();
+  const { themeClasses, isDarkMode, activeTrades, setSelectedScreenshot, deleteTrade, dataLoading } = useApp();
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   if (dataLoading) {
     return <TimelineSkeleton />;
@@ -15,17 +18,68 @@ export default function Timeline() {
     <div className="space-y-6 max-w-4xl mx-auto">
       <Seo title="Journal Timeline Feed" path="/timeline" />
 
-      <div>
-        <h2 className={`text-xl font-display font-semibold ${themeClasses.textMain}`}>Interactive Journal Feed</h2>
-        <p className={`text-xs ${themeClasses.textSub}`}>Review detailed qualitative trade setups in a Notion-inspired workspace timeline.</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className={`text-xl font-display font-semibold ${themeClasses.textMain}`}>Interactive Journal Feed</h2>
+          <p className={`text-xs ${themeClasses.textSub}`}>Review detailed qualitative trade setups in a Notion-inspired workspace timeline.</p>
+        </div>
+        <button
+          onClick={() => { setSelectMode(p => !p); if (selectMode) setSelectedIds(new Set()); }}
+          className={`text-[10px] font-mono px-3 py-1.5 border rounded transition cursor-pointer ${selectMode ? 'bg-brand-rose/10 text-brand-rose border-brand-rose/30' : `${themeClasses.border} ${themeClasses.textSub} ${themeClasses.bgHover}`}`}
+        >
+          {selectMode ? 'Cancel' : 'Select'}
+        </button>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div className={`flex items-center justify-between border rounded p-3 ${themeClasses.border} ${themeClasses.bgPanel}`}>
+          <span className={`text-xs font-mono ${themeClasses.textMain}`}>{selectedIds.size} trade{selectedIds.size > 1 ? 's' : ''} selected</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className={`text-[10px] font-mono px-3 py-1.5 border rounded transition cursor-pointer ${themeClasses.border} ${themeClasses.textSub}`}
+            >
+              Deselect all
+            </button>
+            <button
+              onClick={async () => {
+                if (!window.confirm(`Delete ${selectedIds.size} selected trade${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return;
+                for (const id of selectedIds) {
+                  await deleteTrade(id);
+                }
+                setSelectedIds(new Set());
+                setSelectMode(false);
+              }}
+              className="text-[10px] font-mono px-3 py-1.5 rounded transition cursor-pointer bg-brand-rose text-white hover:bg-red-700 font-bold flex items-center gap-1"
+            >
+              <Trash2 className="w-3 h-3" />
+              Delete {selectedIds.size > 1 ? `(${selectedIds.size})` : ''}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={`relative border-l pl-4 md:pl-6 space-y-8 font-sans ${themeClasses.border}`}>
         {activeTrades.map((t) => (
           <div key={t.id} className="relative">
             <div className={`absolute left-[-21px] md:left-[-29px] top-1.5 w-2 h-2 rounded-full ring-4 ${isDarkMode ? 'bg-white ring-black' : 'bg-black ring-white'}`} />
 
-            <div className={`border rounded p-4 md:p-5 hover:border-gray-400 transition space-y-3 ${themeClasses.bgPanel} ${themeClasses.border}`}>
+            <div className={`border rounded p-4 md:p-5 hover:border-gray-400 transition space-y-3 ${themeClasses.bgPanel} ${themeClasses.border} ${selectMode ? 'select-none' : ''}`}>
+              {selectMode && (
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(t.id)}
+                  onChange={() => {
+                    setSelectedIds(prev => {
+                      const next = new Set(prev);
+                      if (next.has(t.id)) next.delete(t.id);
+                      else next.add(t.id);
+                      return next;
+                    });
+                  }}
+                  className="accent-brand-rose cursor-pointer absolute top-4 left-[-16px] md:left-[-24px] z-10"
+                />
+              )}
 
               <div className="flex justify-between items-start flex-wrap gap-2">
                 <div className="flex items-center space-x-3 flex-wrap gap-y-1">

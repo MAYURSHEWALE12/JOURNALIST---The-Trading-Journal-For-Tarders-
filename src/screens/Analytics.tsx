@@ -8,7 +8,7 @@ import { memo } from 'react';
 
 interface ScatterTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: Record<string, unknown>; value: number; [key: string]: unknown }>;
+  payload?: Array<{ payload: any; value: number }>;
   isDarkMode: boolean;
 }
 
@@ -54,7 +54,7 @@ const CustomScatterTooltip = memo(function CustomScatterTooltip({ active, payloa
 
 interface DonutTooltipProps {
   active?: boolean;
-  payload?: Array<{ name: string; value: number; payload: { color: string }; [key: string]: unknown }>;
+  payload?: Array<{ name: string; value: number; payload: { color: string } }>;
   isDarkMode: boolean;
 }
 

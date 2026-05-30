@@ -146,11 +146,11 @@ const toShortDate = (dateStr: string) =>
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: Record<string, unknown>; value: number; [key: string]: unknown }>;
+  payload?: Array<{ payload: any; value: number }>;
   label?: string;
   isDarkMode: boolean;
-  bestDay: string;
-  worstDay: string;
+  bestDay: number;
+  worstDay: number;
 }
 
 const CustomTooltip = memo(function CustomTooltip({ active, payload, label, isDarkMode, bestDay, worstDay }: CustomTooltipProps) {

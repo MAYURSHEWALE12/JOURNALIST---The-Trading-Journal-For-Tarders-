@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   TrendingUp, TrendingDown,
-  Search, LayoutGrid, List, Share2, Download, X
+  Search, LayoutGrid, List, Share2, Download, X, ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -33,6 +33,19 @@ export default function Dashboard() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [glowTheme, setGlowTheme] = useState<'slate' | 'emerald' | 'indigo'>('indigo');
   const [isExporting, setIsExporting] = useState(false);
+
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setFilterDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (dataLoading) {
     return <DashboardSkeleton />;
@@ -201,16 +214,53 @@ export default function Dashboard() {
                 className={`border focus:border-gray-400 rounded py-1.5 pl-8 pr-3 text-xs focus:outline-none transition w-full font-mono ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
               />
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'WIN' | 'LOSS' | 'BREAKEVEN')}
-              className={`border rounded py-1.5 px-3 text-xs focus:outline-none cursor-pointer ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
-            >
-              <option value="ALL">All Outcomes</option>
-              <option value="WIN">Wins</option>
-              <option value="LOSS">Losses</option>
-              <option value="BREAKEVEN">Breakevens</option>
-            </select>
+            <div className="relative" ref={filterRef}>
+              <button
+                type="button"
+                onClick={() => setFilterDropdownOpen(prev => !prev)}
+                className={`border rounded py-1.5 px-3 pr-8 text-xs focus:outline-none cursor-pointer flex items-center justify-between gap-1.5 transition min-w-[115px] sm:min-w-[125px] text-left font-semibold relative ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain}`}
+              >
+                <span className="truncate">
+                  {statusFilter === 'ALL' && 'All Outcomes'}
+                  {statusFilter === 'WIN' && 'Wins'}
+                  {statusFilter === 'LOSS' && 'Losses'}
+                  {statusFilter === 'BREAKEVEN' && 'Breakevens'}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-500 absolute right-2.5 transition-transform duration-200 pointer-events-none ${filterDropdownOpen ? 'rotate-180' : 'rotate-0'}`} />
+              </button>
+
+              {filterDropdownOpen && (
+                <div className={`absolute top-full right-0 mt-1.5 w-36 rounded-lg border shadow-2xl p-1 z-50 transition-all duration-200 ${
+                  isDarkMode ? 'bg-[#121212] border-white/[0.08] text-white' : 'bg-white border-gray-200 text-black'
+                }`}>
+                  {[
+                    { value: 'ALL', label: 'All Outcomes' },
+                    { value: 'WIN', label: 'Wins' },
+                    { value: 'LOSS', label: 'Losses' },
+                    { value: 'BREAKEVEN', label: 'Breakevens' }
+                  ].map(opt => {
+                    const isActive = opt.value === statusFilter;
+                    return (
+                      <div
+                        key={opt.value}
+                        onClick={() => {
+                          setStatusFilter(opt.value as 'ALL' | 'WIN' | 'LOSS' | 'BREAKEVEN');
+                          setFilterDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-2.5 py-2 rounded text-xs transition duration-150 cursor-pointer flex justify-between items-center ${
+                          isActive
+                            ? (isDarkMode ? 'bg-white/10 text-white font-semibold' : 'bg-black/5 text-black font-semibold')
+                            : (isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/[0.04]' : 'text-gray-600 hover:text-black hover:bg-black/[0.03]')
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isActive && <span className="text-[10px] text-gray-400">✦</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
             <button
               onClick={() => exportTradesToExcel(activeTrades)}
               className={`w-24 sm:w-28 h-10 text-xs border rounded transition cursor-pointer font-bold shrink-0 flex items-center justify-center text-center ${

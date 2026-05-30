@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, Minus, HelpCircle, Activity, Award, ShieldAlert, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 import type { Trade, CalendarDay } from '../types';
 import type { ThemeClasses } from '../context/UIContext';
 import { computeJournalistScore, type JournalistScoreResult } from '../lib/journalistScore';
@@ -223,6 +224,7 @@ function KpiCard({
 
 export default function KpiDashboard({ trades, computedStats, themeClasses, isDarkMode, calendarDays, currentYear, currentMonth, handlePrevMonth, handleNextMonth, selectedDate, setSelectedDate }: KpiDashboardProps) {
   const score: JournalistScoreResult = useMemo(() => computeJournalistScore(trades), [trades]);
+  const { accounts, activeAccountId } = useApp();
 
   const { kpis, scoreContrib } = useMemo(() => {
     const total = trades.length;
@@ -303,6 +305,17 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
       return { label, value, prevValue, change, health, benchmark, tooltip, insight, sparklineData };
     }
 
+    const activeAccObj = accounts.find(a => a.id === activeAccountId);
+    const startBalance = activeAccObj && activeAccObj.accountSize !== undefined ? activeAccObj.accountSize : 10000;
+    const currentBalance = startBalance + totalPnl;
+    const balanceChange = startBalance > 0 ? ((currentBalance - startBalance) / startBalance) * 100 : 0;
+
+    const balanceData = sortedByDate.reduce((acc: { v: number }[], t) => {
+      const last = acc.length > 0 ? acc[acc.length - 1].v : startBalance;
+      acc.push({ v: last + t.netPnl });
+      return acc;
+    }, [] as { v: number }[]);
+
     const pnLData = sortedByDate.reduce((acc: { v: number }[], t) => {
       const last = acc.length > 0 ? acc[acc.length - 1].v : 0;
       acc.push({ v: last + t.netPnl });
@@ -310,6 +323,17 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
     }, [] as { v: number }[]);
 
     const kpis: KpiMeta[] = [
+      makeKpi(
+        'Account Balance',
+        `$${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+        `$${startBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+        balanceChange,
+        currentBalance >= startBalance ? 'excellent' : 'needsImprovement',
+        `$${startBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+        'Account Size + Net PnL | Current net valuation of your active trading account balance. | Measures your total available trading capital after all closed trades.',
+        currentBalance >= startBalance ? `Capital grew by +${balanceChange.toFixed(2)}% from initial funding.` : `Capital drawdown is ${balanceChange.toFixed(2)}% from initial deposit.`,
+        balanceData,
+      ),
       makeKpi(
         'Net P&L',
         `${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(0)}`,
@@ -342,6 +366,9 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         'Gross Profit / Gross Loss | Gross profit divided by gross loss. Measures earnings per dollar risked. | A key institutional metric; values above 2.0 indicate exceptional profit generation.',
         pf >= 2 ? 'Your profitability exceeds standard benchmarks.' : pf >= 1 ? 'Profitable, but consider managing risk tight.' : 'Outflows exceed inflows; system requires adjustment.',
       ),
+    ];
+
+    const additionalKpis: KpiMeta[] = [
       makeKpi(
         'Trade Expectancy',
         `${expectancy >= 0 ? '+' : ''}$${expectancy.toFixed(0)}`,
@@ -355,9 +382,6 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
         '(Win% * AvgWin) - (Loss% * AvgLoss) | The average expected financial return per trade over time. | Tells you how much each trade is statistically worth on average.',
         expectancy > 0 ? `Each executed trade generates +$${expectancy.toFixed(0)} on average.` : `Each trade loses $${Math.abs(expectancy).toFixed(0)} on average.`,
       ),
-    ];
-
-    const additionalKpis: KpiMeta[] = [
       makeKpi(
         'Avg R Multiple',
         avgRMultiple.toFixed(2),
@@ -445,7 +469,7 @@ export default function KpiDashboard({ trades, computedStats, themeClasses, isDa
             kpi={kpi}
             isDarkMode={isDarkMode}
             themeClasses={themeClasses}
-            type={i === 1 ? 'winrate' : i === 2 ? 'profitfactor' : 'default'}
+            type={i === 2 ? 'winrate' : i === 3 ? 'profitfactor' : 'default'}
             icon={
               i === 0 ? <Activity className="w-4 h-4 text-emerald-500" /> :
               i === 1 ? <Award className="w-4 h-4 text-sky-500" /> :

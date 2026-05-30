@@ -26,6 +26,7 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayTrades, setSelectedDayTrades] = useState<{ day: number; trades: Trade[]; date: string } | null>(null);
   const [dayNote, setDayNote] = useState('');
+  const [savedNote, setSavedNote] = useState('');
   const [dayNotes, setDayNotes] = useState<Record<string, string>>({});
   const [dayNoteIds, setDayNoteIds] = useState<Record<string, string>>({});
 
@@ -342,6 +343,7 @@ export default function Calendar() {
                   if (!hasTrades && !dayNotes[cell.dateString]) return;
                   setSelectedDayTrades({ day: cell.day, trades: dayTrades, date: cell.dateString });
                   setDayNote(dayNotes[cell.dateString] || '');
+                  setSavedNote(dayNotes[cell.dateString] || '');
                 }}
                 className={`h-14 md:h-[76px] p-1.5 md:p-2.5 rounded-xl border flex flex-col justify-between transition-all duration-200 select-none ${cellBg} ${(hasTrades || dayNotes[cell.dateString]) ? 'cursor-pointer hover:shadow-md' : 'pointer-events-none'} ${cellHover}`}
               >
@@ -449,14 +451,36 @@ export default function Calendar() {
             {/* Day Note Section */}
             {selectedDayTrades && (
               <div className={`border-b px-5 py-4 ${themeClasses.border}`}>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <StickyNote className="w-3.5 h-3.5 text-amber-500" />
-                  <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>Day Note</span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <StickyNote className="w-3.5 h-3.5 text-amber-500" />
+                    <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${themeClasses.textSub}`}>Day Note</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {dayNote !== savedNote && (
+                      <span className="text-[9px] font-mono text-amber-500/70">Unsaved</span>
+                    )}
+                    {dayNote === savedNote && dayNote.trim() && (
+                      <span className="text-[9px] font-mono text-emerald-500/70">Saved</span>
+                    )}
+                    <button
+                      onClick={async () => {
+                        await handleSaveDayNote(selectedDayTrades.date, dayNote);
+                        setSavedNote(dayNote);
+                      }}
+                      className={`text-[10px] font-mono px-2.5 py-1 rounded font-bold transition cursor-pointer ${
+                        dayNote !== savedNote
+                          ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30'
+                          : 'bg-gray-500/10 text-gray-500 cursor-default'
+                      }`}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
                 <textarea
                   value={dayNote}
                   onChange={e => setDayNote(e.target.value)}
-                  onBlur={() => handleSaveDayNote(selectedDayTrades.date, dayNote)}
                   placeholder="Write a note for this day..."
                   rows={3}
                   className={`w-full border rounded-lg p-2.5 text-xs font-mono resize-none focus:outline-none transition ${themeClasses.bgCard} ${themeClasses.border} ${themeClasses.textMain} placeholder:text-gray-500`}
